@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:macro name="orbita_control" params="neck_orbita_serial_port neck_orbita_id neck_orbita_alpha neck_orbita_hardware_zero neck_orbita_reduction">
+    <xacro:macro name="orbita_control" params="name orbita_serial_port orbita_id orbita_alpha orbita_hardware_zero orbita_reduction">
 
         <xacro:include filename="$(find reachy_description)/ros2_control/joint.ros2_control.xacro"/>
 
@@ -9,11 +9,11 @@
             <hardware>
                 <xacro:unless value="$(arg use_fake_hardware)">
                     <plugin>neck_system_hwi/NeckSystem</plugin>
-                    <param name="serial_port">${neck_orbita_serial_port}</param>
-                    <param name="id">${neck_orbita_id}</param>
-                    <param name="alpha">${neck_orbita_alpha}</param>
-                    <param name="hardware_zero">${neck_orbita_hardware_zero}</param>
-                    <param name="reduction">${neck_orbita_reduction}</param>
+                    <param name="serial_port">${orbita_serial_port}</param>
+                    <param name="id">${orbita_id}</param>
+                    <param name="alpha">${orbita_alpha}</param>
+                    <param name="hardware_zero">${orbita_hardware_zero}</param>
+                    <param name="reduction">${orbita_reduction}</param>
                 </xacro:unless>
 
                 <xacro:if value="$(arg use_fake_hardware)">
@@ -28,9 +28,9 @@
                     </xacro:unless>
                 </xacro:if>
             </hardware>
-                 <xacro:position_joint_control name="neck_roll"/>
-                 <xacro:position_joint_control name="neck_pitch"/>
-                 <xacro:position_joint_control name="neck_yaw"/>
+                 <xacro:position_joint_control name="${name}_roll"/>
+                 <xacro:position_joint_control name="${name}_pitch"/>
+                 <xacro:position_joint_control name="${name}_yaw"/>
         </ros2_control>
     </xacro:macro>
 </robot>
