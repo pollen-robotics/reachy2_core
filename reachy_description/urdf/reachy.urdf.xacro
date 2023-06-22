@@ -6,7 +6,6 @@
 
   <xacro:include filename="$(find reachy_description)/urdf/arm.urdf.xacro"/>
   <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro"/>
-  <!-- <xacro:include filename="$(find reachy_description)/urdf/gripper.urdf.xacro"/> -->
 
   <xacro:include filename="$(find reachy_description)/urdf/inertial_primitives.urdf.xacro"/>
 
