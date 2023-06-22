@@ -9,11 +9,13 @@
       <hardware>
         <!-- Use real hardware. -->
         <xacro:unless value="$(arg use_fake_hardware)">
-          <plugin>smart_gripper_system_hwi/GripperSystem</plugin>
+          <plugin>fake_components/GenericSystem</plugin>
+
+          <!-- <plugin>smart_gripper_system_hwi/GripperSystem</plugin>
           <param name="gripper_port">${gripper_port}</param>
           <param name="gripper_id">${gripper_id}</param>
           <param name="min_grasping_finger">${min_grasping_finger}</param>
-          <param name="max_grasping_finger">${max_grasping_finger}</param>
+          <param name="max_grasping_finger">${max_grasping_finger}</param> -->
         </xacro:unless>
 
         <xacro:if value="$(arg use_fake_hardware)">
@@ -30,11 +32,6 @@
       </hardware>
 
       <xacro:position_joint_control name="${name}_finger"/>
-
-      <gpio name="${name}">
-        <state_interface name="torque" data_type="bool"/>
-        <command_interface name="torque" data_type="bool"/>
-      </gpio>
 
     </ros2_control>
   </xacro:macro>

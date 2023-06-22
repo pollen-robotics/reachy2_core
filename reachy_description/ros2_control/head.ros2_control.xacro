@@ -5,7 +5,7 @@
 
         <xacro:include filename="$(find reachy_description)/ros2_control/joint.ros2_control.xacro"/>
 
-        <ros2_control name="head" type="system">
+        <ros2_control name="neck" type="system">
             <hardware>
                 <xacro:unless value="$(arg use_fake_hardware)">
                     <plugin>neck_system_hwi/NeckSystem</plugin>

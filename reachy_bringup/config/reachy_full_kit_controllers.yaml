@@ -8,9 +8,6 @@ controller_manager:
     neck_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
-    antenna_forward_position_controller:
-      type: forward_command_controller/ForwardCommandController
-
     r_arm_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
@@ -27,9 +24,6 @@ controller_manager:
       type: forward_command_controller/ForwardCommandController
 
     forward_speed_limit_controller:
-      type: forward_command_controller/ForwardCommandController
-
-    forward_fan_controller:
       type: forward_command_controller/ForwardCommandController
 
     forward_pid_controller:
@@ -53,11 +47,11 @@ r_arm_forward_position_controller:
     joints:
       - r_shoulder_pitch
       - r_shoulder_roll
-      - r_arm_yaw
+      - r_elbow_yaw
       - r_elbow_pitch
-      - r_forearm_yaw
-      - r_wrist_pitch
       - r_wrist_roll
+      - r_wrist_pitch
+      - r_wrist_yaw
     interface_name: position
     use_sim_time: false
 
@@ -66,27 +60,20 @@ l_arm_forward_position_controller:
     joints:
       - l_shoulder_pitch
       - l_shoulder_roll
-      - l_arm_yaw
+      - l_elbow_yaw
       - l_elbow_pitch
-      - l_forearm_yaw
-      - l_wrist_pitch
       - l_wrist_roll
+      - l_wrist_pitch
+      - l_wrist_yaw
     interface_name: position
     use_sim_time: false
 
-antenna_forward_position_controller:
-  ros__parameters:
-    joints:
-      - l_antenna
-      - r_antenna
-    interface_name: position
-    use_sim_time: false
 
 gripper_forward_position_controller:
   ros__parameters:
     joints:
       - l_gripper
-      - r_gripper
+      - r_gripper_finger
     interface_name: position
     use_sim_time: false
 
@@ -98,22 +85,19 @@ forward_torque_controller:
       - neck_yaw
       - r_shoulder_pitch
       - r_shoulder_roll
-      - r_arm_yaw
+      - r_elbow_yaw
       - r_elbow_pitch
-      - r_forearm_yaw
-      - r_wrist_pitch
       - r_wrist_roll
-      - r_gripper
-      - l_shoulder_pitch
-      - l_shoulder_roll
-      - l_arm_yaw
-      - l_elbow_pitch
-      - l_forearm_yaw
-      - l_wrist_pitch
-      - l_wrist_roll
-      - l_gripper
-      - l_antenna
-      - r_antenna
+      - r_wrist_pitch
+      - r_wrist_yaw
+#      - r_gripper_finger
+#      - l_shoulder_pitch
+#      - l_shoulder_roll
+#      - l_elbow_yaw
+#      - l_elbow_pitch
+#      - l_wrist_roll
+#      - l_wrist_pitch
+#      - l_wrist_yaw
     interface_name: torque
     use_sim_time: false
 
@@ -125,22 +109,19 @@ forward_torque_limit_controller:
       - neck_yaw
       - r_shoulder_pitch
       - r_shoulder_roll
-      - r_arm_yaw
+      - r_elbow_yaw
       - r_elbow_pitch
-      - r_forearm_yaw
-      - r_wrist_pitch
       - r_wrist_roll
-      - r_gripper
+      - r_wrist_pitch
+      - r_wrist_yaw
+      - r_gripper_finger
       - l_shoulder_pitch
       - l_shoulder_roll
-      - l_arm_yaw
+      - l_elbow_yaw
       - l_elbow_pitch
-      - l_forearm_yaw
-      - l_wrist_pitch
       - l_wrist_roll
-      - l_gripper
-      - l_antenna
-      - r_antenna
+      - l_wrist_pitch
+      - l_wrist_yaw
     interface_name: torque_limit
     use_sim_time: false
 
@@ -152,22 +133,19 @@ forward_speed_limit_controller:
       - neck_yaw
       - r_shoulder_pitch
       - r_shoulder_roll
-      - r_arm_yaw
+      - r_elbow_yaw
       - r_elbow_pitch
-      - r_forearm_yaw
-      - r_wrist_pitch
       - r_wrist_roll
-      - r_gripper
+      - r_wrist_pitch
+      - r_wrist_yaw
+      - r_gripper_finger
       - l_shoulder_pitch
       - l_shoulder_roll
-      - l_arm_yaw
+      - l_elbow_yaw
       - l_elbow_pitch
-      - l_forearm_yaw
-      - l_wrist_pitch
       - l_wrist_roll
-      - l_gripper
-      - l_antenna
-      - r_antenna
+      - l_wrist_pitch
+      - l_wrist_yaw
     interface_name: speed_limit
     use_sim_time: false
 
@@ -180,35 +158,17 @@ forward_pid_controller:
       - neck_yaw
       - r_shoulder_pitch
       - r_shoulder_roll
-      - r_arm_yaw
+      - r_elbow_yaw
       - r_elbow_pitch
-      - r_forearm_yaw
-      - r_wrist_pitch
       - r_wrist_roll
-      - r_gripper
+      - r_wrist_pitch
+      - r_wrist_yaw
+      - r_gripper_finger
       - l_shoulder_pitch
       - l_shoulder_roll
-      - l_arm_yaw
+      - l_elbow_yaw
       - l_elbow_pitch
-      - l_forearm_yaw
-      - l_wrist_pitch
       - l_wrist_roll
-      - l_gripper
-      - l_antenna
-      - r_antenna
-    use_sim_time: false
-
-
-forward_fan_controller:
-  ros__parameters:
-    joints:
-      - l_antenna_fan
-      - r_antenna_fan
-      - r_shoulder_fan
-      - l_elbow_fan
-      - r_wrist_fan
-      - r_elbow_fan
-      - l_wrist_fan
-      - l_shoulder_fan
-    interface_name: state
+      - l_wrist_pitch
+      - l_wrist_yaw
     use_sim_time: false

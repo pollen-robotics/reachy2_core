@@ -16,7 +16,7 @@
     </xacro:if>
   </xacro:macro>
 
-  <xacro:macro name="orbita2dof" params="name parent length radius mass xyz rpy damping friction joint1 joint2 joint1_min_angle joint1_max_angle joint2_min_angle joint2_max_angle port_a port_b id_a id_b offset_a offset_b ratio_a ratio_b pitch_inverted">
+  <xacro:macro name="orbita2dof" params="name parent length radius mass xyz rpy damping friction joint1 joint2 joint1_min_angle joint1_max_angle joint2_min_angle joint2_max_angle port_a port_b id_a id_b offset_a offset_b ratio_a ratio_b axis1_inverted axis2_inverted">
 
     <!--
       Orbita 2 dof
@@ -101,7 +101,20 @@
     <xacro:orbita2dof_control
       name="${name}"
       joint1="${joint1}" joint2="${joint2}"
-      port_a="${port_a}" port_b="${port_b}" id_a="${id_a}" id_b="${id_b}" offset_a="${offset_a}" offset_b="${offset_b}" ratio_a="${ratio_a}" ratio_b="${ratio_b}"
+      port_a="${port_a}"
+      id_a="${id_a}"
+      port_b="${port_b}"
+      id_b="${id_b}"
+      offset_a="${offset_a}"
+      offset_b="${offset_b}"
+      ratio_a="${ratio_a}"
+      ratio_b="${ratio_b}"
+      lower_limit_a="${joint1_min_angle}"
+      upper_limit_a="${joint1_max_angle}"
+      lower_limit_b="${joint2_min_angle}"
+      upper_limit_b="${joint2_max_angle}"
+      axis1_inverted="${axis1_inverted}"
+      axis2_inverted="${axis2_inverted}"
     />
 
   </xacro:macro>

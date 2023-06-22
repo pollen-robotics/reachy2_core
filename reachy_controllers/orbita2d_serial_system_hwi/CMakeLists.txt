@@ -28,7 +28,7 @@ target_include_directories(
 )
 
 add_library(orbita2d_serial_hwi STATIC IMPORTED)
-set_property(TARGET orbita2d_serial_hwi PROPERTY IMPORTED_LOCATION $ENV{PWD}/../../src/reachy_2023/reachy_controllers/reachy_2023_controllers_rs/orbita2d_serial_hwi/target/debug/liborbita2d_serial_hwi.a )
+set_property(TARGET orbita2d_serial_hwi PROPERTY IMPORTED_LOCATION /home/reachy-v2/reachy_ws/build/orbita2d_serial_hwi/debug/liborbita2d_serial_hwi.a )
 
 target_link_libraries(
   ${PROJECT_NAME}

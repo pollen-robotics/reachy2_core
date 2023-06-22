@@ -49,6 +49,9 @@ private:
   double hw_commands_i_gain_[2];
   double hw_commands_d_gain_[2];
 
+  uint8_t axis1_inverted;
+  uint8_t axis2_inverted;
+
   // Store time between update loops
   rclcpp::Clock clock_;
   rclcpp::Time last_timestamp_;

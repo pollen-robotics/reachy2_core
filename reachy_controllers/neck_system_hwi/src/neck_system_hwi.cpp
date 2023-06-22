@@ -289,6 +289,12 @@ NeckSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
 hardware_interface::return_type
 NeckSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
+
+/*  RCLCPP_INFO(
+      rclcpp::get_logger("NeckSystem"),
+      "(%s) TORQUE! %f", info_.name.c_str(), hw_commands_torque_[0]
+    );
+ */
   if (neck_hwi_set_target_orientation_max_speed(
     this->uid, 
     hw_commands_position_,

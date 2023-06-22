@@ -3,21 +3,22 @@
 
   <xacro:include filename="$(find reachy_description)/ros2_control/joint.ros2_control.xacro"/>
 
-  <xacro:macro name="orbita2dof_control" params="name joint1 joint2 port_a port_b id_a id_b offset_a offset_b ratio_a ratio_b">
+  <xacro:macro name="orbita2dof_control" params="name joint1 joint2 port_a port_b id_a id_b offset_a offset_b ratio_a ratio_b lower_limit_a upper_limit_a lower_limit_b upper_limit_b axis1_inverted axis2_inverted">
 
     <ros2_control name="${name}" type="system">
       <hardware>
         <!-- Use real hardware. -->
         <xacro:unless value="$(arg use_fake_hardware)">
-          <plugin>orbita2d_hardware_interface/Orbita2dofSystem</plugin>
-          <param name="port_a">${port_a}</param>
-          <param name="port_b">${port_b}</param>
-          <param name="id_a">${id_a}</param>
-          <param name="id_b">${id_b}</param>
-          <param name="offset_a">${offset_a}</param>
-          <param name="offset_b">${offset_b}</param>
-          <param name="ratio_a">${ratio_a}</param>
-          <param name="ratio_b">${ratio_b}</param>
+          <plugin>orbita2d_serial_system_hwi/Orbita2dSerialSystem</plugin>
+          <param name="serial_port_1">${port_a}</param>
+          <param name="serial_port_2">${port_b}</param>
+          <param name="id_1">${id_a}</param>
+          <param name="id_2">${id_b}</param>
+          <param name="offsets">${offset_a},${offset_b}</param>
+          <param name="ratio">${ratio_a},${ratio_b}</param>
+          <param name="limits">${lower_limit_a},${upper_limit_a},${lower_limit_b},${upper_limit_b}</param>
+          <param name="axis1_inverted">${axis1_inverted}</param>
+          <param name="axis2_inverted">${axis2_inverted}</param>
 
         </xacro:unless>
 
@@ -35,11 +36,6 @@
       </hardware>
       <xacro:position_joint_control name="${name}_${joint1}"/>
       <xacro:position_joint_control name="${name}_${joint2}"/>
-      <gpio name="${name}">
-        <state_interface name="torque" data_type="bool"/>
-        <command_interface name="torque" data_type="bool"/>
-      </gpio>
-
     </ros2_control>
 
   </xacro:macro>

@@ -254,6 +254,18 @@
 
     />
 
+<!--   <xacro:orbita
+    name="neck" parent="${parent}"
+    length="${neck_length}" radius="${neck_radius}" mass="${neck_mass}"
+    xyz="0 0 0" rpy="0 0 0"
+    damping="${damping}" friction="${friction}"
+    orbita_serial_port="${neck_orbita_serial_port}"
+    orbita_id="${neck_orbita_id}"
+    orbita_hardware_zero="${neck_orbita_hardware_zero}"
+    orbita_reduction="${neck_orbita_reduction}"
+  /> -->
+
+
     <!-- Cameras -->
 
     <xacro:if value="$(arg use_gazebo)">

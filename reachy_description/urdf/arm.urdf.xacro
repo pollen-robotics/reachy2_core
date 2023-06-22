@@ -16,14 +16,14 @@
   <xacro:property name="arm_length" value="0.28"/>
   <xacro:property name="arm_radius" value="0.03"/>
   <xacro:property name="arm_mass" value="0.5"/>
-  <xacro:property name="shoulder_ratio_a" value="-1.5"/>
-  <xacro:property name="shoulder_ratio_b" value="-1.5"/>
+  <xacro:property name="shoulder_ratio_a" value="47.519"/>
+  <xacro:property name="shoulder_ratio_b" value="47.519"/>
 
   <xacro:property name="forearm_length" value="0.28"/>
   <xacro:property name="forearm_radius" value="0.025"/>
   <xacro:property name="forearm_mass" value="0.45"/>
-  <xacro:property name="elbow_ratio_a" value="1.778"/>
-  <xacro:property name="elbow_ratio_b" value="1.778"/>
+  <xacro:property name="elbow_ratio_a" value="45.018"/>
+  <xacro:property name="elbow_ratio_b" value="45.018"/>
 
   <xacro:property name="wrist_length" value="0.01"/>
   <xacro:property name="wrist_radius" value="0.02"/>
@@ -37,18 +37,24 @@
     <xacro:property name="reflect" value="-1"/>
     <xacro:property name="min_shoulder_roll" value="-0.0"/>
     <xacro:property name="max_shoulder_roll" value="${pi/2}"/>
-    <xacro:property name="pitch_inverted" value="1.0"/>
+    <xacro:property name="shoulder_axis1_inverted" value="0"/>
+    <xacro:property name="shoulder_axis2_inverted" value="0"/>
+    <xacro:property name="elbow_axis1_inverted" value="0"/>
+    <xacro:property name="elbow_axis2_inverted" value="0"/>
   </xacro:if>
   <xacro:if value="${side == 'right'}">
     <xacro:property name="reflect" value="1"/>
     <xacro:property name="min_shoulder_roll" value="-${pi/2}"/>
     <xacro:property name="max_shoulder_roll" value="0.0"/>
-    <xacro:property name="pitch_inverted" value="0.0"/>
+    <xacro:property name="shoulder_axis1_inverted" value="1"/>
+    <xacro:property name="shoulder_axis2_inverted" value="0"/>
+    <xacro:property name="elbow_axis1_inverted" value="1"/>
+    <xacro:property name="elbow_axis2_inverted" value="0"/>
   </xacro:if>
   <xacro:property name="p" value="${prefix}"/>
 
   <xacro:orbita2dof
-    name="${p}_arm" parent="${parent}"
+    name="${p}_shoulder" parent="${parent}"
     length="${arm_length}" radius="${arm_radius}" mass="${arm_mass}"
     xyz="${arm_offset_x} ${arm_offset_y*reflect} ${arm_offset_z}" rpy="0 0 ${arm_offset_yaw*reflect}"
     damping="${damping}" friction="${friction}"
@@ -59,11 +65,12 @@
     id_a="${shoulder_id_a}" id_b="${shoulder_id_b}"
     offset_a="0.0" offset_b="0.0"
     ratio_a="${shoulder_ratio_a}" ratio_b="${shoulder_ratio_b}"
-    pitch_inverted="${pitch_inverted}"
+    axis1_inverted="${shoulder_axis1_inverted}"
+    axis2_inverted="${shoulder_axis2_inverted}"
   />
 
-  <xacro:orbita2dof
-    name="${p}_forearm" parent="${p}_arm_ball_link"
+   <xacro:orbita2dof
+    name="${p}_elbow" parent="${p}_shoulder_ball_link"
     length="${forearm_length}" radius="${forearm_radius}" mass="${forearm_mass}"
     xyz="0 0 -${arm_length}" rpy="0 0 0"
     damping="${damping}" friction="${friction}"
@@ -74,11 +81,12 @@
     id_a="${elbow_id_a}" id_b="${elbow_id_b}"
     offset_a="0.0" offset_b="0.0"
     ratio_a="${elbow_ratio_a}" ratio_b="${elbow_ratio_b}"
-    pitch_inverted="0.0"
+    axis1_inverted="${elbow_axis1_inverted}"
+    axis2_inverted="${elbow_axis2_inverted}"
   />
 
   <xacro:orbita
-    name="${p}_wrist" parent="${p}_forearm_ball_link"
+    name="${p}_wrist" parent="${p}_elbow_ball_link"
     length="${wrist_length}" radius="${wrist_radius}" mass="${wrist_mass}"
     xyz="0 0 -${forearm_length}" rpy="${pi} 0 0"
     damping="${damping}" friction="${friction}"
@@ -88,8 +96,7 @@
     orbita_reduction="${wrist_reduction}"
   />
 
-
-  <xacro:smartgripper
+<!--   <xacro:smartgripper
     prefix="${p}" parent="${p}_wrist_ball_link" side="${side}"
     damping="${damping}" friction="${friction}"
     gripper_port="${gripper_port}"
@@ -101,7 +108,7 @@
     <origin xyz="0 0 0.1" rpy="${pi+reflect*0.35} 0 0"/>
     <parent link="${p}_gripper_palm_link"/>
     <child link="${p}_arm_tip"/>
-  </joint>
+  </joint> -->
 
 </xacro:macro>
 </robot>

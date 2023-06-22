@@ -309,7 +309,7 @@ def launch_setup(context, *args, **kwargs):
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[
-                # neck_forward_position_controller_spawner,
+                neck_forward_position_controller_spawner,
                 r_arm_forward_position_controller_spawner,
                 # l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
@@ -360,19 +360,19 @@ def launch_setup(context, *args, **kwargs):
         *((control_node,) if not gazebo_py else
           (SetUseSimTime(True),  # does not seem to work...
            gazebo_node)),
-        fake_camera_node,
-        fake_zoom_node,
+        # fake_camera_node,
+        # fake_zoom_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-        gripper_safe_controller_node,
+        # gripper_safe_controller_node,
         delay_sdk_server_after_kinematics,
-        camera_publisher_node,
-        camera_focus_node,
-        camera_zoom_node,
-        sdk_camera_server_node,
-        dynamic_state_router_node,
+        # camera_publisher_node,
+        # camera_focus_node,
+        # camera_zoom_node,
+        # sdk_camera_server_node,
+        # dynamic_state_router_node,
     ]
 
 

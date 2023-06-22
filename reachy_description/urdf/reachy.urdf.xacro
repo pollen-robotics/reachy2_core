@@ -14,14 +14,14 @@
     <xacro:property name="right_elbow_port_b" value="/dev/right_elbow_B"/>
 
 
-    <xacro:property name="right_elbow_id_a" value="1"/>
-    <xacro:property name="right_elbow_id_b" value="0"/>
+    <xacro:property name="right_elbow_id_a" value="71"/>
+    <xacro:property name="right_elbow_id_b" value="72"/>
 
-    <xacro:property name="right_wrist_id" value="2"/>
+    <xacro:property name="right_wrist_id" value="70"/>
     <xacro:property name="right_wrist_port" value="/dev/right_wrist"/>
     <xacro:arg name="right_wrist_hardware_zero" default="0.0, 0.0, 0.0"/>
 
-    <xacro:property name="neck_id" value="2"/>
+    <xacro:property name="neck_id" value="10"/>
     <xacro:property name="neck_port" value="/dev/neck"/>
     <xacro:arg name="neck_hardware_zero" default="0.0, 0.0, 0.0"/>
 
@@ -37,11 +37,11 @@
     <xacro:property name="right_shoulder_port_a" value="/dev/right_shoulder_A"/>
     <xacro:property name="right_shoulder_port_b" value="/dev/right_shoulder_B"/>
 
-    <xacro:property name="right_shoulder_id_a" value="6"/>
-    <xacro:property name="right_shoulder_id_b" value="5"/>
+    <xacro:property name="right_shoulder_id_a" value="81"/>
+    <xacro:property name="right_shoulder_id_b" value="82"/>
 
 
-    <xacro:property name="right_gripper_id" value="11"/>
+    <xacro:property name="right_gripper_id" value="41"/>
     <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
 
   <!-- <xacro:property name="dynamixel_multiplexer_right" value="http://127.0.0.1:50099"/> -->
@@ -107,8 +107,7 @@
     neck_orbita_serial_port="${neck_port}"
     neck_orbita_id="${neck_id}"
     neck_orbita_hardware_zero="$(arg neck_hardware_zero)"
-
-  />
+  /> 
 
   <!-- RIGHT ARM -->
   <xacro:arm

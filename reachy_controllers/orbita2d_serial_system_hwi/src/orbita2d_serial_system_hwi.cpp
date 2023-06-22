@@ -36,8 +36,7 @@ Orbita2dSerialSystem::on_init(const hardware_interface::HardwareInfo & info)
     return CallbackReturn::ERROR;
   }
 
-// TODO: UPDATE
-  long unsigned int nb_joints_expected = 3;
+  long unsigned int nb_joints_expected = 2;
   if (info.joints.size() != nb_joints_expected)
   {
     RCLCPP_ERROR(
@@ -49,46 +48,69 @@ Orbita2dSerialSystem::on_init(const hardware_interface::HardwareInfo & info)
   }
 
 
-  const char *serial_port;
-  uint8_t id;
-  double alpha;
-  double hardware_zero[3];
-  double reduction;
+  const char *serial_port_1;
+  const char *serial_port_2;
+  uint8_t id_1;
+  uint8_t id_2;
+
+  double offsets[2];
+  double ratio[2];
+  double limits[4];
 
   for (auto const& params : info.hardware_parameters)
   {
-    if (params.first == "serial_port") {
-      serial_port = params.second.c_str();
+    if (params.first == "serial_port_1") {
+      serial_port_1 = params.second.c_str();
     }
-    else if (params.first == "id") {
-      id = (uint8_t)std::stoi(params.second.c_str());
+    else if (params.first == "serial_port_2") {
+      serial_port_2 = params.second.c_str();
     }
-    else if (params.first == "alpha") {
-      alpha = std::stod(params.second.c_str());
+    else if (params.first == "id_1") {
+      id_1 = (uint8_t)std::stoi(params.second.c_str());
     }
-    else if (params.first == "hardware_zero") {
+    else if (params.first == "id_2") {
+      id_2 = (uint8_t)std::stoi(params.second.c_str());
+    }
+    else if (params.first == "offsets") {
       std::vector<float> v = parse_string_as_vec(params.second.c_str());
       for (uint i=0; i < v.size(); i++) {
-        hardware_zero[i] = (double)v[i];
+        offsets[i] = (double)v[i];
       }
     }
-    else if (params.first == "reduction") {
-      reduction = std::stod(params.second.c_str());
+    else if (params.first == "ratio") {
+      std::vector<float> v = parse_string_as_vec(params.second.c_str());
+      for (uint i=0; i < v.size(); i++) {
+        ratio[i] = (double)v[i];
+      }
+    }
+    else if (params.first == "limits") {
+      std::vector<float> v = parse_string_as_vec(params.second.c_str());
+      for (uint i=0; i < v.size(); i++) {
+        limits[i] = (double)v[i];
+      }
+    }
+    else if (params.first == "axis1_inverted") {
+      axis1_inverted = (uint8_t)std::stoi(params.second.c_str());
+    }
+    else if (params.first == "axis2_inverted") {
+      axis2_inverted = (uint8_t)std::stoi(params.second.c_str());
     }
   }
 
   RCLCPP_INFO(
     rclcpp::get_logger("Orbita2dSerialSystem"),
-    "Trying to connect on serial port \"%s\"",
-    serial_port
+    "Trying to connect on serial port \"%s\" \"%s\"",
+    serial_port_1, serial_port_2
   );
 
   this->uid = orbita2d_serial_hwi_init(
-    serial_port,
-    id,
-    alpha,
-    hardware_zero,
-    reduction
+    serial_port_1,
+    id_1,
+    serial_port_2,
+    id_2,
+    offsets,
+    ratio,
+    limits
   );
 
   clock_ = rclcpp::Clock();
@@ -224,7 +246,14 @@ Orbita2dSerialSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
   last_timestamp_ = current_timestamp;
 
 
-  if (orbita2d_serial_hwi_get_orientation(this->uid, hw_states_position_) != 0) {
+  if (orbita2d_serial_hwi_get_orientation(this->uid, hw_states_position_) == 0) {
+    if (axis1_inverted) {
+      hw_states_position_[0] = -hw_states_position_[0];
+    }
+    if (axis2_inverted) {
+      hw_states_position_[1] = -hw_states_position_[1];
+    }
+  } else {
     RCLCPP_INFO_THROTTLE(
       rclcpp::get_logger("Orbita2dSerialSystem"),
       clock_,
@@ -232,6 +261,8 @@ Orbita2dSerialSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
       "(%s) READ ORIENTATION ERROR!", info_.name.c_str()
     );
   }
+
+
 
     // if (orbita2d_serial_hwi_get_orientation_velocity_load(this->uid, hw_states_position_, hw_states_velocity_, hw_states_effort_) != 0) {
   //   RCLCPP_INFO_THROTTLE(
@@ -290,9 +321,14 @@ Orbita2dSerialSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
 hardware_interface::return_type
 Orbita2dSerialSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
+  double command[2];
+
+  command[0] = axis1_inverted ? -hw_commands_position_[0] : hw_commands_position_[0];
+  command[1] = axis2_inverted ? -hw_commands_position_[1] : hw_commands_position_[1];
+
   if (orbita2d_serial_hwi_set_target_orientation(
     this->uid, 
-    hw_commands_position_
+    command
   ) != 0) {
     RCLCPP_INFO_THROTTLE(
       rclcpp::get_logger("Orbita2dSerialSystem"),
@@ -315,7 +351,8 @@ Orbita2dSerialSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
   //     "(%s) WRITE ORIENTATION/SPEED LIMIT/TORQUE LIMIT ERROR!", info_.name.c_str()
   //   );
   // }
-
+  
+  
   if (orbita2d_serial_hwi_set_torque(this->uid, hw_commands_torque_) != 0) {
     RCLCPP_INFO_THROTTLE(
       rclcpp::get_logger("Orbita2dSerialSystem"),

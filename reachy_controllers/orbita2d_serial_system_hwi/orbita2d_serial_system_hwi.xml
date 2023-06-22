@@ -1,8 +1,8 @@
 <library path="orbita2d_serial_system_hwi">
 
   <class
-    name="orbita2d_serial_system_hwi/Orbita2dSerialSystemInterface"
-    type="orbita2d_serial_system_hwi::Orbita2dSerialSystemInterface"
+    name="orbita2d_serial_system_hwi/Orbita2dSerialSystem"
+    type="orbita2d_serial_system_hwi::Orbita2dSerialSystem"
     base_class_type="hardware_interface::SystemInterface">
     <description>
       Orbita2d serial hardware interface plugin.
