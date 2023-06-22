@@ -4,6 +4,7 @@
 
   <xacro:include filename="$(find reachy_description)/urdf/orbita.urdf.xacro"/>
   <xacro:include filename="$(find reachy_description)/urdf/orbita2dof.urdf.xacro"/>
+  <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/>
 
   <!-- ARM PARAMETERS -->
   <!-- TODO: USE REAL VALUES -->
@@ -87,13 +88,13 @@
     orbita_reduction="${wrist_reduction}"
   />
 
-  <!-- <xacro:gripper -->
-  <!--   prefix="${p}" parent="${p}_wrist_ball_link" side="${side}" -->
-  <!--   damping="${damping}" friction="${friction}" -->
-  <!--   grpc_multiplexer_url="${grpc_dynamixel_multiplexer_url}" -->
-  <!--   gripper_grasping_finger_id="${gripper_grasping_finger_id}" -->
-  <!--   gripper_action_finger_id="${gripper_action_finger_id}" -->
-  <!-- /> -->
+
+  <xacro:smartgripper
+    prefix="${p}" parent="${p}_wrist_ball_link" side="${side}"
+    damping="${damping}" friction="${friction}"
+    gripper_port="${gripper_port}"
+    gripper_id="${gripper_id}"
+  />
 
   <link name="${p}_arm_tip"/>
   <joint name="${p}_tip_joint" type="fixed">

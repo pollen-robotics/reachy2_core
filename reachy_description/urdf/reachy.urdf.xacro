@@ -5,7 +5,7 @@
   <xacro:arg name="use_gazebo" default="false"/>
 
   <xacro:include filename="$(find reachy_description)/urdf/arm.urdf.xacro"/>
-  <!-- <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro"/> -->
+  <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro"/>
   <!-- <xacro:include filename="$(find reachy_description)/urdf/gripper.urdf.xacro"/> -->
 
   <xacro:include filename="$(find reachy_description)/urdf/inertial_primitives.urdf.xacro"/>
@@ -17,9 +17,15 @@
 
     <xacro:property name="right_elbow_id_a" value="1"/>
     <xacro:property name="right_elbow_id_b" value="0"/>
+
     <xacro:property name="right_wrist_id" value="2"/>
     <xacro:property name="right_wrist_port" value="/dev/right_wrist"/>
     <xacro:arg name="right_wrist_hardware_zero" default="0.0, 0.0, 0.0"/>
+
+    <xacro:property name="neck_id" value="2"/>
+    <xacro:property name="neck_port" value="/dev/neck"/>
+    <xacro:arg name="neck_hardware_zero" default="0.0, 0.0, 0.0"/>
+
 
     <!-- <xacro:property name="left_elbow_id_a" value="8"/> -->
     <!-- <xacro:property name="left_elbow_id_b" value="9"/> -->
@@ -77,9 +83,9 @@
     </xacro:if>
     <xacro:if value="${base_visual}">
       <visual>
-        <origin xyz="0 0 -0.1" rpy="0 0.0 0"/>
+        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0"/>
         <geometry>
-          <box size="0.11 0.2 0.32"/>
+          <box size="0.1 0.2 0.22"/>
         </geometry>
         <!-- <origin xyz="0 0 -0.5" rpy="0 0 0"/> -->
         <!-- <geometry> -->
@@ -96,12 +102,14 @@
   </gazebo>
   <!-- TORSO -->
 
-  <!-- <xacro:head -->
-  <!--   parent="torso" -->
-  <!--   damping="${damping}" friction="${friction}" -->
-  <!--   grpc_multiplexer_url="${ethercat_multiplexer}" -->
-  <!--   neck_id_top="${neck_id_top}" neck_id_middle="${neck_id_middle}" neck_id_bottom="${neck_id_bottom}" -->
-  <!-- /> -->
+  <xacro:head
+    parent="torso"
+    damping="${damping}" friction="${friction}"
+    neck_orbita_serial_port="${neck_port}"
+    neck_orbita_id="${neck_id}"
+    neck_orbita_hardware_zero="$(arg neck_hardware_zero)"
+
+  />
 
   <!-- RIGHT ARM -->
   <xacro:arm
