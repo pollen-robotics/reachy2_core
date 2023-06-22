@@ -9,5 +9,5 @@ fn main() {
         .with_crate(crate_dir)
         .generate()
         .expect("Unable to generate bindings")
-        .write_to_file("orbita2dof_serial_hwi.h");
+        .write_to_file("orbita2d_serial_hwi.h");
 }
