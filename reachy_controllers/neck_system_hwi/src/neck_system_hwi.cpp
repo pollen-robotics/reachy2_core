@@ -93,7 +93,7 @@ NeckSystem::on_init(const hardware_interface::HardwareInfo & info)
   clock_ = rclcpp::Clock();
   RCLCPP_INFO(
     rclcpp::get_logger("NeckSystem"),
-    "System \"%s\" init!", info_.name.c_str()
+    "System \"%s\" init (zero: [%f, %f, %f])!", info_.name.c_str(), hardware_zero[0], hardware_zero[1], hardware_zero[2]
   );
 
   return CallbackReturn::SUCCESS;

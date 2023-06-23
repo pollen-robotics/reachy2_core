@@ -20,6 +20,7 @@ REACHY_CONFIG_NECK_ORBITA_ZERO = "neck_orbita_zero"
 REACHY_CONFIG_TOP = "top"
 REACHY_CONFIG_BOTTOM = "bottom"
 REACHY_CONFIG_MIDDLE = "middle"
+REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO = "right_wrist_orbita_zero"
 
 
 # Before launching each node, scan the usb2ax to check if there are any missing motors
@@ -49,11 +50,24 @@ class ReachyConfig:
             except KeyError as e:
                 raise KeyError("neck_orbita_zero key not found :: {}".format(e))
 
+            # right wrist zero
+            try:
+                self.right_wrist_orbita_zero_top = config[REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO][REACHY_CONFIG_TOP]
+                self.right_wrist_orbita_zero_middle = config[REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO][REACHY_CONFIG_MIDDLE]
+                self.right_wrist_orbita_zero_bottom = config[REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO][REACHY_CONFIG_BOTTOM]
+            except KeyError as e:
+                raise KeyError("neck_orbita_zero key not found :: {}".format(e))
+
+
     def __str__(self):
         return "robot_model".ljust(25, ' ') + "{}\n".format(self.model) + \
             "neck_orbita_zero_top".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_top) + \
             "neck_orbita_zero_middle".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_middle) + \
-            "neck_orbita_zero_bottom".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_bottom)
+            "neck_orbita_zero_bottom".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_bottom) + \
+            "right_wrist_orbita_zero_top".ljust(25, ' ') + "{}\n".format(self.right_wrist_orbita_zero_top) + \
+            "right_wrist_orbita_zero_middle".ljust(25, ' ') + "{}\n".format(self.right_wrist_orbita_zero_middle) + \
+            "right_wrist_orbita_zero_bottom".ljust(25, ' ') + "{}\n".format(self.right_wrist_orbita_zero_bottom)
+
 
 
 def launch_setup(context, *args, **kwargs):
@@ -85,10 +99,15 @@ def launch_setup(context, *args, **kwargs):
               (' ',)),
             f'robot_config:={reachy_config.model}',
             ' ',
-            'orbita_hardware_zero:="{}, {}, {}"'.format(
+            'neck_hardware_zero:="{}, {}, {}"'.format(
                 reachy_config.neck_orbita_zero_top,
                 reachy_config.neck_orbita_zero_middle,
                 reachy_config.neck_orbita_zero_bottom),
+            ' ',
+            'right_wrist_hardware_zero:="{}, {}, {}"'.format(
+                reachy_config.right_wrist_orbita_zero_top,
+                reachy_config.right_wrist_orbita_zero_middle,
+                reachy_config.right_wrist_orbita_zero_bottom),
             ' ',
         ]
     )  # To be cleaned on issue #92

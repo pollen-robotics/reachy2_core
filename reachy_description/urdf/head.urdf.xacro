@@ -4,7 +4,7 @@
   <xacro:arg name="depth_camera" default="false"/>
   <xacro:property name="camera_link" value="0.05" /> <!-- Size of square 'camera' box -->
   <xacro:property name="camera_convergence" value="0.0" /> <!-- convergence angle (rad) of the cameras. 0=parallel-->
-  <xacro:property name="neck_orbita_reduction" value="4.0"/>
+  <xacro:property name="neck_orbita_reduction" value="4.266667"/>
   <xacro:property name="neck_orbita_alpha" value="0.9424777960769379"/>
 
 
