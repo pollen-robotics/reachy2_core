@@ -191,7 +191,7 @@
         </geometry>
 	<material name="neckwhite"/>
       </visual>
-     
+
     </link>
 
     <joint name="head_base_fixed" type="fixed">
@@ -199,6 +199,27 @@
       <parent link="head" />
       <child link="head_base" />
     </joint>
+
+
+    <link name="head_tracker">
+
+      <visual name="">
+        <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+        <geometry>
+
+	  <cylinder length="0.04" radius="0.04"/>
+        </geometry>
+	<material name="camblack"/>
+      </visual>
+
+    </link>
+
+    <joint name="head_tracker_fixed" type="fixed">
+      <origin xyz="-0.035 0.0 0.108" rpy="0.0 0.0 0"/>
+      <parent link="head" />
+      <child link="head_tracker" />
+    </joint>
+
 
 
     <link name="head_tip" >
@@ -214,7 +235,7 @@
       <child link="head_tip" />
     </joint>
 
-    
+
 
 
     <!-- <link name="l_antenna_link"> -->
