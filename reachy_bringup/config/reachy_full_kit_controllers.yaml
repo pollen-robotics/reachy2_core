@@ -73,7 +73,7 @@ forward_torque_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-#      - r_gripper_finger
+      - r_gripper_finger
 #      - l_shoulder_pitch
 #      - l_shoulder_roll
 #      - l_elbow_yaw
