@@ -62,6 +62,9 @@ class ReachyKdlKinematics(LifecycleNode):
             if chain.getNrOfJoints():
                 self.logger.info(f'Found kinematics chain for "{arm}"!')
 
+                for j in self.get_chain_joints_name(chain):
+                    self.logger.info(f'\t{j}')
+
                 # Create forward kinematics service
                 self.fk_srv[arm] = self.create_service(
                     srv_type=GetForwardKinematics,
@@ -125,6 +128,9 @@ class ReachyKdlKinematics(LifecycleNode):
         # We automatically loads the kinematics corresponding to the config
         if chain.getNrOfJoints():
             self.logger.info(f'Found kinematics chain for head!')
+
+            for j in self.get_chain_joints_name(chain):
+                self.logger.info(f'\t{j}')
 
             # Create forward kinematics service
             srv = self.create_service(
@@ -350,7 +356,14 @@ class ReachyKdlKinematics(LifecycleNode):
             raise
 
     def get_chain_joints_name(self, chain):
-        return [chain.getSegment(i).getJoint().getName() for i in range(chain.getNrOfJoints())]
+        joints = []
+
+        for i in range(chain.getNrOfSegments()):
+            joint = chain.getSegment(i).getJoint()
+            if joint.getType() == joint.RotAxis:
+                joints.append(joint.getName())
+
+        return joints
 
 
 def main():
