@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 <xacro:macro name="arm" params="prefix parent side damping friction shoulder_port_a shoulder_port_b shoulder_id_a shoulder_id_b elbow_port_a elbow_port_b elbow_id_a elbow_id_b wrist_port wrist_id wrist_hardware_zero gripper_port gripper_id">
 
+
   <xacro:include filename="$(find reachy_description)/urdf/orbita.urdf.xacro"/>
   <xacro:include filename="$(find reachy_description)/urdf/orbita2dof.urdf.xacro"/>
   <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/>
