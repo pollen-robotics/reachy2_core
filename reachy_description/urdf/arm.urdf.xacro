@@ -96,7 +96,7 @@
     orbita_reduction="${wrist_reduction}"
   />
 
-<!--   <xacro:smartgripper
+  <xacro:smartgripper
     prefix="${p}" parent="${p}_wrist_ball_link" side="${side}"
     damping="${damping}" friction="${friction}"
     gripper_port="${gripper_port}"
@@ -108,7 +108,7 @@
     <origin xyz="0 0 0.1" rpy="${pi+reflect*0.35} 0 0"/>
     <parent link="${p}_gripper_palm_link"/>
     <child link="${p}_arm_tip"/>
-  </joint> -->
+  </joint>
 
 </xacro:macro>
 </robot>

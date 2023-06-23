@@ -41,7 +41,7 @@
     <xacro:property name="right_shoulder_id_b" value="82"/>
 
 
-    <xacro:property name="right_gripper_id" value="41"/>
+    <xacro:property name="right_gripper_id" value="11"/>
     <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
 
   <!-- <xacro:property name="dynamixel_multiplexer_right" value="http://127.0.0.1:50099"/> -->

@@ -9,13 +9,11 @@
       <hardware>
         <!-- Use real hardware. -->
         <xacro:unless value="$(arg use_fake_hardware)">
-          <plugin>fake_components/GenericSystem</plugin>
-
-          <!-- <plugin>smart_gripper_system_hwi/GripperSystem</plugin>
+          <plugin>smart_gripper_dynamixel_system_hwi/SmartGripperDynamixelSystem</plugin>
           <param name="gripper_port">${gripper_port}</param>
           <param name="gripper_id">${gripper_id}</param>
           <param name="min_grasping_finger">${min_grasping_finger}</param>
-          <param name="max_grasping_finger">${max_grasping_finger}</param> -->
+          <param name="max_grasping_finger">${max_grasping_finger}</param>
         </xacro:unless>
 
         <xacro:if value="$(arg use_fake_hardware)">
