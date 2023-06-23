@@ -372,7 +372,7 @@ def launch_setup(context, *args, **kwargs):
         # camera_focus_node,
         # camera_zoom_node,
         # sdk_camera_server_node,
-        # dynamic_state_router_node,
+        dynamic_state_router_node,
     ]
 
 
