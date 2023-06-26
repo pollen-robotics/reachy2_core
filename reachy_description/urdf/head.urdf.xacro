@@ -227,7 +227,7 @@
 
     <joint name="head_tip_fixed" type="fixed">
       <!-- between the cameras -->
-      <origin xyz="0.030 0.022 0.085" rpy="-1.57 0.0 -1.57"/>
+      <origin xyz="0.030 0.022 0.085" rpy="0 0.0 0"/>
 
       <!-- Rotation center -->
       <!-- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -->
@@ -235,6 +235,19 @@
       <child link="head_tip" />
     </joint>
 
+
+    <link name="camera_optical_left" >
+    </link>
+
+    <joint name="camera_optical_left" type="fixed">
+      <!-- between the cameras -->
+      <origin xyz="0.030 0.022 0.085" rpy="-1.57 0.0 -1.57"/>
+
+      <!-- Rotation center -->
+      <!-- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -->
+      <parent link="head" />
+      <child link="camera_optical_left" />
+    </joint>
 
 
 
