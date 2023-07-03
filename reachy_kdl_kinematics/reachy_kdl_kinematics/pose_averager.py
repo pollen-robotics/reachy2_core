@@ -13,16 +13,18 @@ class PoseAverager:
         self.z = deque(maxlen=window_length)
         self.q = deque(maxlen=window_length)
 
+        self.current_pose=None
     def append(self, pose: Pose):
         self.x.append(pose.position.x)
         self.y.append(pose.position.y)
         self.z.append(pose.position.z)
         self.q.append([
-            pose.orientation.x, 
+            pose.orientation.x,
             pose.orientation.y,
             pose.orientation.z,
             pose.orientation.w,
         ])
+        self.current_pose=pose
 
     def mean(self) -> Pose:
         pose = Pose()
@@ -38,4 +40,3 @@ class PoseAverager:
         pose.orientation.w = avg_q[3]
 
         return pose
-    

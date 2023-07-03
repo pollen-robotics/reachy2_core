@@ -52,6 +52,8 @@ class ReachyKdlKinematics(LifecycleNode):
         self.target_sub, self.averaged_target_sub = {}, {}
         self.averaged_pose = {}
         self.max_joint_vel = {}
+        self.averager_ready = {}
+        self.forward_position_pub = {}
 
         for prefix in ('l', 'r'):
             arm = f'{prefix}_arm'
@@ -82,7 +84,7 @@ class ReachyKdlKinematics(LifecycleNode):
                 self.logger.info(f'Adding service "{self.ik_srv[arm].srv_name}"...')
 
                 # Create cartesian control pub/subscription
-                forward_position_pub = self.create_publisher(
+                self.forward_position_pub[arm] = self.create_publisher(
                     msg_type=Float64MultiArray,
                     topic=f'/{arm}_forward_position_controller/commands',
                     qos_profile=5,
@@ -97,7 +99,7 @@ class ReachyKdlKinematics(LifecycleNode):
                         name=arm,
                         # arm straight, with elbow at -90 (facing forward)
                         q0=[0, 0, 0, -np.pi / 2, 0, 0, 0],
-                        forward_publisher=forward_position_pub,
+                        forward_publisher=self.forward_position_pub[arm],
                     ),
                 )
                 self.logger.info(f'Adding subscription on "{self.target_sub[arm].topic}"...')
@@ -111,16 +113,18 @@ class ReachyKdlKinematics(LifecycleNode):
                         name=arm,
                         # arm straight, with elbow at -90 (facing forward)
                         q0=[0, 0, 0, -np.pi / 2, 0, 0, 0],
-                        forward_publisher=forward_position_pub,
+                        forward_publisher=self.forward_position_pub[arm],
                     ),
                 )
-                self.averaged_pose[arm] = PoseAverager(window_length=1)
+                self.averaged_pose[arm] = PoseAverager(window_length=10)
                 self.max_joint_vel[arm] = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
                 self.logger.info(f'Adding subscription on "{self.target_sub[arm].topic}"...')
 
                 self.chain[arm] = chain
                 self.fk_solver[arm] = fk_solver
                 self.ik_solver[arm] = ik_solver
+
+                self.averager_ready[arm] = Event()
 
         # Kinematics for the head
         chain, fk_solver, ik_solver = generate_solver(self.urdf, 'torso', 'head_tip', L=np.array([1e-6, 1e-6, 1e-6, 1.0, 1.0, 1.0]))  # L weight matrix to considere only the orientation
@@ -194,8 +198,47 @@ class ReachyKdlKinematics(LifecycleNode):
             self.fk_solver['head'] = fk_solver
             self.ik_solver['head'] = ik_solver
 
+
+
+        self.create_timer(0.01, self.timer_averager_callback)
+
         self.logger.info(f'Kinematics node ready!')
         self.trigger_configure()
+
+    def timer_averager_callback(self):
+
+        for arm in self.averager_ready.keys():
+            if self.averager_ready[arm].is_set():
+
+                self.averaged_pose[arm].append(self.averaged_pose[arm].current_pose)
+                avg_pose = self.averaged_pose[arm].mean()
+                M = ros_pose_to_matrix(avg_pose)
+
+                error, sol = inverse_kinematics(
+                    self.ik_solver[arm],
+                    q0=[0, 0, 0, -np.pi / 2, 0, 0, 0],
+                    target_pose=M,
+                    nb_joints=self.chain[arm].getNrOfJoints(),
+                )
+
+
+                current_position = np.array(self.get_current_position(self.chain[arm]))
+
+                err = np.abs(np.array(sol) - current_position)
+                self.logger.info(f"AVG {arm} arm, {sol} {err}")
+                if (err>np.radians(0.5)).any():
+                    self.logger.info(f"Sending avg command to {arm} arm")
+                    msg = Float64MultiArray()
+                    msg.data = np.array(sol).tolist()
+                    self.forward_position_pub[arm].publish(msg)
+
+
+                else: #we are close enough, stop sending commands
+
+                    self.averager_ready[arm].clear()
+                    self.averaged_pose[arm].current_pose=None
+
+
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
         # Dummy state to minimize impact on current behavior
@@ -303,7 +346,9 @@ class ReachyKdlKinematics(LifecycleNode):
         msg = Float64MultiArray()
         msg.data = smoothed_sol.tolist()
 
-        forward_publisher.publish(msg)
+        self.averager_ready[name].set()
+
+        # forward_publisher.publish(msg)
 
     def get_current_position(self, chain) -> List[float]:
         joints = self.get_chain_joints_name(chain)
