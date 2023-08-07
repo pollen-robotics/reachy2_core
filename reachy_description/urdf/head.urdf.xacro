@@ -20,7 +20,7 @@
     <xacro:include filename="$(find reachy_description)/ros2_control/head.ros2_control.xacro"/>
 
     <joint name="neck_roll" type="revolute">
-      <origin xyz="-0.032893 0.0 0.110675" rpy="-0.15105105 0.08669986 -1.05356462"/>
+      <origin xyz="-0.032893 0.0 0.110675" rpy="0.0 0.17453293 0.0"/>
       <parent link="${parent}"/>
       <child link="head_x"/>
       <axis xyz="1 0 0"/>
@@ -71,7 +71,7 @@
     </link>
 
     <joint name="neck_fixed" type="fixed">
-      <origin xyz="0 0 0" rpy="0.0 0.0 1.047"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
       <parent link="head_z" />
       <child link="head" />
     </joint>
@@ -215,7 +215,7 @@
     </link>
 
     <joint name="head_tracker_fixed" type="fixed">
-      <origin xyz="-0.035 0.0 0.108" rpy="0.0 0.0 0"/>
+      <origin xyz="-0.030 0.0 0.111" rpy="0.0 0.0 0"/>
       <parent link="head" />
       <child link="head_tracker" />
     </joint>
@@ -227,7 +227,7 @@
 
     <joint name="head_tip_fixed" type="fixed">
       <!-- between the cameras -->
-      <origin xyz="0.015 0 0.085" rpy="0.0 0.0 0"/>
+      <origin xyz="0.030 0.022 0.085" rpy="0 0.0 0"/>
 
       <!-- Rotation center -->
       <!-- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -->
@@ -235,6 +235,19 @@
       <child link="head_tip" />
     </joint>
 
+
+    <link name="camera_optical_left" >
+    </link>
+
+    <joint name="camera_optical_left" type="fixed">
+      <!-- between the cameras -->
+      <origin xyz="0.030 0.022 0.085" rpy="-1.57 0.0 -1.57"/>
+
+      <!-- Rotation center -->
+      <!-- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -->
+      <parent link="head" />
+      <child link="camera_optical_left" />
+    </joint>
 
 
 
