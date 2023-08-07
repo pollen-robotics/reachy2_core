@@ -28,7 +28,7 @@ target_include_directories(
 )
 
 add_library(neck_hwi STATIC IMPORTED)
-set_property(TARGET neck_hwi PROPERTY IMPORTED_LOCATION /home/reachy-v2/reachy_ws/build/neck_hwi/debug/libneck_hwi.a )
+set_property(TARGET neck_hwi PROPERTY IMPORTED_LOCATION /home/remi/reachy_ws/build/neck_hwi/debug/libneck_hwi.a )
 
 target_link_libraries(
   ${PROJECT_NAME}
