@@ -1,11 +1,23 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<xacro:macro name="arm" params="prefix parent side damping friction shoulder_port_a shoulder_port_b shoulder_id_a shoulder_id_b elbow_port_a elbow_port_b elbow_id_a elbow_id_b wrist_port wrist_id wrist_hardware_zero gripper_port gripper_id">
+<xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config">
 
 
-  <xacro:include filename="$(find reachy_description)/urdf/orbita.urdf.xacro"/>
-  <xacro:include filename="$(find reachy_description)/urdf/orbita2dof.urdf.xacro"/>
-  <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/>
+  <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro"/>
+  <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro"/>
+  <!-- <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/> -->
+
+
+
+  <!-- <!-\- Orbita2d config -\-> -->
+  <!-- <xacro:arg name="orbita2d_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml"/> -->
+  <!-- <xacro:arg name="orbita2d_elbow_config" default="$(find orbita2d_description)/config/fake.yaml"/> -->
+
+  <!-- <!-\- Orbita3d config -\-> -->
+  <!-- <xacro:arg name="orbita3d_wrist_config" default="$(find orbita3d_controller)/config/fake.yaml"/> -->
+
+
+
 
   <!-- ARM PARAMETERS -->
   <!-- TODO: USE REAL VALUES -->
@@ -54,23 +66,20 @@
   </xacro:if>
   <xacro:property name="p" value="${prefix}"/>
 
-  <xacro:orbita2dof
+
+  <xacro:orbita2d
     name="${p}_shoulder" parent="${parent}"
     length="${arm_length}" radius="${arm_radius}" mass="${arm_mass}"
     xyz="${arm_offset_x} ${arm_offset_y*reflect} ${arm_offset_z}" rpy="0 0 ${arm_offset_yaw*reflect}"
     damping="${damping}" friction="${friction}"
     joint1="pitch" joint2="roll"
     joint1_min_angle="-${pi/2}" joint1_max_angle="${pi/2}"
-    joint2_min_angle="${min_shoulder_roll}" joint2_max_angle="${max_shoulder_roll}"
-    port_a="${shoulder_port_a}" port_b="${shoulder_port_b}"
-    id_a="${shoulder_id_a}" id_b="${shoulder_id_b}"
-    offset_a="0.0" offset_b="0.0"
-    ratio_a="${shoulder_ratio_a}" ratio_b="${shoulder_ratio_b}"
-    axis1_inverted="${shoulder_axis1_inverted}"
-    axis2_inverted="${shoulder_axis2_inverted}"
+    joint2_min_angle="-${pi/2}" joint2_max_angle="0.0"
+    config_file="${orbita2d_shoulder_config}"
   />
 
-   <xacro:orbita2dof
+
+   <xacro:orbita2d
     name="${p}_elbow" parent="${p}_shoulder_ball_link"
     length="${forearm_length}" radius="${forearm_radius}" mass="${forearm_mass}"
     xyz="0 0 -${arm_length}" rpy="0 0 0"
@@ -78,38 +87,30 @@
     joint1="yaw" joint2="pitch"
     joint1_min_angle="-${pi/2}" joint1_max_angle="${pi/2}"
     joint2_min_angle="-2.25" joint2_max_angle="0.1"
-    port_a="${elbow_port_a}" port_b="${elbow_port_b}"
-    id_a="${elbow_id_a}" id_b="${elbow_id_b}"
-    offset_a="0.0" offset_b="0.0"
-    ratio_a="${elbow_ratio_a}" ratio_b="${elbow_ratio_b}"
-    axis1_inverted="${elbow_axis1_inverted}"
-    axis2_inverted="${elbow_axis2_inverted}"
+    config_file="${orbita2d_elbow_config}"
   />
 
-  <xacro:orbita
+  <xacro:orbita3d
     name="${p}_wrist" parent="${p}_elbow_ball_link"
     length="${wrist_length}" radius="${wrist_radius}" mass="${wrist_mass}"
     xyz="0 0 -${forearm_length}" rpy="${pi} 0 0"
     damping="${damping}" friction="${friction}"
-    orbita_serial_port="${wrist_port}"
-    orbita_id="${wrist_id}"
-    orbita_hardware_zero="${wrist_hardware_zero}"
-    orbita_reduction="${wrist_reduction}"
+    config_file="${orbita3d_wrist_config}"
   />
 
-  <xacro:smartgripper
-    prefix="${p}" parent="${p}_wrist_ball_link" side="${side}"
-    damping="${damping}" friction="${friction}"
-    gripper_port="${gripper_port}"
-    gripper_id="${gripper_id}"
-  />
+  <!-- <xacro:smartgripper -->
+  <!--   prefix="${p}" parent="${p}_wrist_ball_link" side="${side}" -->
+  <!--   damping="${damping}" friction="${friction}" -->
+  <!--   gripper_port="${gripper_port}" -->
+  <!--   gripper_id="${gripper_id}" -->
+  <!-- /> -->
 
-  <link name="${p}_arm_tip"/>
-  <joint name="${p}_tip_joint" type="fixed">
-    <origin xyz="0 0 0.1" rpy="${pi} 0 0"/>
-    <parent link="${p}_gripper_palm_link"/>
-    <child link="${p}_arm_tip"/>
-  </joint>
+  <!-- <link name="${p}_arm_tip"/> -->
+  <!-- <joint name="${p}_tip_joint" type="fixed"> -->
+  <!--   <origin xyz="0 0 0.1" rpy="${pi} 0 0"/> -->
+  <!--   <parent link="${p}_gripper_palm_link"/> -->
+  <!--   <child link="${p}_arm_tip"/> -->
+  <!-- </joint> -->
 
 </xacro:macro>
 </robot>

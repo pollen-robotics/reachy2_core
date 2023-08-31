@@ -16,11 +16,10 @@ FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = 'full_kit', 'sta
 STARTER_KIT_RIGHT_NO_HEAD = 'starter_kit_right_no_head'
 
 REACHY_CONFIG_MODEL = "model"
-REACHY_CONFIG_NECK_ORBITA_ZERO = "neck_orbita_zero"
-REACHY_CONFIG_TOP = "top"
-REACHY_CONFIG_BOTTOM = "bottom"
-REACHY_CONFIG_MIDDLE = "middle"
-REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO = "right_wrist_orbita_zero"
+REACHY_CONFIG_NECK = "neck_config"
+REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
+REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
+REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
 
 
 # Before launching each node, scan the usb2ax to check if there are any missing motors
@@ -44,29 +43,38 @@ class ReachyConfig:
 
             # orbita zero
             try:
-                self.neck_orbita_zero_top = config[REACHY_CONFIG_NECK_ORBITA_ZERO][REACHY_CONFIG_TOP]
-                self.neck_orbita_zero_middle = config[REACHY_CONFIG_NECK_ORBITA_ZERO][REACHY_CONFIG_MIDDLE]
-                self.neck_orbita_zero_bottom = config[REACHY_CONFIG_NECK_ORBITA_ZERO][REACHY_CONFIG_BOTTOM]
-            except KeyError as e:
-                raise KeyError("neck_orbita_zero key not found :: {}".format(e))
+                self.neck_config=config[REACHY_CONFIG_NECK]
 
-            # right wrist zero
-            try:
-                self.right_wrist_orbita_zero_top = config[REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO][REACHY_CONFIG_TOP]
-                self.right_wrist_orbita_zero_middle = config[REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO][REACHY_CONFIG_MIDDLE]
-                self.right_wrist_orbita_zero_bottom = config[REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO][REACHY_CONFIG_BOTTOM]
             except KeyError as e:
-                raise KeyError("neck_orbita_zero key not found :: {}".format(e))
+                raise KeyError("orbita3d neck config key not found :: {}".format(e))
+
+            # right shoulder
+            try:
+                self.right_shoulder_config=config[REACHY_CONFIG_RIGHT_SHOULDER]
+
+            except KeyError as e:
+                raise KeyError("orbita2d right shoulder key not found :: {}".format(e))
+
+            # right elbow
+            try:
+                self.right_elbow_config=config[REACHY_CONFIG_RIGHT_ELBOW]
+            except KeyError as e:
+                raise KeyError("orbita2d right elbow key not found :: {}".format(e))
+
+            # right wrist
+            try:
+                self.right_wrist_config=config[REACHY_CONFIG_RIGHT_WRIST]
+            except KeyError as e:
+                raise KeyError("orbita3d right wrist key not found :: {}".format(e))
+
 
 
     def __str__(self):
         return "robot_model".ljust(25, ' ') + "{}\n".format(self.model) + \
-            "neck_orbita_zero_top".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_top) + \
-            "neck_orbita_zero_middle".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_middle) + \
-            "neck_orbita_zero_bottom".ljust(25, ' ') + "{}\n".format(self.neck_orbita_zero_bottom) + \
-            "right_wrist_orbita_zero_top".ljust(25, ' ') + "{}\n".format(self.right_wrist_orbita_zero_top) + \
-            "right_wrist_orbita_zero_middle".ljust(25, ' ') + "{}\n".format(self.right_wrist_orbita_zero_middle) + \
-            "right_wrist_orbita_zero_bottom".ljust(25, ' ') + "{}\n".format(self.right_wrist_orbita_zero_bottom)
+            "neck_config".ljust(25, ' ') + "{}\n".format(self.neck_config) + \
+            "right_shoulder_config".ljust(25, ' ') + "{}\n".format(self.right_shoulder_config) + \
+            "right_elbow_config".ljust(25, ' ') + "{}\n".format(self.right_elbow_config) + \
+            "right_wrist_config".ljust(25, ' ') + "{}\n".format(self.right_wrist_config)
 
 
 
@@ -99,15 +107,17 @@ def launch_setup(context, *args, **kwargs):
               (' ',)),
             f'robot_config:={reachy_config.model}',
             ' ',
-            'neck_hardware_zero:="{}, {}, {}"'.format(
-                reachy_config.neck_orbita_zero_top,
-                reachy_config.neck_orbita_zero_middle,
-                reachy_config.neck_orbita_zero_bottom),
+            'neck_config:="{}"'.format(
+                reachy_config.neck_config),
             ' ',
-            'right_wrist_hardware_zero:="{}, {}, {}"'.format(
-                reachy_config.right_wrist_orbita_zero_top,
-                reachy_config.right_wrist_orbita_zero_middle,
-                reachy_config.right_wrist_orbita_zero_bottom),
+            'r_shoulder_config:="{}"'.format(
+                reachy_config.right_shoulder_config),
+            ' ',
+            'r_elbow_config:="{}"'.format(
+                reachy_config.right_elbow_config),
+            ' ',
+            'r_wrist_config:="{}"'.format(
+                reachy_config.right_wrist_config),
             ' ',
         ]
     )  # To be cleaned on issue #92
@@ -332,11 +342,11 @@ def launch_setup(context, *args, **kwargs):
                 r_arm_forward_position_controller_spawner,
                 # l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
-                gripper_forward_position_controller_spawner,
+                # gripper_forward_position_controller_spawner,
                 forward_torque_controller_spawner,
-                # forward_torque_limit_controller_spawner,
-                # forward_speed_limit_controller_spawner,
-                # forward_pid_controller_spawner,
+                forward_torque_limit_controller_spawner,
+                forward_speed_limit_controller_spawner,
+                forward_pid_controller_spawner,
                 # forward_fan_controller_spawner,
                 # fan_controller_spawner,
                 kinematics_node

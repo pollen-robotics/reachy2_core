@@ -7,51 +7,22 @@
   <xacro:include filename="$(find reachy_description)/urdf/arm.urdf.xacro"/>
   <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro"/>
 
-  <xacro:include filename="$(find reachy_description)/urdf/inertial_primitives.urdf.xacro"/>
+
+  <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro"/>
+
+
+
+  <!-- config  -->
+  <xacro:arg name="neck_config" default="$(find orbita3d_controller)/config/fake.yaml"/>
+  <xacro:arg name="r_shoulder_config" default="$(find orbita2d_controller)/config/fake.yaml"/>
+  <xacro:arg name="r_elbow_config" default="$(find orbita2d_controller)/config/fake.yaml"/>
+  <xacro:arg name="r_wrist_config" default="$(find orbita3d_controller)/config/fake.yaml"/>
+  <!-- config  -->
 
 
   <!-- HWI IDs -->
-    <xacro:property name="right_elbow_port_a" value="/dev/right_elbow_A"/>
-    <xacro:property name="right_elbow_port_b" value="/dev/right_elbow_B"/>
-
-
-    <xacro:property name="right_elbow_id_a" value="71"/>
-    <xacro:property name="right_elbow_id_b" value="72"/>
-
-    <xacro:property name="right_wrist_id" value="70"/>
-    <xacro:property name="right_wrist_port" value="/dev/right_wrist"/>
-    <xacro:arg name="right_wrist_hardware_zero" default="0.0, 0.0, 0.0"/>
-
-    <xacro:property name="neck_id" value="10"/>
-    <xacro:property name="neck_port" value="/dev/neck"/>
-    <xacro:arg name="neck_hardware_zero" default="0.0, 0.0, 0.0"/>
-
-
-    <!-- <xacro:property name="left_elbow_id_a" value="8"/> -->
-    <!-- <xacro:property name="left_elbow_id_b" value="9"/> -->
-    <!-- <xacro:property name="left_wrist_id" value="10"/> -->
-
-
-
-    <!-- <xacro:property name="left_shoulder_id_a" value="2"/> -->
-    <!-- <xacro:property name="left_shoulder_id_b" value="1"/> -->
-    <xacro:property name="right_shoulder_port_a" value="/dev/right_shoulder_A"/>
-    <xacro:property name="right_shoulder_port_b" value="/dev/right_shoulder_B"/>
-
-    <xacro:property name="right_shoulder_id_a" value="81"/>
-    <xacro:property name="right_shoulder_id_b" value="82"/>
-
-
     <xacro:property name="right_gripper_id" value="11"/>
     <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
-
-  <!-- <xacro:property name="dynamixel_multiplexer_right" value="http://127.0.0.1:50099"/> -->
-  <!--   <xacro:property name="right_gripper_grasping_finger_id" value="11"/> -->
-  <!--   <xacro:property name="right_gripper_action_finger_id" value="12"/> -->
-  <!-- <xacro:property name="dynamixel_multiplexer_left" value="http://127.0.0.1:50096"/> -->
-  <!--   <xacro:property name="left_gripper_grasping_finger_id" value="21"/> -->
-  <!--   <xacro:property name="left_gripper_action_finger_id" value="22"/> -->
-
   <!-- HWI IDs -->
 
   <!-- MODEL PARAMETERS -->
@@ -64,13 +35,12 @@
   <xacro:property name="forearm_length" value="0.28"/>
   <!-- MODEL PARAMETERS -->
 
-
-
     <material name="torsoblack">
-        <color rgba="0.5 0.5 0.5 1"/>
+        <color rgba="0.5 0.5 0.5 1.0"/>
     </material>
 
-  
+
+
   <link name="world"/>
   <joint name="world_joint" type="fixed">
     <origin xyz="0 0 1.0" rpy="0 0 0"/>
@@ -112,24 +82,19 @@
   <xacro:head
     parent="torso"
     damping="${damping}" friction="${friction}"
-    neck_orbita_serial_port="${neck_port}"
-    neck_orbita_id="${neck_id}"
-    neck_orbita_hardware_zero="$(arg neck_hardware_zero)"
-  /> 
+    neck_config="$(arg neck_config)"
+  />
+
+<!-- <xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config gripper_port gripper_id"> -->
 
   <!-- RIGHT ARM -->
   <xacro:arm
     prefix="r" parent="torso" side="right"
     damping="${damping}" friction="${friction}"
-    shoulder_port_a="${right_shoulder_port_a}" shoulder_port_b="${right_shoulder_port_b}"
-    elbow_port_a="${right_elbow_port_a}" elbow_port_b="${right_elbow_port_b}"
-    wrist_port="${right_wrist_port}"
-    shoulder_id_a="${right_shoulder_id_a}" shoulder_id_b="${right_shoulder_id_b}"
-    elbow_id_a="${right_elbow_id_a}" elbow_id_b="${right_elbow_id_b}"
-    wrist_id="${right_wrist_id}"
-    wrist_hardware_zero="$(arg right_wrist_hardware_zero)"
-    gripper_id="${right_gripper_id}"
-    gripper_port="${right_gripper_port}"
+    orbita2d_shoulder_config="$(arg r_shoulder_config)"
+    orbita2d_elbow_config="$(arg r_elbow_config)"
+    orbita3d_wrist_config="$(arg r_wrist_config)"
+
     />
 
   <!-- <link name="r_wrist_cam_frame"/> -->
