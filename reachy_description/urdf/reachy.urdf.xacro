@@ -17,6 +17,9 @@
   <xacro:arg name="r_shoulder_config" default="$(find orbita2d_controller)/config/fake.yaml"/>
   <xacro:arg name="r_elbow_config" default="$(find orbita2d_controller)/config/fake.yaml"/>
   <xacro:arg name="r_wrist_config" default="$(find orbita3d_controller)/config/fake.yaml"/>
+
+  <xacro:property name="right_gripper_id" value="11"/>
+  <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
   <!-- config  -->
 
 
@@ -94,7 +97,8 @@
     orbita2d_shoulder_config="$(arg r_shoulder_config)"
     orbita2d_elbow_config="$(arg r_elbow_config)"
     orbita3d_wrist_config="$(arg r_wrist_config)"
-
+    gripper_id="${right_gripper_id}"
+    gripper_port="${right_gripper_port}"
     />
 
   <!-- <link name="r_wrist_cam_frame"/> -->

@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config">
+<xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config gripper_port gripper_id">
 
 
   <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro"/>
   <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro"/>
-  <!-- <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/> -->
+  <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/>
 
 
 
@@ -98,19 +98,19 @@
     config_file="${orbita3d_wrist_config}"
   />
 
-  <!-- <xacro:smartgripper -->
-  <!--   prefix="${p}" parent="${p}_wrist_ball_link" side="${side}" -->
-  <!--   damping="${damping}" friction="${friction}" -->
-  <!--   gripper_port="${gripper_port}" -->
-  <!--   gripper_id="${gripper_id}" -->
-  <!-- /> -->
+  <xacro:smartgripper
+    prefix="${p}" parent="${p}_wrist_ball_link" side="${side}"
+    damping="${damping}" friction="${friction}"
+    gripper_port="${gripper_port}"
+    gripper_id="${gripper_id}"
+  />
 
-  <!-- <link name="${p}_arm_tip"/> -->
-  <!-- <joint name="${p}_tip_joint" type="fixed"> -->
-  <!--   <origin xyz="0 0 0.1" rpy="${pi} 0 0"/> -->
-  <!--   <parent link="${p}_gripper_palm_link"/> -->
-  <!--   <child link="${p}_arm_tip"/> -->
-  <!-- </joint> -->
+  <link name="${p}_arm_tip"/>
+  <joint name="${p}_tip_joint" type="fixed">
+    <origin xyz="0 0 0.1" rpy="${pi} 0 0"/>
+    <parent link="${p}_gripper_palm_link"/>
+    <child link="${p}_arm_tip"/>
+  </joint>
 
 </xacro:macro>
 </robot>

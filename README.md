@@ -117,6 +117,16 @@ went right, or at least that not everything went wrong.
 Fake robot enables to test the bare minimum.
 To actually run some code, we will escalate this replacing fake by gazebo simulation.
 
+Don't forget to add the Orbita2d and Orbita3d config files paths to your .reachy.yaml:
+
+```
+	neck_config: path_to_orbita3d_neck_config_file
+	right_shoulder_config:: path_to_orbita2d_right_shoulder_config_file
+	right_elbow_config:: path_to_orbita2d_right_elbow_config_file
+	right_wrist_config:: path_to_orbita3d_right_wrist_config_file
+	...
+```
+
 </details>
 
 <details>
