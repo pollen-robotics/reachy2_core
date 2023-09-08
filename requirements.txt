@@ -2,7 +2,8 @@
 git+https://github.com/pollen-robotics/colcon-cargo.git
 git+https://github.com/colcon/colcon-ros-cargo.git
 reachy-sdk
-setuptools==58.2.0
 transforms3d
 v4l2py
 zoom_kurokesu
+pypot
+setuptools==58.2.0
