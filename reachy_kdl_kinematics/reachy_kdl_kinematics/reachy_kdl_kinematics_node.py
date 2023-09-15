@@ -45,7 +45,8 @@ class ReachyKdlKinematics(LifecycleNode):
             False,
             ParameterDescriptor(description="Enable Quadratic Programming Inverse Kinematics. reachy_placo must be installed."),
         )
-        self._USE_QP_IK = self.get_parameter("use_qp_ik").get_parameter_value().bool_value
+        # TODO merge the launch modifications that bring this parameter...
+        self._USE_QP_IK = False #self.get_parameter("use_qp_ik").get_parameter_value().bool_value
         self.logger.info(f"Using QP IK: {self._USE_QP_IK}")
 
 
@@ -73,6 +74,10 @@ class ReachyKdlKinematics(LifecycleNode):
         new_urdf = copy.copy(self.urdf)
         new_urdf = remove_ros2_control_tags(new_urdf)
         new_urdf = fix_arm_tip_names(new_urdf)
+        
+        # f = open("/tmp/reachy2.urdf", "w")
+        # f.write(new_urdf)
+        # f.close()
 
         if self._USE_QP_IK:
             from reachy_placo import ik_reachy_placo
