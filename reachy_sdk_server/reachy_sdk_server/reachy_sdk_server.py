@@ -226,22 +226,27 @@ class ReachySDKServer(
     # Config gRPCs
     def GetReachyConfig(self, request: Empty, context) -> config_pb2.ConfigReachy:
         """Get Reachy generation and if there is a mobile base attached."""
-        from reachy_utils.config import get_reachy_generation, get_zuuu_version, get_camera_parameters, get_reachy_model
-        generation = get_reachy_generation()
+        from reachy_utils.config import get_reachy_config, get_reachy_serial_number, get_zuuu_version, get_parts_availability, get_software_info
+        config = get_reachy_config()
         mobile_base_presence = True if get_zuuu_version() != 'none' else False
-        config = get_reachy_model()
 
-        camera_parameters = get_camera_parameters()
-
-        left = list(camera_parameters["left"].values())
-        right = list(camera_parameters["right"].values())
-        camera_parameters = left + right
+        enabled_parts = [
+            getattr(config_pb2.Parts, part.upper())
+            for (part, status) in get_parts_availability().items() if status
+            ]
+        disabled_parts = [
+            getattr(config_pb2.Parts, part.upper())
+            for (part, status) in get_parts_availability().items() if not status
+            ]
 
         return config_pb2.ConfigReachy(
-            generation=generation,
-            mobile_base_presence=mobile_base_presence,
-            camera_parameters=camera_parameters,
             config=config,
+            with_mobile_base=mobile_base_presence,
+            enabled_parts=enabled_parts,
+            disabled_parts=disabled_parts,
+            core_software_version=get_software_info()['core_version'],
+            robot_serial_number=get_reachy_serial_number(),
+            mobile_base_serial_number=str(get_zuuu_version()),
         )
 
 
