@@ -24,8 +24,8 @@ REACHY_CONFIG_RIGHT_WRIST_ORBITA_ZERO = "right_wrist_orbita_zero"
 
 
 # Before launching each node, scan the usb2ax to check if there are any missing motors
-from reachy_utils.discovery import get_missing_motors_reachy
-get_missing_motors_reachy(check_service=False)
+# from reachy_utils.discovery import get_missing_motors_reachy
+# get_missing_motors_reachy(check_service=False)
 
 
 class ReachyConfig:
