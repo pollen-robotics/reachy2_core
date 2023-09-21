@@ -3,9 +3,9 @@
 import time
 from subprocess import run, PIPE, check_output
 from concurrent.futures import ThreadPoolExecutor
-from queue import Empty
 
 import grpc
+from google.protobuf.empty_pb2 import Empty
 from google.protobuf.wrappers_pb2 import BoolValue, FloatValue
 
 import rclpy
@@ -15,7 +15,7 @@ from geometry_msgs.msg import Twist
 from reachy_sdk_api import mobile_platform_reachy_pb2, mobile_platform_reachy_pb2_grpc
 
 from zuuu_interfaces.srv import SetZuuuMode, GetZuuuMode, GetOdometry, ResetOdometry
-from zuuu_interfaces.srv import GoToXYTheta, DistanceToGoal, SetZuuuSafety
+from zuuu_interfaces.srv import GoToXYTheta, DistanceToGoal, GetZuuuSafety, SetZuuuSafety
 from zuuu_interfaces.srv import SetSpeed, GetBatteryVoltage
 
 from reachy_utils.config import get_zuuu_version
@@ -74,9 +74,13 @@ class MobileBaseServer(
         while not self.reset_odometry_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service ResetOdometry not available, waiting again...')
 
-        self.set_zuuu_safety = self.create_client(SetZuuuSafety, 'SetZuuuSafety')
-        while not self.reset_odometry_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('service ResetOdometry not available, waiting again...')
+        self.set_zuuu_safety_client = self.create_client(SetZuuuSafety, 'SetZuuuSafety')
+        while not self.set_zuuu_safety_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service SetZuuuSafety not available, waiting again...')
+
+        self.get_zuuu_safety_client = self.create_client(GetZuuuSafety, 'GetZuuuSafety')
+        while not self.get_zuuu_safety_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service GetZuuuSafety not available, waiting again...')
 
         self.logger.info('Initialized mobile base server.')
 
@@ -303,13 +307,39 @@ class MobileBaseServer(
 
     def SetZuuuSafety(
                     self,
-                    request: mobile_platform_reachy_pb2.SetZuuuSafetyRequest,
+                    request: mobile_platform_reachy_pb2.LidarSafety,
                     context) -> mobile_platform_reachy_pb2.MobilityServiceAck:
         """Set on/off the anti-collision safety handled by the mobile base hal."""
         req = SetZuuuSafety.Request()
         req.safety_on = request.safety_on.value
-        self.set_zuuu_safety.call_async(req)
+        req.safety_distance = request.safety_distance.value
+        req.critical_distance = request.critical_distance.value
+        self.set_zuuu_safety_client.call_async(req)
         return mobile_platform_reachy_pb2.MobilityServiceAck(success=BoolValue(value=True))
+
+    def GetZuuuSafety(
+                    self,
+                    request: Empty,
+                    context) -> mobile_platform_reachy_pb2.LidarSafety:
+        """Get the anti-collision safety status handled by the mobile base hal
+        along with the safety and critical distances.
+        """
+        req = GetZuuuSafety.Request()
+
+        future = self.get_zuuu_safety_client.call_async(req)
+        for _ in range(1000):
+            if future.done():
+                ros_response = future.result()
+                safety_on = ros_response.safety_on
+                safety_distance = ros_response.safety_distance
+                critical_distance = ros_response.critical_distance
+                break
+            time.sleep(0.001)
+        return mobile_platform_reachy_pb2.LidarSafety(
+            safety_on=BoolValue(value=safety_on),
+            safety_distance=FloatValue(value=safety_distance),
+            critical_distance=FloatValue(value=critical_distance),
+        )
 
 
 def main():

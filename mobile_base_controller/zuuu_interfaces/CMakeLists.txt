@@ -34,6 +34,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/GetBatteryVoltage.srv"
   "srv/GetZuuuMode.srv"
   "srv/SetZuuuSafety.srv"
+  "srv/GetZuuuSafety.srv"
 )
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

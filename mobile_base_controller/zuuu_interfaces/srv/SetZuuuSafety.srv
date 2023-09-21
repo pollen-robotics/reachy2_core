@@ -1,4 +1,6 @@
 bool safety_on
+float64 safety_distance
+float64 critical_distance
 ---
 # True if the change is made
 bool success

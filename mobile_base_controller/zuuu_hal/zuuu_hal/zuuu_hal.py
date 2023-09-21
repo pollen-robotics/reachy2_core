@@ -52,7 +52,7 @@ from rcl_interfaces.msg import SetParametersResult
 
 from zuuu_interfaces.srv import SetZuuuMode, GetZuuuMode, GetOdometry, ResetOdometry
 from zuuu_interfaces.srv import GoToXYTheta, IsGoToFinished, DistanceToGoal
-from zuuu_interfaces.srv import SetSpeed, GetBatteryVoltage, SetZuuuSafety
+from zuuu_interfaces.srv import SetSpeed, GetBatteryVoltage, SetZuuuSafety, GetZuuuSafety
 
 from zuuu_hal.utils import PID, angle_diff, sign
 from zuuu_hal.lidar_safety import LidarSafety
@@ -349,6 +349,9 @@ class ZuuuHAL(Node):
         self.set_safety_service = self.create_service(
             SetZuuuSafety, 'SetZuuuSafety', self.handle_zuuu_set_safety)
 
+        self.get_safety_service = self.create_service(
+            GetZuuuSafety, 'GetZuuuSafety', self.handle_zuuu_get_safety)
+
         # Initialize the transform broadcaster
         self.br = TransformBroadcaster(self)
 
@@ -538,12 +541,22 @@ class ZuuuHAL(Node):
 
     def handle_zuuu_set_safety(self, request: SetZuuuSafety.Request, response: SetZuuuSafety.Response
                                ) -> SetZuuuSafety.Response:
-        """Hangle SetZuuuSafety service request"""
+        """Handle SetZuuuSafety service request"""
         safety_on = request.safety_on
         state = 'ON' if safety_on else 'OFF'
         self.get_logger().info(f"Lidar safety is now {state}")
         self.safety_on = safety_on
+        self.lidar_safety.safety_distance = request.safety_distance
+        self.lidar_safety.critical_distance = request.critical_distance
         response.success = True
+        return response
+
+    def handle_zuuu_get_safety(self, request: GetZuuuSafety.Request, response: GetZuuuSafety.Response
+                               ) -> GetZuuuSafety.Response:
+        """Handle GetZuuuSafety service request"""
+        response.safety_on = self.safety_on
+        response.safety_distance = self.lidar_safety.safety_distance
+        response.critical_distance = self.lidar_safety.critical_distance
         return response
 
     def check_battery(self, verbose: bool = False) -> None:
