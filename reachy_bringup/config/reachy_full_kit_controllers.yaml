@@ -11,8 +11,8 @@ controller_manager:
     r_arm_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
-    # gripper_forward_position_controller:
-    #   type: forward_command_controller/ForwardCommandController
+    gripper_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
 
     forward_torque_controller:
       type: forward_command_controller/ForwardCommandController
@@ -73,7 +73,7 @@ forward_torque_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-      # - r_gripper_finger
+      - r_gripper_finger
 #      - l_shoulder_pitch
 #      - l_shoulder_roll
 #      - l_elbow_yaw
@@ -97,7 +97,7 @@ forward_torque_limit_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-      # - r_gripper_finger
+      - r_gripper_finger
       # - l_shoulder_pitch
       # - l_shoulder_roll
       # - l_elbow_yaw
@@ -121,7 +121,7 @@ forward_speed_limit_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-      # - r_gripper_finger
+      - r_gripper_finger
       # - l_shoulder_pitch
       # - l_shoulder_roll
       # - l_elbow_yaw
@@ -146,7 +146,7 @@ forward_pid_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-      # - r_gripper_finger
+      - r_gripper_finger
       # - l_shoulder_pitch
       # - l_shoulder_roll
       # - l_elbow_yaw

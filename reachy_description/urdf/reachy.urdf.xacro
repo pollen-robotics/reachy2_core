@@ -24,8 +24,8 @@
 
 
   <!-- HWI IDs -->
-    <xacro:property name="right_gripper_id" value="11"/>
-    <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
+    <!-- <xacro:property name="left_gripper_id" value="12"/> -->
+    <!-- <xacro:property name="left_gripper_port" value="/dev/left_gripper"/> -->
   <!-- HWI IDs -->
 
   <!-- MODEL PARAMETERS -->
