@@ -21,13 +21,19 @@
 
   <xacro:property name="right_gripper_id" value="11"/>
   <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
+
+
+  <xacro:arg name="l_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml"/>
+  <xacro:arg name="l_elbow_config" default="$(find orbita2d_description)/config/fake.yaml"/>
+  <xacro:arg name="l_wrist_config" default="$(find orbita3d_description)/config/fake.yaml"/>
+
+  <xacro:property name="left_gripper_id" value="12"/>
+  <xacro:property name="left_gripper_port" value="/dev/left_gripper"/>
+
+
+
   <!-- config  -->
 
-
-  <!-- HWI IDs -->
-    <!-- <xacro:property name="left_gripper_id" value="12"/> -->
-    <!-- <xacro:property name="left_gripper_port" value="/dev/left_gripper"/> -->
-  <!-- HWI IDs -->
 
   <!-- MODEL PARAMETERS -->
   <xacro:property name="base_collision" value="false"/>
@@ -104,6 +110,19 @@
     gripper_port="${right_gripper_port}"
     />
 
+
+  <!-- LEFT ARM -->
+  <xacro:arm
+    prefix="l" parent="torso" side="left"
+    damping="${damping}" friction="${friction}"
+    orbita2d_shoulder_config="$(arg l_shoulder_config)"
+    orbita2d_elbow_config="$(arg l_elbow_config)"
+    orbita3d_wrist_config="$(arg l_wrist_config)"
+    gripper_id="${left_gripper_id}"
+    gripper_port="${left_gripper_port}"
+    />
+
+
   <!-- <link name="r_wrist_cam_frame"/> -->
   <!-- <joint name="r_wrist_cam_frame_joint" type="fixed"> -->
   <!--   <origin xyz="0 0 0" rpy="0.0 0 0"/> -->
@@ -118,19 +137,6 @@
   <!--   <parent link="r_wrist_cam_frame"/> -->
   <!--   <child link="r_wrist_camera"/> -->
   <!-- </joint> -->
-
-  <!-- LEFT ARM -->
-    <!-- <xacro:arm -->
-    <!-- prefix="l" parent="torso" side="left" -->
-    <!-- damping="${damping}" friction="${friction}" -->
-    <!-- shoulder_port_a="${left_shoulder_port_a}" shoulder_port_b="${left_shoulder_port_b}" -->
-    <!-- elbow_port_a="${left_elbow_port_a}" elbow_port_b="${left_elbow_port_b}" -->
-    <!-- wrist_port="${left_wrist_port}" -->
-    <!-- shoulder_id_a="${left_shoulder_id_a}" shoulder_id_b="${left_shoulder_id_b}" -->
-    <!-- elbow_id_a="${left_elbow_id_a}" elbow_id_b="${left_elbow_id_b}" -->
-    <!-- wrist_id="${left_wrist_id}" -->
-    <!-- gripper_id="${left_gripper_id}" -->
-    <!-- /> -->
 
 
     <xacro:if value="$(arg use_gazebo)">

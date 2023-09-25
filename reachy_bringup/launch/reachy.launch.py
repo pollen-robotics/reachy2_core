@@ -340,7 +340,7 @@ def launch_setup(context, *args, **kwargs):
             on_exit=[
                 neck_forward_position_controller_spawner,
                 r_arm_forward_position_controller_spawner,
-                # l_arm_forward_position_controller_spawner,
+                l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
                 gripper_forward_position_controller_spawner,
                 forward_torque_controller_spawner,

@@ -31,9 +31,9 @@ left_arm_controller:
     joints:
       - l_shoulder_pitch
       - l_shoulder_roll
-      - l_arm_yaw
+      - l_elbow_yaw
       - l_elbow_pitch
-      - l_forearm_yaw
+      - l_wrist_yaw
       - l_wrist_pitch
       - l_wrist_roll
     command_interfaces:
@@ -41,16 +41,14 @@ left_arm_controller:
     state_interfaces:
       - position
       - velocity
-    use_sim_time: true
-
 right_arm_controller:
   ros__parameters:
     joints:
       - r_shoulder_pitch
       - r_shoulder_roll
-      - r_arm_yaw
+      - r_elbow_yaw
       - r_elbow_pitch
-      - r_forearm_yaw
+      - r_wrist_yaw
       - r_wrist_pitch
       - r_wrist_roll
     command_interfaces:
@@ -58,8 +56,6 @@ right_arm_controller:
     state_interfaces:
       - position
       - velocity
-    use_sim_time: true
-
 head_controller:
   ros__parameters:
     joints:
@@ -71,26 +67,21 @@ head_controller:
     state_interfaces:
       - position
       - velocity
-    use_sim_time: true
-
 left_gripper_controller:
   ros__parameters:
     joints:
-      - l_gripper
+      - l_gripper_finger
     command_interfaces:
       - position
     state_interfaces:
       - position
       - velocity
-    use_sim_time: true
-
 right_gripper_controller:
   ros__parameters:
     joints:
-      - r_gripper
+      - r_gripper_finger
     command_interfaces:
       - position
     state_interfaces:
       - position
       - velocity
-    use_sim_time: true

@@ -3,6 +3,7 @@
 <xacro:macro name="smartgripper" params="prefix parent side damping friction gripper_port gripper_id">
 
   <xacro:include filename="$(find reachy_description)/ros2_control/smartgripper.ros2_control.xacro"/>
+  <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro"/>
 
   <xacro:property name="gripper_length" value="0.12"/>
   <xacro:property name="gripper_radius" value="0.03"/>
@@ -21,13 +22,13 @@
 
   </xacro:if>
 
-  
-    <material name="gripperblack">
-        <color rgba="0.4 0.4 0.4 1"/>
-    </material>
-    <material name="gripperwhite">
-        <color rgba="0.9 0.9 0.9 1"/>
-    </material>
+
+    <!-- <material name="gripperblack"> -->
+    <!--     <color rgba="0.4 0.4 0.4 1"/> -->
+    <!-- </material> -->
+    <!-- <material name="gripperwhite"> -->
+    <!--     <color rgba="0.9 0.9 0.9 1"/> -->
+    <!-- </material> -->
 
   <xacro:property name="p" value="${prefix}_gripper"/>
 
@@ -43,7 +44,9 @@
       <geometry>
         <box size="${gripper_radius} ${gripper_radius*2} ${gripper_length/2}"/>
       </geometry>
-      <material name="gripperblack"/>
+      <!-- <material name="gripperblack"/> -->
+      <xacro:gripperblack/>
+
     </visual>
     <xacro:inertial_cuboid mass="${gripper_mass*0.85}" xyz="0 0 ${gripper_length/4}"  rpy="0 0 0" x_length="${gripper_radius}" y_length="${gripper_radius*2}" z_length="${gripper_length/2}"/>
   </link>
@@ -66,7 +69,9 @@
       <geometry>
         <box size="${gripper_radius} 0.01 ${gripper_length/2}"/>
       </geometry>
-      <material name="gripperwhite"/>
+      <!-- <material name="gripperwhite"/> -->
+      <xacro:gripperwhite/>
+
     </visual>
     <xacro:inertial_cuboid mass="${gripper_mass*0.1}" xyz="0 ${gripper_radius} ${gripper_length/4}"  rpy="0 0 0" x_length="${gripper_radius}" y_length="0.01" z_length="${gripper_length/2}"/>
   </link>
@@ -84,7 +89,9 @@
       <geometry>
         <box size="${gripper_radius} 0.01 ${gripper_length/2}"/>
       </geometry>
-      <material name="gripperwhite"/>
+      <!-- <material name="gripperwhite"/> -->
+      <xacro:gripperwhite/>
+
     </visual>
     <xacro:inertial_cuboid mass="${gripper_mass*0.1}" xyz="0 ${gripper_radius} ${gripper_length/4}"  rpy="0 0 0" x_length="${gripper_radius}" y_length="0.01" z_length="${gripper_length/2}"/>
   </link>

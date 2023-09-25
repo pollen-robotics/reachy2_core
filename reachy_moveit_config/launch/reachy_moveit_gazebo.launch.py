@@ -168,7 +168,7 @@ def generate_demo_launch(moveit_config):
 
 
 def generate_launch_description():
-    moveit_config = MoveItConfigsBuilder("reachy_v2_wip", package_name="reachy_moveit_config")
+    moveit_config = MoveItConfigsBuilder("reachy_v2", package_name="reachy_moveit_config")
     moveit_config = moveit_config.sensors_3d(None)  # be sure to disable the 3D sensor
 
     # moveit_config = moveit_config.robot_description(mappings={'use_fake_hardware': 'true', 'use_gazebo': 'true', 'use_moveit_gazebo': 'true'})  # pass parameters to xacro (this should work be it does not...)
