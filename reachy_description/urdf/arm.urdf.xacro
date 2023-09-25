@@ -105,12 +105,12 @@
     gripper_id="${gripper_id}"
   />
 
-  <!-- <link name="${p}_arm_tip"/> -->
-  <!-- <joint name="${p}_tip_joint" type="fixed"> -->
-  <!--   <origin xyz="0 0 0.1" rpy="${pi} 0 0"/> -->
-  <!--   <parent link="${p}_gripper_palm_link"/> -->
-  <!--   <child link="${p}_arm_tip"/> -->
-  <!-- </joint> -->
+  <link name="${p}_arm_tip"/>
+  <joint name="${p}_tip_joint" type="fixed">
+    <origin xyz="0 0 0.1" rpy="${pi} 0 0"/>
+    <parent link="${p}_gripper_palm_link"/>
+    <child link="${p}_arm_tip"/>
+  </joint>
 
 </xacro:macro>
 </robot>
