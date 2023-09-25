@@ -9,6 +9,7 @@
 
 
   <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro"/>
+  <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro"/>
 
 
 
@@ -38,9 +39,9 @@
   <xacro:property name="forearm_length" value="0.28"/>
   <!-- MODEL PARAMETERS -->
 
-    <material name="torsoblack">
-        <color rgba="0.5 0.5 0.5 1.0"/>
-    </material>
+    <!-- <material name="torsoblack"> -->
+    <!--     <color rgba="0.5 0.5 0.5 1.0"/> -->
+    <!-- </material> -->
 
 
 
@@ -71,7 +72,9 @@
         <!-- <geometry> -->
         <!--   <cylinder length="1" radius="0.03"/> -->
         <!-- </geometry> -->
-        <material name="torsoblack"/>
+        <!-- <material name="torsoblack"/> -->
+	<xacro:torsoblack/>
+
       </visual>
     </xacro:if>
     <xacro:inertial_cuboid mass="10" xyz="0 0 0.5"  rpy="0 0 0" x_length="0.05" y_length="0.05" z_length="1"/>
@@ -129,5 +132,15 @@
     <!-- gripper_id="${left_gripper_id}" -->
     <!-- /> -->
 
+
+    <xacro:if value="$(arg use_gazebo)">
+        <gazebo>
+            <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+                <!-- <parameters>$(find reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
+                <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>
+                <robotNamespace>/reachy</robotNamespace>
+            </plugin>
+        </gazebo>
+    </xacro:if>
 
 </robot>
