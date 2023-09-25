@@ -1,4 +1,4 @@
-# Default initial positions for reachy_2023's ros2_control fake system
+# Default initial positions for reachy_v2's ros2_control fake system
 
 initial_positions:
    r_shoulder_pitch: 0

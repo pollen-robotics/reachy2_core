@@ -21,7 +21,7 @@ moveit2_tutorials
 moveit_resources
 moveit_task_constructor
 moveit_visual_tools
-reachy_2023
+reachy_v2_wip
 rosparam_shortcuts
 srdfdom
 

@@ -4,7 +4,7 @@ moveit_setup_assistant_config:
     relative_path: urdf/reachy.urdf.xacro
     xacro_args: use_fake_hardware:=true use_gazebo:=true robot_config:=full_kit
   srdf:
-    relative_path: config/reachy_2023.srdf
+    relative_path: config/reachy_v2_wip.srdf
   package_settings:
     author_name: Steve Nguyen
     author_email: steve.nguyen@pollen-robotics.com

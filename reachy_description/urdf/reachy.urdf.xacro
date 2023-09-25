@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="generic_arm">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="reachy_v2">
 
   <xacro:arg name="use_fake_hardware" default="false"/>
   <xacro:arg name="use_gazebo" default="false"/>
@@ -14,10 +14,10 @@
 
 
   <!-- config  -->
-  <xacro:arg name="neck_config" default="$(find orbita3d_controller)/config/fake.yaml"/>
-  <xacro:arg name="r_shoulder_config" default="$(find orbita2d_controller)/config/fake.yaml"/>
-  <xacro:arg name="r_elbow_config" default="$(find orbita2d_controller)/config/fake.yaml"/>
-  <xacro:arg name="r_wrist_config" default="$(find orbita3d_controller)/config/fake.yaml"/>
+  <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake.yaml"/>
+  <xacro:arg name="r_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml"/>
+  <xacro:arg name="r_elbow_config" default="$(find orbita2d_description)/config/fake.yaml"/>
+  <xacro:arg name="r_wrist_config" default="$(find orbita3d_description)/config/fake.yaml"/>
 
   <xacro:property name="right_gripper_id" value="11"/>
   <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
