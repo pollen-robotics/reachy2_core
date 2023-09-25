@@ -49,6 +49,8 @@ https://doc.rust-lang.org/cargo/getting-started/installation.html
 mkdir ~/reachy_ws && cd ~/reachy_ws
 mkdir src && cd src
 git clone https://github.com/pollen-robotics/reachy_2023.git
+git clone https://github.com/pollen-robotics/orbita2d_control.git
+git clone https://github.com/pollen-robotics/orbita3d_control.git
 ```
 
 ### Build Reachy_2023 env
@@ -104,7 +106,7 @@ if you want to try things by yourself. Let's walk you through some of these.
 
 <details>
   <summary>Fake</summary>
-  
+
 ```commandline
 ros2 launch reachy_bringup reachy.launch.py  fake:=true start_rviz:=true
 ```
@@ -115,16 +117,26 @@ went right, or at least that not everything went wrong.
 Fake robot enables to test the bare minimum.
 To actually run some code, we will escalate this replacing fake by gazebo simulation.
 
+Don't forget to add the Orbita2d and Orbita3d config files paths to your .reachy.yaml:
+
+```
+	neck_config: path_to_orbita3d_neck_config_file
+	right_shoulder_config:: path_to_orbita2d_right_shoulder_config_file
+	right_elbow_config:: path_to_orbita2d_right_elbow_config_file
+	right_wrist_config:: path_to_orbita3d_right_wrist_config_file
+	...
+```
+
 </details>
 
 <details>
   <summary>Gazebo</summary>
-  
+
 
 ```commandline
 ros2 launch reachy_bringup reachy.launch.py  gazebo:=true
 ```
-After running this one, you should see Reachy inside Gazebo simulation tool. 
+After running this one, you should see Reachy inside Gazebo simulation tool.
 Nothing should be moving yet, but we will see about it in the next sections.
 </details>
 
@@ -158,7 +170,7 @@ ros2 control list_hardware_interfaces
 
 <details>
   <summary>Reachy SDK</summary>
-  
+
 To test a bit further, you can start a fake instance and gazebo, with sdk_server on
 
 ```commandline
@@ -189,4 +201,3 @@ More info on how to use Reachy's Python SDK can be found on
 Now that is everything is set up properly on your environment, let's try to move some real stuff.
 
 To be continued...
-

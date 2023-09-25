@@ -4,9 +4,18 @@
   <xacro:arg name="depth_camera" default="false"/>
   <xacro:property name="camera_link" value="0.05" /> <!-- Size of square 'camera' box -->
   <xacro:property name="camera_convergence" value="0.0" /> <!-- convergence angle (rad) of the cameras. 0=parallel-->
-  <xacro:property name="neck_orbita_reduction" value="4.266667"/>
-  <xacro:property name="neck_orbita_alpha" value="0.9424777960769379"/>
 
+
+  <xacro:property name="neck_length" value="0.05"/>
+  <xacro:property name="neck_radius" value="0.03"/>
+  <xacro:property name="neck_mass" value="0.5"/>
+  <xacro:property name="neck_offset_x" value="-0.032893"/>
+  <xacro:property name="neck_offset_y" value="0"/>
+  <xacro:property name="neck_offset_z" value="0.110675"/>
+  <xacro:property name="neck_offset_pitch" value="0.17453293"/>
+  <xacro:property name="neck_offset_yaw" value="0.0"/>
+
+  <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro"/>
 
     <material name="camblack">
         <color rgba="0.2 0.2 0.2 1"/>
@@ -15,147 +24,23 @@
         <color rgba="0.9 0.9 0.9 1"/>
     </material>
 
-  <xacro:macro name="head" params="parent damping friction neck_orbita_serial_port neck_orbita_id neck_orbita_hardware_zero">
 
-    <xacro:include filename="$(find reachy_description)/ros2_control/head.ros2_control.xacro"/>
+  <xacro:macro name="head" params="parent damping friction neck_config">
+  <xacro:orbita3d
+    name="neck" parent="torso"
+    length="${neck_length}" radius="${neck_radius}" mass="${neck_mass}"
+    xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="0 0 ${neck_offset_yaw}"
+    damping="${damping}" friction="${friction}"
+    config_file="${neck_config}"
+  />
 
-    <joint name="neck_roll" type="revolute">
-      <origin xyz="-0.032893 0.0 0.110675" rpy="0.0 0.17453293 0.0"/>
-      <parent link="${parent}"/>
-      <child link="head_x"/>
-      <axis xyz="1 0 0"/>
-      <limit lower="-0.8" upper="0.8" effort="10." velocity="0.0"/>
-      <dynamics damping="${damping}" friction="${friction}"/>
-    </joint>
-
-    <link name="head_x">
-      <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
-      </inertial>
-    </link>
-
-    <joint name="neck_pitch" type="revolute">
-      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
-      <parent link="head_x"/>
-      <child link="head_y"/>
-      <axis xyz="0 1 0"/>
-      <limit lower="-0.8" upper="1.13" effort="10." velocity="0.0"/>
-      <dynamics damping="${damping}" friction="${friction}"/>
-    </joint>
-
-    <link name="head_y" >
-      <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
-      </inertial>
-    </link>
-
-    <joint name="neck_yaw" type="revolute">
-      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
-      <parent link="head_y"/>
-      <child link="head_z"/>
-      <axis xyz="0 0 1"/>
-      <limit lower="-2.79" upper="2.79" effort="10." velocity="0.0"/>
-      <dynamics damping="${damping}" friction="${friction}"/>
-    </joint>
-
-    <link name="head_z">
-      <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
-      </inertial>
-    </link>
 
     <joint name="neck_fixed" type="fixed">
       <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
-      <parent link="head_z" />
+      <parent link="neck_ball_link" />
       <child link="head" />
     </joint>
 
-    <!-- Fixed Orbita Arms Visuals -->
-
-    <!-- <joint name="neck_top" type="fixed"> -->
-    <!--   <origin xyz="0.0067 0.0 0.0478" rpy="0 0.174 0"/> -->
-    <!--   <parent link="${parent}"/> -->
-    <!--   <child link="top_neck_arm"/> -->
-    <!-- </joint> -->
-
-    <!-- <link name="top_neck_arm"> -->
-    <!--   <inertial> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <mass value="0.001"/> -->
-    <!--     <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/> -->
-    <!--   </inertial> -->
-
-    <!--   <visual name=""> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.5236"/> -->
-    <!--     <geometry> -->
-    <!--       <mesh filename="file://$(find reachy_description)/meshes/orbita_arm.dae"/> -->
-    <!--     </geometry> -->
-    <!--   </visual> -->
-    <!--   <collision> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <cylinder length="0.0" radius="0.0" /> -->
-    <!--     </geometry> -->
-    <!--   </collision> -->
-    <!-- </link> -->
-
-    <!-- <joint name="neck_middle" type="fixed"> -->
-    <!--   <origin xyz="0.0067 0.0 0.0478" rpy="0 0.174 0"/> -->
-    <!--   <parent link="${parent}"/> -->
-    <!--   <child link="middle_neck_arm"/> -->
-    <!-- </joint> -->
-
-    <!-- <link name="middle_neck_arm"> -->
-    <!--   <inertial> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <mass value="0.001"/> -->
-    <!--     <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/> -->
-    <!--   </inertial> -->
-    <!--   <visual name=""> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 2.618"/> -->
-    <!--     <geometry> -->
-    <!--       <mesh filename="file://$(find reachy_description)/meshes/orbita_arm.dae"/> -->
-    <!--     </geometry> -->
-    <!--   </visual> -->
-    <!--   <collision> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <cylinder length="0.0" radius="0.0" /> -->
-    <!--     </geometry> -->
-    <!--   </collision> -->
-    <!-- </link> -->
-
-    <!-- <joint name="neck_bottom" type="fixed"> -->
-    <!--   <origin xyz="0.0067 0.0 0.0478" rpy="0 0.174 0"/> -->
-    <!--   <parent link="${parent}"/> -->
-    <!--   <child link="bottom_neck_arm"/> -->
-    <!-- </joint> -->
-
-    <!-- <link name="bottom_neck_arm"> -->
-    <!--   <inertial> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <mass value="0.001"/> -->
-    <!--     <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/> -->
-    <!--   </inertial> -->
-    <!--   <visual name=""> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 -1.57"/> -->
-    <!--     <geometry> -->
-    <!--       <mesh filename="file://$(find reachy_description)/meshes/orbita_arm.dae"/> -->
-    <!--     </geometry> -->
-    <!--   </visual> -->
-    <!--   <collision> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <cylinder length="0.0" radius="0.0" /> -->
-    <!--     </geometry> -->
-    <!--   </collision> -->
-    <!-- </link> -->
 
     <!-- Head Links -->
 
@@ -201,24 +86,24 @@
     </joint>
 
 
-    <link name="head_tracker">
+    <!-- <link name="head_tracker"> -->
 
-      <visual name="">
-        <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
-        <geometry>
+    <!--   <visual name=""> -->
+    <!--     <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/> -->
+    <!--     <geometry> -->
 
-	  <cylinder length="0.04" radius="0.04"/>
-        </geometry>
-	<material name="camblack"/>
-      </visual>
+    <!-- 	  <cylinder length="0.04" radius="0.04"/> -->
+    <!--     </geometry> -->
+    <!-- 	<material name="camblack"/> -->
+    <!--   </visual> -->
 
-    </link>
+    <!-- </link> -->
 
-    <joint name="head_tracker_fixed" type="fixed">
-      <origin xyz="-0.030 0.0 0.111" rpy="0.0 0.0 0"/>
-      <parent link="head" />
-      <child link="head_tracker" />
-    </joint>
+    <!-- <joint name="head_tracker_fixed" type="fixed"> -->
+    <!--   <origin xyz="-0.030 0.0 0.111" rpy="0.0 0.0 0"/> -->
+    <!--   <parent link="head" /> -->
+    <!--   <child link="head_tracker" /> -->
+    <!-- </joint> -->
 
 
 
@@ -249,83 +134,6 @@
       <child link="camera_optical_left" />
     </joint>
 
-
-
-    <!-- <link name="l_antenna_link"> -->
-    <!--   <inertial> -->
-    <!--     <origin xyz="-0.001 0.0 0.008" rpy="0.0 0.0 0.0"/> -->
-    <!--     <mass value="0.004"/> -->
-    <!--     <inertia ixx="1.794e-7" ixy="-1.240e-5" ixz="1.91701e-8" iyy="1.5e-7" iyz="3.169e-6" izz="1.933e-7"/> -->
-    <!--   </inertial> -->
-    <!--   <visual name=""> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <mesh filename="file://$(find reachy_description)/meshes/antenna.dae"/> -->
-    <!--     </geometry> -->
-    <!--   </visual> -->
-    <!--   <collision> -->
-    <!--     <origin xyz="0.1 0.0 0.1" rpy="0.0 0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <cylinder length="0.0" radius="0.0" /> -->
-    <!--     </geometry> -->
-    <!--   </collision> -->
-    <!-- </link> -->
-
-    <!-- <joint name="l_antenna" type="revolute"> -->
-    <!--   <origin xyz="-0.052 0.057 0.086" rpy="0.166 -1.054 -1.11"/> -->
-    <!--   <parent link="head"/> -->
-    <!--   <child link="l_antenna_link"/> -->
-    <!--   <axis xyz="0 0 1"/> -->
-    <!--   <limit lower="-2.618" upper="2.618" effort="10." velocity="0.0"/> -->
-    <!-- </joint> -->
-
-    <!-- <link name="r_antenna_link"> -->
-    <!--   <inertial> -->
-    <!--     <origin xyz="-0.001 0.0 0.008" rpy="0.0 0.0 0.0"/> -->
-    <!--     <mass value="0.004"/> -->
-    <!--     <inertia ixx="1.794e-7" ixy="-1.240e-5" ixz="1.91701e-8" iyy="1.5e-7" iyz="3.169e-6" izz="1.933e-7"/> -->
-    <!--   </inertial> -->
-    <!--   <visual name=""> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <mesh filename="file://$(find reachy_description)/meshes/antenna.dae"/> -->
-    <!--     </geometry> -->
-    <!--   </visual> -->
-    <!--   <collision> -->
-    <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
-    <!--     <geometry> -->
-    <!--       <cylinder length="0.0" radius="0.0" /> -->
-    <!--     </geometry> -->
-    <!--   </collision> -->
-    <!-- </link> -->
-
-    <!-- <joint name="r_antenna" type="revolute"> -->
-    <!--   <origin xyz="-0.052 -0.057 0.086" rpy="-0.166 -1.054 1.11"/> -->
-    <!--   <parent link="head"/> -->
-    <!--   <child link="r_antenna_link"/> -->
-    <!--   <axis xyz="0 0 1"/> -->
-    <!--   <limit lower="-2.618" upper="2.618" effort="10." velocity="0.0"/> -->
-    <!-- </joint> -->
-
-    <xacro:head_control
-      neck_orbita_serial_port="${neck_orbita_serial_port}"
-      neck_orbita_id="${neck_orbita_id}"
-      neck_orbita_alpha="${neck_orbita_alpha}"
-      neck_orbita_hardware_zero="${neck_orbita_hardware_zero}"
-      neck_orbita_reduction="${neck_orbita_reduction}"
-
-    />
-
-<!--   <xacro:orbita
-    name="neck" parent="${parent}"
-    length="${neck_length}" radius="${neck_radius}" mass="${neck_mass}"
-    xyz="0 0 0" rpy="0 0 0"
-    damping="${damping}" friction="${friction}"
-    orbita_serial_port="${neck_orbita_serial_port}"
-    orbita_id="${neck_orbita_id}"
-    orbita_hardware_zero="${neck_orbita_hardware_zero}"
-    orbita_reduction="${neck_orbita_reduction}"
-  /> -->
 
 
     <!-- Reachy Cameras -->
