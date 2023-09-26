@@ -38,7 +38,7 @@
 
 
   <!-- MODEL PARAMETERS -->
-  <xacro:property name="base_collision" value="false"/>
+  <xacro:property name="base_collision" value="true"/>
   <xacro:property name="base_visual" value="true"/>
   <xacro:property name="damping" value="0.1"/>
   <xacro:property name="friction" value="0.1"/>
@@ -64,7 +64,18 @@
   <link name="torso">
     <xacro:if value="${base_collision}">
       <collision>
-        <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0"/>
+        <geometry>
+          <box size="0.1 0.2 0.22"/>
+        </geometry>
+
+        <!-- <origin xyz="0 0 -0.5" rpy="0 0 0"/> -->
+        <!-- <geometry> -->
+        <!--   <cylinder length="1" radius="0.03"/> -->
+        <!-- </geometry> -->
+      </collision>
+      <collision>
+        <origin xyz="-0.15 0 -0.5" rpy="0 0 0"/>
         <geometry>
           <cylinder length="1" radius="0.03"/>
         </geometry>
@@ -76,13 +87,15 @@
         <geometry>
           <box size="0.1 0.2 0.22"/>
         </geometry>
-        <!-- <origin xyz="0 0 -0.5" rpy="0 0 0"/> -->
-        <!-- <geometry> -->
-        <!--   <cylinder length="1" radius="0.03"/> -->
-        <!-- </geometry> -->
         <!-- <material name="torsoblack"/> -->
 	<xacro:torsoblack/>
-
+      </visual>
+      <visual>
+        <origin xyz="-0.15 0 -0.5" rpy="0 0 0"/>
+        <geometry>
+          <cylinder length="1" radius="0.03"/>
+        </geometry>
+	<xacro:torsoblack/>
       </visual>
     </xacro:if>
     <xacro:inertial_cuboid mass="10" xyz="0 0 0.5"  rpy="0 0 0" x_length="0.05" y_length="0.05" z_length="1"/>
