@@ -51,6 +51,7 @@ mkdir src && cd src
 git clone https://github.com/pollen-robotics/reachy_2023.git
 git clone https://github.com/pollen-robotics/orbita2d_control.git
 git clone https://github.com/pollen-robotics/orbita3d_control.git
+git clone https://github.com/pollen-robotics/ros2_pollen_toolbox.git
 ```
 
 ### Build Reachy_2023 env
