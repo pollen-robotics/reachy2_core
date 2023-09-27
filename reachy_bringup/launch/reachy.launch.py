@@ -21,6 +21,11 @@ REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
 REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
 REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
 
+REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
+REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
+REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
+
+
 
 # Before launching each node, scan the usb2ax to check if there are any missing motors
 from reachy_utils.discovery import get_missing_motors_reachy
@@ -34,12 +39,15 @@ class ReachyConfig:
         with open(config_file) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
 
-            # Robot model
-            if config[REACHY_CONFIG_MODEL] in [FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]:
+            # Robot model (Only full kit for now, TODO)
+            if config[REACHY_CONFIG_MODEL] in [FULL_KIT]: #, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]:
                 self.model = config[REACHY_CONFIG_MODEL]
             else:
                 raise ValueError('Bad robot model "{}". Expected values are {}'.format(
                     config[REACHY_CONFIG_MODEL],[FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]))
+
+
+            #TODO Multiple config
 
             # orbita zero
             try:
@@ -68,13 +76,38 @@ class ReachyConfig:
                 raise KeyError("orbita3d right wrist key not found :: {}".format(e))
 
 
+            # left shoulder
+            try:
+                self.left_shoulder_config=config[REACHY_CONFIG_LEFT_SHOULDER]
+
+            except KeyError as e:
+                raise KeyError("orbita2d left shoulder key not found :: {}".format(e))
+
+            # left elbow
+            try:
+                self.left_elbow_config=config[REACHY_CONFIG_LEFT_ELBOW]
+            except KeyError as e:
+                raise KeyError("orbita2d left elbow key not found :: {}".format(e))
+
+            # left wrist
+            try:
+                self.left_wrist_config=config[REACHY_CONFIG_LEFT_WRIST]
+            except KeyError as e:
+                raise KeyError("orbita3d left wrist key not found :: {}".format(e))
+
+
+
+
 
     def __str__(self):
         return "robot_model".ljust(25, ' ') + "{}\n".format(self.model) + \
             "neck_config".ljust(25, ' ') + "{}\n".format(self.neck_config) + \
             "right_shoulder_config".ljust(25, ' ') + "{}\n".format(self.right_shoulder_config) + \
             "right_elbow_config".ljust(25, ' ') + "{}\n".format(self.right_elbow_config) + \
-            "right_wrist_config".ljust(25, ' ') + "{}\n".format(self.right_wrist_config)
+            "right_wrist_config".ljust(25, ' ') + "{}\n".format(self.right_wrist_config) +\
+            "left_shoulder_config".ljust(25, ' ') + "{}\n".format(self.left_shoulder_config) + \
+            "left_elbow_config".ljust(25, ' ') + "{}\n".format(self.left_elbow_config) + \
+            "left_wrist_config".ljust(25, ' ') + "{}\n".format(self.left_wrist_config)
 
 
 
@@ -119,6 +152,17 @@ def launch_setup(context, *args, **kwargs):
             'r_wrist_config:="{}"'.format(
                 reachy_config.right_wrist_config),
             ' ',
+            'l_shoulder_config:="{}"'.format(
+                reachy_config.left_shoulder_config),
+            ' ',
+            'l_elbow_config:="{}"'.format(
+                reachy_config.left_elbow_config),
+            ' ',
+            'l_wrist_config:="{}"'.format(
+                reachy_config.left_wrist_config),
+            ' ',
+
+
         ]
     )  # To be cleaned on issue #92
     # print(robot_description_content.perform(context=context))
@@ -154,44 +198,44 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
-    camera_publisher_node = Node(
-        package='camera_controllers',
-        executable='camera_publisher',
-        output='both',
-        condition=IfCondition(
-            PythonExpression(
-                f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
-            )),
-    )
+    # camera_publisher_node = Node(
+    #     package='camera_controllers',
+    #     executable='camera_publisher',
+    #     output='both',
+    #     condition=IfCondition(
+    #         PythonExpression(
+    #             f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
+    #         )),
+    # )
 
-    camera_focus_node = Node(
-        package='camera_controllers',
-        executable='camera_focus',
-        output='both',
-        condition=IfCondition(
-            PythonExpression(
-                f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
-            )),
-    )
+    # camera_focus_node = Node(
+    #     package='camera_controllers',
+    #     executable='camera_focus',
+    #     output='both',
+    #     condition=IfCondition(
+    #         PythonExpression(
+    #             f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
+    #         )),
+    # )
 
-    camera_zoom_node = Node(
-        package='camera_controllers',
-        executable='camera_zoom_service',
-        output='both',
-        condition=IfCondition(
-            PythonExpression(
-                f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
-            )),
-    )
+    # camera_zoom_node = Node(
+    #     package='camera_controllers',
+    #     executable='camera_zoom_service',
+    #     output='both',
+    #     condition=IfCondition(
+    #         PythonExpression(
+    #             f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
+    #         )),
+    # )
 
-    sdk_camera_server_node = Node(
-        package='reachy_sdk_server',
-        executable='camera_server',
-        output='both',
-        condition=IfCondition(PythonExpression(
-                f"{start_sdk_server_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
-            )),
-    )
+    # sdk_camera_server_node = Node(
+    #     package='reachy_sdk_server',
+    #     executable='camera_server',
+    #     output='both',
+    #     condition=IfCondition(PythonExpression(
+    #             f"{start_sdk_server_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
+    #         )),
+    # )
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -252,15 +296,15 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
-    antenna_forward_position_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['antenna_forward_position_controller', '-c', '/controller_manager'],
-        condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']")
-        )
-    )
+    # antenna_forward_position_controller_spawner = Node(
+    #     package='controller_manager',
+    #     executable='spawner',
+    #     arguments=['antenna_forward_position_controller', '-c', '/controller_manager'],
+    #     condition=IfCondition(
+    #         PythonExpression(
+    #             f"'{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']")
+    #     )
+    # )
 
     gripper_forward_position_controller_spawner = Node(
         package='controller_manager',
@@ -296,16 +340,16 @@ def launch_setup(context, *args, **kwargs):
         arguments=['forward_pid_controller', '-c', '/controller_manager'],
     )
 
-    forward_fan_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['forward_fan_controller', '-c', '/controller_manager'],
-    )
+    # forward_fan_controller_spawner = Node(
+    #     package='controller_manager',
+    #     executable='spawner',
+    #     arguments=['forward_fan_controller', '-c', '/controller_manager'],
+    # )
 
-    fan_controller_spawner = Node(
-        package='fans_controller',
-        executable='fans_controller',
-    )
+    # fan_controller_spawner = Node(
+    #     package='fans_controller',
+    #     executable='fans_controller',
+    # )
 
     delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
@@ -361,29 +405,29 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
-    gripper_safe_controller_node = Node(
-        package='gripper_safe_controller',
-        executable='gripper_safe_controller',
-        arguments=['--controllers-file', robot_controllers],
-        condition=IfCondition(
-                    PythonExpression(
-                        f"'{reachy_config.model}' != '{MINI}'")
-        ),
-    )
+    # gripper_safe_controller_node = Node(
+    #     package='gripper_safe_controller',
+    #     executable='gripper_safe_controller',
+    #     arguments=['--controllers-file', robot_controllers],
+    #     condition=IfCondition(
+    #                 PythonExpression(
+    #                     f"'{reachy_config.model}' != '{MINI}'")
+    #     ),
+    # )
 
-    fake_camera_node = Node(
-        package='reachy_fake',
-        executable='fake_camera',
-        condition=IfCondition(fake_rl),
-    )
+    # fake_camera_node = Node(
+    #     package='reachy_fake',
+    #     executable='fake_camera',
+    #     condition=IfCondition(fake_rl),
+    # )
 
-    fake_zoom_node = Node(
-        package='reachy_fake',
-        executable='fake_zoom',
-        condition=IfCondition(
-            PythonExpression(f"{fake_py} or {gazebo_py}"),
-        ),
-    )
+    # fake_zoom_node = Node(
+    #     package='reachy_fake',
+    #     executable='fake_zoom',
+    #     condition=IfCondition(
+    #         PythonExpression(f"{fake_py} or {gazebo_py}"),
+    #     ),
+    # )
 
     return [
         *((control_node,) if not gazebo_py else
