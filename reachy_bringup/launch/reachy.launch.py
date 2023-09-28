@@ -25,13 +25,6 @@ REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
 REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
 REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
 
-
-
-# Before launching each node, scan the usb2ax to check if there are any missing motors
-from reachy_utils.discovery import get_missing_motors_reachy
-get_missing_motors_reachy(check_service=False)
-
-
 class ReachyConfig:
     def __init__(self, config_file_path='~/.reachy.yaml'):
 
