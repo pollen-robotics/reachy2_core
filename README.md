@@ -48,10 +48,17 @@ https://doc.rust-lang.org/cargo/getting-started/installation.html
 ```commandline
 mkdir ~/reachy_ws && cd ~/reachy_ws
 mkdir src && cd src
-git clone https://github.com/pollen-robotics/reachy_2023.git
+git clone https://github.com/pollen-robotics/reachy_v2_wip.git
 git clone https://github.com/pollen-robotics/orbita2d_control.git
 git clone https://github.com/pollen-robotics/orbita3d_control.git
 git clone https://github.com/pollen-robotics/ros2_pollen_toolbox.git
+```
+
+### Install specific patches for Cargo/ROS
+
+```commandline
+cargo install --git https://github.com/jerry73204/cargo-ament-build.git --branch conditionally-copy-cargo-lock-file
+python3 -m pip install --upgrade --force-reinstall git+https://github.com/pollen-robotics/colcon-cargo.git
 ```
 
 ### Build Reachy_2023 env
