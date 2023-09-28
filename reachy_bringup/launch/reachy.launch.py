@@ -11,6 +11,7 @@ from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 import yaml
 import os
+from multiprocessing import Process
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = 'full_kit', 'starter_kit_right', 'starter_kit_left', 'headless', 'mini'
 STARTER_KIT_RIGHT_NO_HEAD = 'starter_kit_right_no_head'
@@ -28,8 +29,18 @@ REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
 
 
 # Before launching each node, scan the usb2ax to check if there are any missing motors
-from reachy_utils.discovery import get_missing_motors_reachy
-get_missing_motors_reachy(check_service=False)
+def run_get_missing_motors_reachy():
+    from reachy_utils.discovery import get_missing_motors_reachy
+
+    get_missing_motors_reachy(check_service=False)
+
+
+# Run this as a process to avoid conflict with gazebo on qt resources
+p = Process(target=run_get_missing_motors_reachy)
+p.start()
+print("Waiting for reachy_discovery to finish...")
+p.join()
+print("reachy_discovery finished!")
 
 
 class ReachyConfig:
