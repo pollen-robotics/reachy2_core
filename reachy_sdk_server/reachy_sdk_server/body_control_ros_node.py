@@ -192,7 +192,7 @@ class BodyControlNode(Node):
             self._device_type = {}
 
             for uid, (name, kv) in enumerate(zip(state.joint_names, state.interface_values)):
-                if 'position' in kv.interface_names:
+                if 'position' in kv.interface_names or 'torque' in kv.interface_names or 'p_gain' in kv.interface_names:
                     self._device_type[name] = 'joints'
                 elif 'force' in kv.interface_names:
                     self._device_type[name] = 'sensors'
