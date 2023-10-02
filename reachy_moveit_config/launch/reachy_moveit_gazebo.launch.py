@@ -20,7 +20,7 @@ from moveit_configs_utils.launch_utils import (
 )
 
 from moveit_configs_utils import MoveItConfigsBuilder
-from moveit_configs_utils.launches import generate_demo_launch
+from moveit_configs_utils.launches import generate_demo_launch, generate_rsp_launch
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT = 'full_kit', 'starter_kit_right', 'starter_kit_left'
 
@@ -107,16 +107,6 @@ def generate_demo_launch(moveit_config):
         )
     )
 
-    # Given the published joint states, publish tf for the robot links
-    ld.add_action(
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/rsp.launch.py")
-            ),
-            launch_arguments={'use_sim_time': f'{use_sim_time}'}.items()
-        )
-    )
-
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
@@ -171,5 +161,8 @@ def generate_launch_description():
     moveit_config = MoveItConfigsBuilder("reachy_v2", package_name="reachy_moveit_config")
     # moveit_config = moveit_config.sensors_3d(None)  # be sure to disable the 3D sensor
     moveit_config = moveit_config.robot_description(mappings={'use_fake_hardware': 'true', 'use_gazebo': 'true', 'use_moveit_gazebo': 'true'})  # pass parameters to xacro (this should work be it does not...)
+    ld = generate_demo_launch(moveit_config.to_moveit_configs())
+    for action in generate_rsp_launch(moveit_config.to_moveit_configs()).entities:
+        ld.add_entity(action)
+    return ld
 
-    return generate_demo_launch(moveit_config.to_moveit_configs())
