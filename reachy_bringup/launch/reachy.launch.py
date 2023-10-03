@@ -114,8 +114,6 @@ def launch_setup(context, *args, **kwargs):
     fake_py = fake_rl.perform(context) == 'true'
     gazebo_rl = LaunchConfiguration('gazebo')
     gazebo_py = gazebo_rl.perform(context) == 'true'
-    start_sdk_server_rl = LaunchConfiguration('start_sdk_server')
-    start_sdk_server_py = start_sdk_server_rl.perform(context) == 'true'
 
     # Robot config
     reachy_config = ReachyConfig()
@@ -183,14 +181,6 @@ def launch_setup(context, *args, **kwargs):
         output='screen',
     )
 
-    sdk_server_node = Node(
-        package='reachy_sdk_server',
-        executable='reachy_sdk_server',
-        output='both',
-        arguments=[reachy_config.model],
-        condition=IfCondition(start_sdk_server_rl),
-    )
-
     # camera_publisher_node = Node(
     #     package='camera_controllers',
     #     executable='camera_publisher',
@@ -218,15 +208,6 @@ def launch_setup(context, *args, **kwargs):
     #     condition=IfCondition(
     #         PythonExpression(
     #             f"not {fake_py} and not {gazebo_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
-    #         )),
-    # )
-
-    # sdk_camera_server_node = Node(
-    #     package='reachy_sdk_server',
-    #     executable='camera_server',
-    #     output='both',
-    #     condition=IfCondition(PythonExpression(
-    #             f"{start_sdk_server_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
     #         )),
     # )
 
@@ -358,12 +339,6 @@ def launch_setup(context, *args, **kwargs):
         executable='reachy_kdl_kinematics',
     )
 
-    dynamic_state_router_node = Node(
-        package='dynamic_state_router',
-        executable='dynamic_state_router',
-        arguments=[robot_controllers],
-    )
-
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             FindPackageShare("reachy_gazebo"), '/launch', '/gazebo.launch.py']),
@@ -389,13 +364,6 @@ def launch_setup(context, *args, **kwargs):
                 kinematics_node
             ],
         ),
-    )
-
-    delay_sdk_server_after_kinematics = RegisterEventHandler(
-        event_handler=OnStateTransition(
-            target_lifecycle_node=kinematics_node, goal_state='inactive',
-            entities=[sdk_server_node],
-        )
     )
 
     # gripper_safe_controller_node = Node(
@@ -433,12 +401,9 @@ def launch_setup(context, *args, **kwargs):
         delay_rviz_after_joint_state_broadcaster_spawner,
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         # gripper_safe_controller_node,
-        delay_sdk_server_after_kinematics,
         # camera_publisher_node,
         # camera_focus_node,
         # camera_zoom_node,
-        # sdk_camera_server_node,
-        dynamic_state_router_node,
     ]
 
 
@@ -463,12 +428,6 @@ def generate_launch_description():
             'gazebo',
             default_value='false',
             description='Start a fake_hardware with gazebo as simulation tool.',
-            choices=['true', 'false']
-        ),
-        DeclareLaunchArgument(
-            'start_sdk_server',
-            default_value='false',
-            description='Start sdk_server along with reachy nodes with this launch file.',
             choices=['true', 'false']
         ),
         OpaqueFunction(function=launch_setup)
