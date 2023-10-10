@@ -17,11 +17,21 @@ def generate_moveit_config_args():
         description='Start RViz2 automatically with this launch file.',
         choices=['true', 'false']
     ),
+    # DeclareLaunchArgument(
+    #     'use_sim_time',
+    #     default_value='true',
+    #     description='Start RViz2 automatically with this launch file.',
+    #     choices=['true', 'false']
+    # ),
     DeclareLaunchArgument(
         'use_moveit_gazebo',
         default_value='false',
         description='Start RViz2 automatically with this launch file.',
         choices=['true', 'false']
+    ),
+    DeclareBooleanLaunchArg(
+        "use_rviz",
+        default_value=True
     )
 
 

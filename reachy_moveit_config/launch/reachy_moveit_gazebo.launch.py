@@ -53,6 +53,7 @@ def generate_demo_launch(context, *args, **kwargs):
      * ros2_control_node + controller spawners
     """
     SetUseSimTime(True)
+
     robot_model = "full_kit"
     if robot_model_file:
         # TODO find a ROS way to log (without rebuilding a whole node ?
@@ -71,7 +72,12 @@ def generate_demo_launch(context, *args, **kwargs):
         description="If true, use simulated clock.",
     ),
 
+    # ld_array.append(use_sim_time_arg)
     use_sim_time = LaunchConfiguration("use_sim_time")
+    # if use_sim_time.perform(context) == 'true':
+    #     SetUseSimTime(True)
+    # else:
+    #     SetUseSimTime(False)
 
     ld_array.append(
         DeclareBooleanLaunchArg(
@@ -87,7 +93,7 @@ def generate_demo_launch(context, *args, **kwargs):
             description="By default, we are not in debug mode",
         ))
 
-    ld_array.append(DeclareBooleanLaunchArg("use_rviz", default_value=True))
+    # ld_array.append(DeclareBooleanLaunchArg("use_rviz", default_value=True))
 
     # If there are virtual joints, broadcast static tf by including virtual_joints launch
     virtual_joints_launch = (
