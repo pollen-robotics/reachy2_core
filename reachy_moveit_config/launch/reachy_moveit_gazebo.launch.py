@@ -2,7 +2,7 @@ from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
-    TimerAction
+    TimerAction, OpaqueFunction
 )
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -13,13 +13,13 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from srdfdom.srdf import SRDF
 
+from moveit_utils.launch_utils import generate_moveit_config_args, generate_moveit_config
 
 from moveit_configs_utils.launch_utils import (
     add_debuggable_node,
     DeclareBooleanLaunchArg,
 )
 
-from moveit_configs_utils import MoveItConfigsBuilder
 from moveit_configs_utils.launches import generate_demo_launch, generate_rsp_launch
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT = 'full_kit', 'starter_kit_right', 'starter_kit_left'
@@ -40,7 +40,7 @@ def get_reachy_config():
 robot_model_file = get_reachy_config()
 
 
-def generate_demo_launch(moveit_config):
+def generate_demo_launch(context, *args, **kwargs):
     """
     Launches a self contained demo
 
@@ -59,47 +59,48 @@ def generate_demo_launch(moveit_config):
         print("Using robot_model described in ~/.reachy.yaml ...")
         robot_model = robot_model_file
     print("Robot Model :: {}".format(robot_model))
+    moveit_config = generate_moveit_config(context)
 
-    ld = LaunchDescription()
+    ld_array = []
 
-    ld.add_action(
-        DeclareLaunchArgument(
-            "use_sim_time",
-            default_value="true",
-            description="If true, use simulated clock.",
-        ),
-    )
+    for action in generate_rsp_launch(moveit_config).entities:
+        ld_array.append(action)
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="true",
+        description="If true, use simulated clock.",
+    ),
 
     use_sim_time = LaunchConfiguration("use_sim_time")
 
-    ld.add_action(
+    ld_array.append(
         DeclareBooleanLaunchArg(
             "db",
             default_value=False,
             description="By default, we do not start a database (it can be large)",
-        )
-    )
-    ld.add_action(
+        ))
+
+    ld_array.append(
         DeclareBooleanLaunchArg(
             "debug",
             default_value=False,
             description="By default, we are not in debug mode",
-        )
-    )
-    ld.add_action(DeclareBooleanLaunchArg("use_rviz", default_value=True))
+        ))
+
+    ld_array.append(DeclareBooleanLaunchArg("use_rviz", default_value=True))
 
     # If there are virtual joints, broadcast static tf by including virtual_joints launch
     virtual_joints_launch = (
-        moveit_config.package_path / "launch/static_virtual_joint_tfs.launch.py"
+            moveit_config.package_path / "launch/static_virtual_joint_tfs.launch.py"
     )
     if virtual_joints_launch.exists():
-        ld.add_action(
+        ld_array.append(
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(str(virtual_joints_launch)),
             )
         )
 
-    ld.add_action(
+    ld_array.append(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
                 FindPackageShare("reachy_gazebo"), '/launch', '/gazebo.launch.py']),
@@ -107,7 +108,7 @@ def generate_demo_launch(moveit_config):
         )
     )
 
-    ld.add_action(
+    ld_array.append(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 str(moveit_config.package_path / "launch/move_group.launch.py")
@@ -117,7 +118,7 @@ def generate_demo_launch(moveit_config):
     )
 
     # Run Rviz and load the default config to see the state of the move_group node
-    ld.add_action(
+    ld_array.append(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 str(moveit_config.package_path / "launch/moveit_rviz.launch.py")
@@ -128,7 +129,7 @@ def generate_demo_launch(moveit_config):
     )
 
     # If database loading was enabled, start mongodb as well
-    ld.add_action(
+    ld_array.append(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
                 str(moveit_config.package_path / "launch/warehouse_db.launch.py")
@@ -138,7 +139,7 @@ def generate_demo_launch(moveit_config):
         )
     )
 
-    ld.add_action(
+    ld_array.append(
 
         TimerAction(
             period=5.0,
@@ -154,15 +155,11 @@ def generate_demo_launch(moveit_config):
         )
     )
 
-    return ld
+    return ld_array
 
 
 def generate_launch_description():
-    moveit_config = MoveItConfigsBuilder("reachy_v2", package_name="reachy_moveit_config")
-    # moveit_config = moveit_config.sensors_3d(None)  # be sure to disable the 3D sensor
-    moveit_config = moveit_config.robot_description(mappings={'use_fake_hardware': 'true', 'use_gazebo': 'true', 'use_moveit_gazebo': 'true'})  # pass parameters to xacro (this should work be it does not...)
-    ld = generate_demo_launch(moveit_config.to_moveit_configs())
-    for action in generate_rsp_launch(moveit_config.to_moveit_configs()).entities:
-        ld.add_entity(action)
-    return ld
-
+    return LaunchDescription([
+        *generate_moveit_config_args(),
+        OpaqueFunction(function=generate_demo_launch)
+    ])
