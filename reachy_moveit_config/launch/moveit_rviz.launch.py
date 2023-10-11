@@ -12,7 +12,6 @@ from launch_ros.actions import Node
 def opaque_launch_description(context, *args, **kwargs):
     moveit_config = generate_moveit_config(context)
 
-    debug_arg = DeclareBooleanLaunchArg("debug", default_value=False)
     rviz_config_arg = DeclareLaunchArgument(
         "rviz_config",
         default_value=str(moveit_config.package_path / "config/moveit.rviz"),
@@ -37,7 +36,6 @@ def opaque_launch_description(context, *args, **kwargs):
     return [
         use_sim_time_arg,
         rviz_config_arg,
-        debug_arg,
         rviz_node,
     ]
 

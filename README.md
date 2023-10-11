@@ -218,6 +218,8 @@ tigervnc &
 novnc &
 DISPLAY=:0 startfluxbox &
 DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py
-DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=false
+DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=true
+DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveitpy.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=true
+
 
 ```
