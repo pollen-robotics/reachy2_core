@@ -27,9 +27,6 @@ def opaque_launch_description(context, *args, **kwargs):
             {'use_sim_time': LaunchConfiguration("use_sim_time")},
         ],
     )
-    print("\n\n")
-    print(LaunchConfiguration("use_sim_time").perform(context))
-    print("\n\n")
 
     return [
         use_sim_time_arg,
