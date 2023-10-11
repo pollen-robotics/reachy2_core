@@ -76,7 +76,8 @@ def generate_demo_launch(moveit_config):
         package="reachy_moveitpy_test",
         executable="moveit_test",
         output="both",
-        parameters=[moveit_config_dict],
+        parameters=[moveit_config_dict
+                    'use_sim_time': get_parama(usetime),'],
     )
 
     ld.add_action(

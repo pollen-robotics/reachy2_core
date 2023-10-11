@@ -64,20 +64,11 @@ def generate_demo_launch(context, *args, **kwargs):
 
     ld_array = []
 
-    for action in generate_rsp_launch(moveit_config).entities:
-        ld_array.append(action)
-    use_sim_time_arg = DeclareLaunchArgument(
-        "use_sim_time",
-        default_value="true",
-        description="If true, use simulated clock.",
-    ),
+    # for action in generate_rsp_launch(moveit_config).entities:
+    #     ld_array.append(action)
 
-    # ld_array.append(use_sim_time_arg)
-    use_sim_time = LaunchConfiguration("use_sim_time")
-    # if use_sim_time.perform(context) == 'true':
-    #     SetUseSimTime(True)
-    # else:
-    #     SetUseSimTime(False)
+    use_sim_time = LaunchConfiguration("use_sim_time").perform(context)
+
 
     ld_array.append(
         DeclareBooleanLaunchArg(
@@ -123,6 +114,16 @@ def generate_demo_launch(context, *args, **kwargs):
         )
     )
 
+    # Given the published joint states, publish tf for the robot links
+    ld_array.append(
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                str(moveit_config.package_path / "launch/rsp.launch.py")
+            ),
+            launch_arguments={'use_sim_time': f'{use_sim_time}'}.items()
+        )
+    )
+
     # Run Rviz and load the default config to see the state of the move_group node
     ld_array.append(
         IncludeLaunchDescription(
@@ -146,7 +147,6 @@ def generate_demo_launch(context, *args, **kwargs):
     )
 
     ld_array.append(
-
         TimerAction(
             period=5.0,
             actions=[
