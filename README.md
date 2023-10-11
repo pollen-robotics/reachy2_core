@@ -209,3 +209,17 @@ More info on how to use Reachy's Python SDK can be found on
 Now that is everything is set up properly on your environment, let's try to move some real stuff.
 
 To be continued...
+
+
+### Current prefered way of showing GUIs in docker
+In the docker console:
+```
+tigervnc &
+novnc &
+DISPLAY=:0 startfluxbox &
+DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py
+DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=true
+DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveitpy.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=true
+
+
+```
