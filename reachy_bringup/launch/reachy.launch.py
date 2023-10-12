@@ -335,8 +335,8 @@ def launch_setup(context, *args, **kwargs):
     kinematics_node = LifecycleNode(
         name='kinematics',
         namespace='',
-        package='reachy_kdl_kinematics',
-        executable='reachy_kdl_kinematics',
+        package='pollen_kdl_kinematics',
+        executable='pollen_kdl_kinematics',
     )
 
     gazebo_node = IncludeLaunchDescription(
