@@ -38,7 +38,7 @@ def opaque_launch_description(context, *args, **kwargs):
     )
 
     delayed_moveit_py_node = TimerAction(
-        period=10.0,
+        period=0.1,
         actions=[
             moveit_py_node,
         ],
