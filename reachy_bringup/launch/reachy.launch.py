@@ -186,7 +186,8 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare("reachy_bringup"),
             "config",
-            f"reachy_{reachy_config.model}_controllers.yaml",
+            f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
+            # f"reachy_{reachy_config.model}_controllers.yaml",
         ]
     )
 
@@ -410,7 +411,7 @@ def launch_setup(context, *args, **kwargs):
                 forward_pid_controller_spawner,
                 # forward_fan_controller_spawner,
                 # fan_controller_spawner,
-                # *trajectory_controllers,
+                *trajectory_controllers,
                 kinematics_node,
             ],
         ),

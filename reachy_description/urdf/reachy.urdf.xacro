@@ -159,7 +159,7 @@
     <gazebo>
       <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
         <!-- <parameters>$(find reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
-        <!--          <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>-->
+<!--                  <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>-->
         <parameters>$(find reachy_bringup)/config/ros2_controllers_ultimate_combo_top_moumoute.yaml</parameters>
         <robotNamespace>/reachy</robotNamespace>
       </plugin>
