@@ -10,7 +10,7 @@ from control_msgs.msg import DynamicJointState, InterfaceValue
 from geometry_msgs.msg import Pose, PoseStamped
 from sensor_msgs.msg import JointState
 
-from reachy_msgs.srv import GetForwardKinematics, GetInverseKinematics
+from pollen_msgs.srv import GetForwardKinematics, GetInverseKinematics
 
 from reachy_sdk_api.arm_kinematics_pb2 import (
     ArmEndEffector, ArmSide, ArmJointPosition,
