@@ -47,9 +47,9 @@
   <xacro:property name="forearm_length" value="0.28"/>
   <!-- MODEL PARAMETERS -->
 
-    <!-- <material name="torsoblack"> -->
-    <!--     <color rgba="0.5 0.5 0.5 1.0"/> -->
-    <!-- </material> -->
+  <!-- <material name="torsoblack"> -->
+  <!--     <color rgba="0.5 0.5 0.5 1.0"/> -->
+  <!-- </material> -->
 
 
 
@@ -88,14 +88,14 @@
           <box size="0.1 0.2 0.22"/>
         </geometry>
         <!-- <material name="torsoblack"/> -->
-	<xacro:torsoblack/>
+        <xacro:torsoblack/>
       </visual>
       <visual>
         <origin xyz="-0.15 0 -0.5" rpy="0 0 0"/>
         <geometry>
           <cylinder length="1" radius="0.03"/>
         </geometry>
-	<xacro:torsoblack/>
+        <xacro:torsoblack/>
       </visual>
     </xacro:if>
     <xacro:inertial_cuboid mass="10" xyz="0 0 0.5"  rpy="0 0 0" x_length="0.05" y_length="0.05" z_length="1"/>
@@ -107,35 +107,35 @@
   <!-- TORSO -->
 
   <xacro:head
-    parent="torso"
-    damping="${damping}" friction="${friction}"
-    neck_config="$(arg neck_config)"
+          parent="torso"
+          damping="${damping}" friction="${friction}"
+          neck_config="$(arg neck_config)"
   />
 
-<!-- <xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config gripper_port gripper_id"> -->
+  <!-- <xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config gripper_port gripper_id"> -->
 
   <!-- RIGHT ARM -->
   <xacro:arm
-    prefix="r" parent="torso" side="right"
-    damping="${damping}" friction="${friction}"
-    orbita2d_shoulder_config="$(arg r_shoulder_config)"
-    orbita2d_elbow_config="$(arg r_elbow_config)"
-    orbita3d_wrist_config="$(arg r_wrist_config)"
-    gripper_id="${right_gripper_id}"
-    gripper_port="${right_gripper_port}"
-    />
+          prefix="r" parent="torso" side="right"
+          damping="${damping}" friction="${friction}"
+          orbita2d_shoulder_config="$(arg r_shoulder_config)"
+          orbita2d_elbow_config="$(arg r_elbow_config)"
+          orbita3d_wrist_config="$(arg r_wrist_config)"
+          gripper_id="${right_gripper_id}"
+          gripper_port="${right_gripper_port}"
+  />
 
 
   <!-- LEFT ARM -->
   <xacro:arm
-    prefix="l" parent="torso" side="left"
-    damping="${damping}" friction="${friction}"
-    orbita2d_shoulder_config="$(arg l_shoulder_config)"
-    orbita2d_elbow_config="$(arg l_elbow_config)"
-    orbita3d_wrist_config="$(arg l_wrist_config)"
-    gripper_id="${left_gripper_id}"
-    gripper_port="${left_gripper_port}"
-    />
+          prefix="l" parent="torso" side="left"
+          damping="${damping}" friction="${friction}"
+          orbita2d_shoulder_config="$(arg l_shoulder_config)"
+          orbita2d_elbow_config="$(arg l_elbow_config)"
+          orbita3d_wrist_config="$(arg l_wrist_config)"
+          gripper_id="${left_gripper_id}"
+          gripper_port="${left_gripper_port}"
+  />
 
 
   <!-- <link name="r_wrist_cam_frame"/> -->
@@ -154,29 +154,19 @@
   <!-- </joint> -->
 
 
-    <xacro:if value="$(arg use_gazebo)">
+  <xacro:if value="$(arg use_gazebo)">
 
-      <xacro:unless value="$(arg use_moveit_gazebo)">
+    <gazebo>
+      <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+        <!-- <parameters>$(find reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
+        <!--          <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>-->
+        <parameters>$(find reachy_bringup)/config/ros2_controllers_ultimate_combo_top_moumoute.yaml</parameters>
+        <robotNamespace>/reachy</robotNamespace>
+      </plugin>
+    </gazebo>
 
-        <gazebo>
-            <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-                <!-- <parameters>$(find reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
-                <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>
-                <robotNamespace>/reachy</robotNamespace>
-            </plugin>
-        </gazebo>
+
+  </xacro:if>
 
 
-        </xacro:unless>
-
-	<xacro:if value="$(arg use_moveit_gazebo)">
-      <gazebo>
-	<plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-	  <parameters>$(find reachy_moveit_config)/config/ros2_controllers.yaml</parameters>
-	  <robotNamespace>/reachy</robotNamespace>
-	</plugin>
-      </gazebo>
-    </xacro:if>
-
-   </xacro:if>
 </robot>

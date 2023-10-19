@@ -1,6 +1,13 @@
 from launch import LaunchDescription, LaunchContext
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler, IncludeLaunchDescription, TimerAction, \
-    OpaqueFunction, LogInfo, SetEnvironmentVariable
+from launch.actions import (
+    DeclareLaunchArgument,
+    RegisterEventHandler,
+    IncludeLaunchDescription,
+    TimerAction,
+    OpaqueFunction,
+    LogInfo,
+    SetEnvironmentVariable,
+)
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit, OnProcessStart, OnExecutionComplete
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, PythonExpression
@@ -11,9 +18,17 @@ from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 import yaml
 import os
+from launch_param_builder import load_xacro
+from pathlib import Path
 
-FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = 'full_kit', 'starter_kit_right', 'starter_kit_left', 'headless', 'mini'
-STARTER_KIT_RIGHT_NO_HEAD = 'starter_kit_right_no_head'
+FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = (
+    "full_kit",
+    "starter_kit_right",
+    "starter_kit_left",
+    "headless",
+    "mini",
+)
+STARTER_KIT_RIGHT_NO_HEAD = "starter_kit_right_no_head"
 
 REACHY_CONFIG_MODEL = "model"
 REACHY_CONFIG_NECK = "neck_config"
@@ -25,97 +40,106 @@ REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
 REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
 REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
 
-class ReachyConfig:
-    def __init__(self, config_file_path='~/.reachy.yaml'):
 
+class ReachyConfig:
+    def __init__(self, config_file_path="~/.reachy.yaml"):
         config_file = os.path.expanduser(config_file_path)
         with open(config_file) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
 
             # Robot model (Only full kit for now, TODO)
-            if config[REACHY_CONFIG_MODEL] in [FULL_KIT]: #, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]:
+            if config[REACHY_CONFIG_MODEL] in [
+                FULL_KIT
+            ]:  # , STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]:
                 self.model = config[REACHY_CONFIG_MODEL]
             else:
-                raise ValueError('Bad robot model "{}". Expected values are {}'.format(
-                    config[REACHY_CONFIG_MODEL],[FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]))
+                raise ValueError(
+                    'Bad robot model "{}". Expected values are {}'.format(
+                        config[REACHY_CONFIG_MODEL],
+                        [FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD],
+                    )
+                )
 
-
-            #TODO Multiple config
+            # TODO Multiple config
 
             # orbita zero
             try:
-                self.neck_config=config[REACHY_CONFIG_NECK]
+                self.neck_config = config[REACHY_CONFIG_NECK]
 
             except KeyError as e:
                 raise KeyError("orbita3d neck config key not found :: {}".format(e))
 
             # right shoulder
             try:
-                self.right_shoulder_config=config[REACHY_CONFIG_RIGHT_SHOULDER]
+                self.right_shoulder_config = config[REACHY_CONFIG_RIGHT_SHOULDER]
 
             except KeyError as e:
                 raise KeyError("orbita2d right shoulder key not found :: {}".format(e))
 
             # right elbow
             try:
-                self.right_elbow_config=config[REACHY_CONFIG_RIGHT_ELBOW]
+                self.right_elbow_config = config[REACHY_CONFIG_RIGHT_ELBOW]
             except KeyError as e:
                 raise KeyError("orbita2d right elbow key not found :: {}".format(e))
 
             # right wrist
             try:
-                self.right_wrist_config=config[REACHY_CONFIG_RIGHT_WRIST]
+                self.right_wrist_config = config[REACHY_CONFIG_RIGHT_WRIST]
             except KeyError as e:
                 raise KeyError("orbita3d right wrist key not found :: {}".format(e))
 
-
             # left shoulder
             try:
-                self.left_shoulder_config=config[REACHY_CONFIG_LEFT_SHOULDER]
+                self.left_shoulder_config = config[REACHY_CONFIG_LEFT_SHOULDER]
 
             except KeyError as e:
                 raise KeyError("orbita2d left shoulder key not found :: {}".format(e))
 
             # left elbow
             try:
-                self.left_elbow_config=config[REACHY_CONFIG_LEFT_ELBOW]
+                self.left_elbow_config = config[REACHY_CONFIG_LEFT_ELBOW]
             except KeyError as e:
                 raise KeyError("orbita2d left elbow key not found :: {}".format(e))
 
             # left wrist
             try:
-                self.left_wrist_config=config[REACHY_CONFIG_LEFT_WRIST]
+                self.left_wrist_config = config[REACHY_CONFIG_LEFT_WRIST]
             except KeyError as e:
                 raise KeyError("orbita3d left wrist key not found :: {}".format(e))
 
-
-
-
-
     def __str__(self):
-        return "robot_model".ljust(25, ' ') + "{}\n".format(self.model) + \
-            "neck_config".ljust(25, ' ') + "{}\n".format(self.neck_config) + \
-            "right_shoulder_config".ljust(25, ' ') + "{}\n".format(self.right_shoulder_config) + \
-            "right_elbow_config".ljust(25, ' ') + "{}\n".format(self.right_elbow_config) + \
-            "right_wrist_config".ljust(25, ' ') + "{}\n".format(self.right_wrist_config) +\
-            "left_shoulder_config".ljust(25, ' ') + "{}\n".format(self.left_shoulder_config) + \
-            "left_elbow_config".ljust(25, ' ') + "{}\n".format(self.left_elbow_config) + \
-            "left_wrist_config".ljust(25, ' ') + "{}\n".format(self.left_wrist_config)
-
+        return (
+            "robot_model".ljust(25, " ")
+            + "{}\n".format(self.model)
+            + "neck_config".ljust(25, " ")
+            + "{}\n".format(self.neck_config)
+            + "right_shoulder_config".ljust(25, " ")
+            + "{}\n".format(self.right_shoulder_config)
+            + "right_elbow_config".ljust(25, " ")
+            + "{}\n".format(self.right_elbow_config)
+            + "right_wrist_config".ljust(25, " ")
+            + "{}\n".format(self.right_wrist_config)
+            + "left_shoulder_config".ljust(25, " ")
+            + "{}\n".format(self.left_shoulder_config)
+            + "left_elbow_config".ljust(25, " ")
+            + "{}\n".format(self.left_elbow_config)
+            + "left_wrist_config".ljust(25, " ")
+            + "{}\n".format(self.left_wrist_config)
+        )
 
 
 def launch_setup(context, *args, **kwargs):
     # perform(context) returns arg as a string, hence the conversion
     # var_rl is a ROS launch type object
     # var_py is a converted version, python friendly
-    start_rviz_rl = LaunchConfiguration('start_rviz')
-    start_rviz_py = start_rviz_rl.perform(context) == 'true'
-    fake_rl = LaunchConfiguration('fake')
-    fake_py = fake_rl.perform(context) == 'true'
-    gazebo_rl = LaunchConfiguration('gazebo')
-    gazebo_py = gazebo_rl.perform(context) == 'true'
-    start_sdk_server_rl = LaunchConfiguration('start_sdk_server')
-    start_sdk_server_py = start_sdk_server_rl.perform(context) == 'true'
+    start_rviz_rl = LaunchConfiguration("start_rviz")
+    start_rviz_py = start_rviz_rl.perform(context) == "true"
+    fake_rl = LaunchConfiguration("fake")
+    fake_py = fake_rl.perform(context) == "true"
+    gazebo_rl = LaunchConfiguration("gazebo")
+    gazebo_py = gazebo_rl.perform(context) == "true"
+    start_sdk_server_rl = LaunchConfiguration("start_sdk_server")
+    start_sdk_server_py = start_sdk_server_rl.perform(context) == "true"
 
     # Robot config
     reachy_config = ReachyConfig()
@@ -123,70 +147,62 @@ def launch_setup(context, *args, **kwargs):
 
     robot_description_content = Command(
         [
-            PathJoinSubstitution([FindExecutable(name='xacro')]),
-            ' ',
-            PathJoinSubstitution(
-                [FindPackageShare('reachy_description'), 'urdf', 'reachy.urdf.xacro']
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
+            *(
+                (" ", "use_fake_hardware:=true", " ")
+                if fake_py
+                else (" ", "use_fake_hardware:=true use_gazebo:=true depth_camera:=true ", " ")
+                if gazebo_py
+                else (" ",)
             ),
-            *((' ', 'use_fake_hardware:=true', ' ') if fake_py else
-              (' ', 'use_fake_hardware:=true use_gazebo:=true depth_camera:=true', ' ') if gazebo_py else
-              (' ',)),
-            f'robot_config:={reachy_config.model}',
-            ' ',
-            'neck_config:="{}"'.format(
-                reachy_config.neck_config),
-            ' ',
-            'r_shoulder_config:="{}"'.format(
-                reachy_config.right_shoulder_config),
-            ' ',
-            'r_elbow_config:="{}"'.format(
-                reachy_config.right_elbow_config),
-            ' ',
-            'r_wrist_config:="{}"'.format(
-                reachy_config.right_wrist_config),
-            ' ',
-            'l_shoulder_config:="{}"'.format(
-                reachy_config.left_shoulder_config),
-            ' ',
-            'l_elbow_config:="{}"'.format(
-                reachy_config.left_elbow_config),
-            ' ',
-            'l_wrist_config:="{}"'.format(
-                reachy_config.left_wrist_config),
-            ' ',
-
-
+            f"robot_config:={reachy_config.model}",
+            " ",
+            'neck_config:="{}"'.format(reachy_config.neck_config),
+            " ",
+            'r_shoulder_config:="{}"'.format(reachy_config.right_shoulder_config),
+            " ",
+            'r_elbow_config:="{}"'.format(reachy_config.right_elbow_config),
+            " ",
+            'r_wrist_config:="{}"'.format(reachy_config.right_wrist_config),
+            " ",
+            'l_shoulder_config:="{}"'.format(reachy_config.left_shoulder_config),
+            " ",
+            'l_elbow_config:="{}"'.format(reachy_config.left_elbow_config),
+            " ",
+            'l_wrist_config:="{}"'.format(reachy_config.left_wrist_config),
+            " ",
         ]
-    )  # To be cleaned on issue #92
+    )
+
     # print(robot_description_content.perform(context=context))
 
     robot_description = {
-        'robot_description': ParameterValue(robot_description_content, value_type=str),
+        "robot_description": ParameterValue(robot_description_content, value_type=str),
     }
 
     robot_controllers = PathJoinSubstitution(
         [
-            FindPackageShare('reachy_bringup'),
-            'config',
-            f'reachy_{reachy_config.model}_controllers.yaml',
+            FindPackageShare("reachy_bringup"),
+            "config",
+            f"reachy_{reachy_config.model}_controllers.yaml",
         ]
     )
 
-    rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare('reachy_description'), 'config', 'reachy.rviz']
-    )
+    rviz_config_file = PathJoinSubstitution([FindPackageShare("reachy_description"), "config", "reachy.rviz"])
 
     control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
+        package="controller_manager",
+        executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
-        output='screen',
+        output="screen",
     )
 
     sdk_server_node = Node(
-        package='reachy_sdk_server',
-        executable='reachy_sdk_server',
-        output='both',
+        package="reachy_sdk_server",
+        executable="reachy_sdk_server",
+        output="both",
         arguments=[reachy_config.model],
         condition=IfCondition(start_sdk_server_rl),
     )
@@ -231,61 +247,61 @@ def launch_setup(context, *args, **kwargs):
     # )
 
     robot_state_publisher_node = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='both',
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        output="both",
         parameters=[robot_description],
     )
 
     rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        output='log',
-        arguments=['-d', rviz_config_file],
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="log",
+        arguments=["-d", rviz_config_file],
         condition=IfCondition(start_rviz_rl),
     )
 
     gazebo_state_broadcaster_params = PathJoinSubstitution(
-        [FindPackageShare('reachy_gazebo'), 'config', 'gz_state_broadcaster_params.yaml']
+        [FindPackageShare("reachy_gazebo"), "config", "gz_state_broadcaster_params.yaml"]
     )
 
     joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=[*(('joint_state_broadcaster', '-p', gazebo_state_broadcaster_params) if gazebo_py else
-                     ('joint_state_broadcaster',)),
-                   '--controller-manager',
-                   '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            *(
+                ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
+                if gazebo_py
+                else ("joint_state_broadcaster",)
+            ),
+            "--controller-manager",
+            "/controller_manager",
+        ],
     )
 
     neck_forward_position_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['neck_forward_position_controller', '-c', '/controller_manager'],
-        condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' != '{HEADLESS}'")
-        )
+        package="controller_manager",
+        executable="spawner",
+        arguments=["neck_forward_position_controller", "-c", "/controller_manager"],
+        condition=IfCondition(PythonExpression(f"'{reachy_config.model}' != '{HEADLESS}'")),
     )
 
     r_arm_forward_position_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['r_arm_forward_position_controller', '-c', '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["r_arm_forward_position_controller", "-c", "/controller_manager"],
         condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']")
-        )
+            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']")
+        ),
     )
 
     l_arm_forward_position_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['l_arm_forward_position_controller', '-c', '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["l_arm_forward_position_controller", "-c", "/controller_manager"],
         condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']")
+            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']")
         ),
     )
 
@@ -300,37 +316,34 @@ def launch_setup(context, *args, **kwargs):
     # )
 
     gripper_forward_position_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['gripper_forward_position_controller', '-c', '/controller_manager'],
-        condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' != '{MINI}'")
-        ),
+        package="controller_manager",
+        executable="spawner",
+        arguments=["gripper_forward_position_controller", "-c", "/controller_manager"],
+        condition=IfCondition(PythonExpression(f"'{reachy_config.model}' != '{MINI}'")),
     )
 
     forward_torque_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['forward_torque_controller', '-c', '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["forward_torque_controller", "-c", "/controller_manager"],
     )
 
     forward_torque_limit_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['forward_torque_limit_controller', '-c', '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["forward_torque_limit_controller", "-c", "/controller_manager"],
     )
 
     forward_speed_limit_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['forward_speed_limit_controller', '-c', '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["forward_speed_limit_controller", "-c", "/controller_manager"],
     )
 
     forward_pid_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['forward_pid_controller', '-c', '/controller_manager'],
+        package="controller_manager",
+        executable="spawner",
+        arguments=["forward_pid_controller", "-c", "/controller_manager"],
     )
 
     # forward_fan_controller_spawner = Node(
@@ -352,24 +365,35 @@ def launch_setup(context, *args, **kwargs):
     )
 
     kinematics_node = LifecycleNode(
-        name='kinematics',
-        namespace='',
-        package='reachy_kdl_kinematics',
-        executable='reachy_kdl_kinematics',
+        name="kinematics",
+        namespace="",
+        package="reachy_kdl_kinematics",
+        executable="reachy_kdl_kinematics",
     )
 
     dynamic_state_router_node = Node(
-        package='dynamic_state_router',
-        executable='dynamic_state_router',
+        package="dynamic_state_router",
+        executable="dynamic_state_router",
         arguments=[robot_controllers],
     )
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            FindPackageShare("reachy_gazebo"), '/launch', '/gazebo.launch.py']),
-        launch_arguments={'robot_config': f'{reachy_config.model}'}.items()
+        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
+        launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
+
+    # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
+    trajectory_controllers = []
+    for traj_controller in [ "left_arm_controller",  "right_arm_controller", "head_controller", "left_gripper_controller", "right_gripper_controller"]:
+            trajectory_controllers.append( Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=[traj_controller, '-c', '/controller_manager'],
+                output="screen",
+                parameters=[{'use_sim_time': True}]
+            )
+        )
 
     delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
@@ -386,14 +410,16 @@ def launch_setup(context, *args, **kwargs):
                 forward_pid_controller_spawner,
                 # forward_fan_controller_spawner,
                 # fan_controller_spawner,
-                kinematics_node
+                # *trajectory_controllers,
+                kinematics_node,
             ],
         ),
     )
 
     delay_sdk_server_after_kinematics = RegisterEventHandler(
         event_handler=OnStateTransition(
-            target_lifecycle_node=kinematics_node, goal_state='inactive',
+            target_lifecycle_node=kinematics_node,
+            goal_state="inactive",
             entities=[sdk_server_node],
         )
     )
@@ -422,10 +448,9 @@ def launch_setup(context, *args, **kwargs):
     #     ),
     # )
 
+
     return [
-        *((control_node,) if not gazebo_py else
-          (SetUseSimTime(True),  # does not seem to work...
-           gazebo_node)),
+        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
         # fake_camera_node,
         # fake_zoom_node,
         robot_state_publisher_node,
@@ -443,35 +468,37 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    return LaunchDescription([
-        # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79
-        SetEnvironmentVariable('PYTHONOPTIMIZE', '1'),
+    return LaunchDescription(
+        [
+            # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79
+            SetEnvironmentVariable("PYTHONOPTIMIZE", "1"),
+            DeclareLaunchArgument(
+                "start_rviz",
+                default_value="false",
+                description="Start RViz2 automatically with this launch file.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "fake",
+                default_value="false",
+                description="Start on fake_reachy mode with this launch file.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "gazebo",
+                default_value="false",
+                description="Start a fake_hardware with gazebo as simulation tool.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "start_sdk_server",
+                default_value="false",
+                description="Start sdk_server along with reachy nodes with this launch file.",
+                choices=["true", "false"],
+            ),
+            OpaqueFunction(function=launch_setup),
+        ]
+    )
 
-        DeclareLaunchArgument(
-            'start_rviz',
-            default_value='false',
-            description='Start RViz2 automatically with this launch file.',
-            choices=['true', 'false']
-        ),
-        DeclareLaunchArgument(
-            'fake',
-            default_value='false',
-            description='Start on fake_reachy mode with this launch file.',
-            choices=['true', 'false']
-        ),
-        DeclareLaunchArgument(
-            'gazebo',
-            default_value='false',
-            description='Start a fake_hardware with gazebo as simulation tool.',
-            choices=['true', 'false']
-        ),
-        DeclareLaunchArgument(
-            'start_sdk_server',
-            default_value='false',
-            description='Start sdk_server along with reachy nodes with this launch file.',
-            choices=['true', 'false']
-        ),
-        OpaqueFunction(function=launch_setup)
-    ])
 
 # TODO use a OnProcessIO to check whether every node has sent its 'OK' message and log accordingly ?
