@@ -386,13 +386,20 @@ def launch_setup(context, *args, **kwargs):
 
     # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
     trajectory_controllers = []
-    for traj_controller in [ "left_arm_controller",  "right_arm_controller", "head_controller", "left_gripper_controller", "right_gripper_controller"]:
-            trajectory_controllers.append( Node(
+    for traj_controller in [
+        "left_arm_controller",
+        "right_arm_controller",
+        "head_controller",
+        "left_gripper_controller",
+        "right_gripper_controller",
+    ]:
+        trajectory_controllers.append(
+            Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=[traj_controller, '-c', '/controller_manager'],
+                arguments=[traj_controller, "-c", "/controller_manager"],
                 output="screen",
-                parameters=[{'use_sim_time': True}]
+                parameters=[{"use_sim_time": True}],
             )
         )
 
@@ -441,19 +448,9 @@ def launch_setup(context, *args, **kwargs):
     #     condition=IfCondition(fake_rl),
     # )
 
-    # fake_zoom_node = Node(
-    #     package='reachy_fake',
-    #     executable='fake_zoom',
-    #     condition=IfCondition(
-    #         PythonExpression(f"{fake_py} or {gazebo_py}"),
-    #     ),
-    # )
-
-
     return [
         *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
         # fake_camera_node,
-        # fake_zoom_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,

@@ -25,11 +25,6 @@ from control_msgs.msg import DynamicJointState, InterfaceValue
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import WrenchStamped
 
-from reachy_msgs.srv import GetCameraZoomLevel, GetCameraZoomSpeed
-from reachy_msgs.srv import SetCameraZoomLevel, SetCameraZoomSpeed
-from reachy_msgs.srv import GetCameraZoomFocus, SetCameraZoomFocus
-from reachy_msgs.srv import SetFocusState
-
 DUMMY_JOINT_INTERFACE_NAMES = [
     'torque',
     'p_gain', 'i_gain', 'd_gain',
