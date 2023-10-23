@@ -238,15 +238,6 @@ def launch_setup(context, *args, **kwargs):
     #         )),
     # )
 
-    # sdk_camera_server_node = Node(
-    #     package='reachy_sdk_server',
-    #     executable='camera_server',
-    #     output='both',
-    #     condition=IfCondition(PythonExpression(
-    #             f"{start_sdk_server_py} and '{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']"
-    #         )),
-    # )
-
     robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
