@@ -28,7 +28,7 @@ target_include_directories(
 )
 
 add_library(smart_gripper_dynamixel_hwi STATIC IMPORTED)
-set_property(TARGET smart_gripper_dynamixel_hwi PROPERTY IMPORTED_LOCATION $ENV{PWD}/../../build/smart_gripper_dynamixel_hwi/debug/libsmart_gripper_dynamixel_hwi.a )
+set_property(TARGET smart_gripper_dynamixel_hwi PROPERTY IMPORTED_LOCATION $ENV{PWD}/../../build/smart_gripper_dynamixel_hwi/release/libsmart_gripper_dynamixel_hwi.a )
 
 target_link_libraries(
   ${PROJECT_NAME}
