@@ -422,7 +422,7 @@ def launch_setup(context, *args, **kwargs):
                 forward_pid_controller_spawner,
                 # forward_fan_controller_spawner,
                 # fan_controller_spawner,
-                *trajectory_controllers,
+                # *trajectory_controllers,
                 kinematics_node,
                 kinematics_node_placo,
             ],
