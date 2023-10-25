@@ -369,7 +369,7 @@ def launch_setup(context, *args, **kwargs):
         executable="pollen_kdl_kinematics",
     )
     
-    kinematics_node = LifecycleNode(
+    kinematics_node_placo = LifecycleNode(
         name="kinematics_placo",
         namespace="",
         package="pollen_placo_kinematics",
@@ -424,6 +424,7 @@ def launch_setup(context, *args, **kwargs):
                 # fan_controller_spawner,
                 *trajectory_controllers,
                 kinematics_node,
+                kinematics_node_placo,
             ],
         ),
     )
