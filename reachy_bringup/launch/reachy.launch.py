@@ -186,8 +186,8 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare("reachy_bringup"),
             "config",
-            f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
-            # f"reachy_{reachy_config.model}_controllers.yaml",
+            # f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
+            f"reachy_{reachy_config.model}_controllers.yaml",
         ]
     )
 
