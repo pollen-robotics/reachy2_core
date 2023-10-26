@@ -1,5 +1,7 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
+#include <chrono>
+#include <thread>
 
 /*
  * I'm glue da ba dee da ba daa
@@ -140,7 +142,9 @@ namespace gazebo
 
             if (!robot_model)
             {
+
                 gzerr << "Model(s) not found" << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 return false;
             }
 
