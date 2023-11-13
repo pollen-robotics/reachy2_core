@@ -10,7 +10,13 @@ from launch.actions import (
 )
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit, OnProcessStart, OnExecutionComplete
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, PythonExpression
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    PythonExpression,
+)
 from launch_ros.descriptions import ParameterValue
 from launch_ros.actions import Node, SetUseSimTime, LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
@@ -56,7 +62,14 @@ class ReachyConfig:
                 raise ValueError(
                     'Bad robot model "{}". Expected values are {}'.format(
                         config[REACHY_CONFIG_MODEL],
-                        [FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD],
+                        [
+                            FULL_KIT,
+                            STARTER_KIT_RIGHT,
+                            STARTER_KIT_LEFT,
+                            HEADLESS,
+                            MINI,
+                            STARTER_KIT_RIGHT_NO_HEAD,
+                        ],
                     )
                 )
 
@@ -140,6 +153,8 @@ def launch_setup(context, *args, **kwargs):
     gazebo_py = gazebo_rl.perform(context) == "true"
     start_sdk_server_rl = LaunchConfiguration("start_sdk_server")
     start_sdk_server_py = start_sdk_server_rl.perform(context) == "true"
+    controllers_rl = LaunchConfiguration("controllers")
+    controllers_py = controllers_rl.perform(context)
 
     # Robot config
     reachy_config = ReachyConfig()
@@ -149,11 +164,17 @@ def launch_setup(context, *args, **kwargs):
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
+            PathJoinSubstitution(
+                [FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]
+            ),
             *(
                 (" ", "use_fake_hardware:=true", " ")
                 if fake_py
-                else (" ", "use_fake_hardware:=true use_gazebo:=true depth_camera:=true ", " ")
+                else (
+                    " ",
+                    "use_fake_hardware:=true use_gazebo:=true depth_camera:=true ",
+                    " ",
+                )
                 if gazebo_py
                 else (" ",)
             ),
@@ -187,7 +208,10 @@ def launch_setup(context, *args, **kwargs):
             FindPackageShare("reachy_bringup"),
             "config",
             # f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
-            f"reachy_{reachy_config.model}_controllers.yaml",
+            # f"reachy_{reachy_config.model}_controllers.yaml",
+            f"reachy_{reachy_config.model}_controllers.yaml"
+            if controllers_py == "default"
+            else f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
         ]
     )
 
@@ -261,7 +285,11 @@ def launch_setup(context, *args, **kwargs):
     )
 
     gazebo_state_broadcaster_params = PathJoinSubstitution(
-        [FindPackageShare("reachy_gazebo"), "config", "gz_state_broadcaster_params.yaml"]
+        [
+            FindPackageShare("reachy_gazebo"),
+            "config",
+            "gz_state_broadcaster_params.yaml",
+        ]
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -282,7 +310,9 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         arguments=["neck_forward_position_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"'{reachy_config.model}' != '{HEADLESS}'")),
+        condition=IfCondition(
+            PythonExpression(f"'{reachy_config.model}' != '{HEADLESS}'")
+        ),
     )
 
     r_arm_forward_position_controller_spawner = Node(
@@ -290,7 +320,9 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         arguments=["r_arm_forward_position_controller", "-c", "/controller_manager"],
         condition=IfCondition(
-            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']")
+            PythonExpression(
+                f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']"
+            )
         ),
     )
 
@@ -299,7 +331,9 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         arguments=["l_arm_forward_position_controller", "-c", "/controller_manager"],
         condition=IfCondition(
-            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']")
+            PythonExpression(
+                f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']"
+            )
         ),
     )
 
@@ -376,7 +410,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
+        PythonLaunchDescriptionSource(
+            [FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]
+        ),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
@@ -415,7 +451,7 @@ def launch_setup(context, *args, **kwargs):
                 forward_pid_controller_spawner,
                 # forward_fan_controller_spawner,
                 # fan_controller_spawner,
-                # *trajectory_controllers,
+                *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
         ),
@@ -446,7 +482,9 @@ def launch_setup(context, *args, **kwargs):
     # )
 
     return [
-        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
+        *(
+            (control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)
+        ),  # does not seem to work...
         # fake_camera_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
@@ -465,7 +503,9 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     # for each file, if it is a .rviz file, add it to the list of choices without the .rviz extension
     rviz_config_choices = []
-    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"):
+    for file in os.listdir(
+        os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"
+    ):
         if file.endswith(".rviz"):
             rviz_config_choices.append(file[:-5])
 
@@ -496,6 +536,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false", *rviz_config_choices],
+            ),
+            DeclareLaunchArgument(
+                "controllers",
+                default_value="default",
+                description="Controller Mode",
+                choices=["default", "trajectory"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
