@@ -24,8 +24,7 @@ from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 import yaml
 import os
-from launch_param_builder import load_xacro
-from pathlib import Path
+
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = (
     "full_kit",
