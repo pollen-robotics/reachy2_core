@@ -3,15 +3,25 @@ from pathlib import Path
 
 import yaml
 from launch import LaunchContext, LaunchDescription
-from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
-                            LogInfo, OpaqueFunction, RegisterEventHandler,
-                            SetEnvironmentVariable, TimerAction)
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    LogInfo,
+    OpaqueFunction,
+    RegisterEventHandler,
+    SetEnvironmentVariable,
+    TimerAction,
+)
 from launch.conditions import IfCondition
-from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
-                                   OnProcessStart)
+from launch.event_handlers import OnExecutionComplete, OnProcessExit, OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (Command, FindExecutable, LaunchConfiguration,
-                                  PathJoinSubstitution, PythonExpression)
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    PythonExpression,
+)
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.event_handlers import OnStateTransition
@@ -435,12 +445,12 @@ def launch_setup(context, *args, **kwargs):
                 l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
                 gripper_forward_position_controller_spawner,
-                forward_torque_controller_spawner,
-                forward_torque_limit_controller_spawner,
-                forward_speed_limit_controller_spawner,
-                forward_pid_controller_spawner,
-                # forward_fan_controller_spawner,
-                # fan_controller_spawner,
+                *(forward_torque_controller_spawner if not fake_py else []),
+                *(forward_torque_limit_controller_spawner if not fake_py else []),
+                *(forward_speed_limit_controller_spawner if not fake_py else []),
+                *(forward_pid_controller_spawner if not fake_py else []),
+                # *(forward_fan_controller_spawner if not fake_py else []),
+                # *(fan_controller_spawner if not fake_py else []),
                 *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
