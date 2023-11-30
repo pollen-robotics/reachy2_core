@@ -1,20 +1,15 @@
-import os
-from pathlib import Path
-
-import yaml
-from launch import LaunchContext, LaunchDescription
+from launch import LaunchDescription, LaunchContext
 from launch.actions import (
     DeclareLaunchArgument,
-    IncludeLaunchDescription,
-    LogInfo,
-    OpaqueFunction,
     RegisterEventHandler,
-    SetEnvironmentVariable,
+    IncludeLaunchDescription,
     TimerAction,
+    OpaqueFunction,
+    LogInfo,
+    SetEnvironmentVariable,
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnExecutionComplete, OnProcessExit, OnProcessStart
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.event_handlers import OnProcessExit, OnProcessStart, OnExecutionComplete
 from launch.substitutions import (
     Command,
     FindExecutable,
@@ -22,10 +17,14 @@ from launch.substitutions import (
     PathJoinSubstitution,
     PythonExpression,
 )
-from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
+from launch_ros.actions import Node, SetUseSimTime, LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.substitutions import FindPackageShare
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+import yaml
+import os
+
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = (
     "full_kit",
