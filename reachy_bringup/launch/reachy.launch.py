@@ -229,13 +229,13 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    sdk_server_node = Node(
-        package="reachy_sdk_server",
-        executable="reachy_sdk_server",
-        output="both",
-        arguments=[reachy_config.model],
-        condition=IfCondition(start_sdk_server_rl),
-    )
+    # sdk_server_node = Node(
+    #     package="reachy_sdk_server",
+    #     executable="reachy_sdk_server",
+    #     output="both",
+    #     arguments=[reachy_config.model],
+    #     condition=IfCondition(start_sdk_server_rl),
+    # )
 
     # camera_publisher_node = Node(
     #     package='camera_controllers',
@@ -444,25 +444,25 @@ def launch_setup(context, *args, **kwargs):
                 l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
                 gripper_forward_position_controller_spawner,
-                forward_torque_controller_spawner,
-                forward_torque_limit_controller_spawner,
-                forward_speed_limit_controller_spawner,
-                forward_pid_controller_spawner,
-                # forward_fan_controller_spawner,
-                # fan_controller_spawner,
+                *(forward_torque_controller_spawner if not fake_py else []),
+                *(forward_torque_limit_controller_spawner if not fake_py else []),
+                *(forward_speed_limit_controller_spawner if not fake_py else []),
+                *(forward_pid_controller_spawner if not fake_py else []),
+                # *(forward_fan_controller_spawner if not fake_py else []),
+                # *(fan_controller_spawner if not fake_py else []),
                 *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
         ),
     )
 
-    delay_sdk_server_after_kinematics = RegisterEventHandler(
-        event_handler=OnStateTransition(
-            target_lifecycle_node=kinematics_node,
-            goal_state="inactive",
-            entities=[sdk_server_node],
-        )
-    )
+    # delay_sdk_server_after_kinematics = RegisterEventHandler(
+    #     event_handler=OnStateTransition(
+    #         target_lifecycle_node=kinematics_node,
+    #         goal_state="inactive",
+    #         entities=[sdk_server_node],
+    #     )
+    # )
 
     # gripper_safe_controller_node = Node(
     #     package='gripper_safe_controller',
@@ -490,7 +490,7 @@ def launch_setup(context, *args, **kwargs):
         delay_rviz_after_joint_state_broadcaster_spawner,
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         # gripper_safe_controller_node,
-        delay_sdk_server_after_kinematics,
+        # delay_sdk_server_after_kinematics,
         # camera_publisher_node,
         # camera_focus_node,
         # camera_zoom_node,
