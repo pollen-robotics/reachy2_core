@@ -24,120 +24,15 @@ from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 import yaml
 import os
-
-
-FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = (
-    "full_kit",
-    "starter_kit_right",
-    "starter_kit_left",
-    "headless",
-    "mini",
+from reachy_utils.config import (
+    ReachyConfig,
+    HEADLESS,
+    STARTER_KIT_RIGHT_NO_HEAD,
+    STARTER_KIT_RIGHT,
+    STARTER_KIT_LEFT,
+    FULL_KIT,
+    MINI,
 )
-STARTER_KIT_RIGHT_NO_HEAD = "starter_kit_right_no_head"
-
-REACHY_CONFIG_MODEL = "model"
-REACHY_CONFIG_NECK = "neck_config"
-REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
-REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
-REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
-
-REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
-REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
-REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
-
-
-class ReachyConfig:
-    def __init__(self, config_file_path="~/.reachy.yaml"):
-        config_file = os.path.expanduser(config_file_path)
-        with open(config_file) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-
-            # Robot model (Only full kit for now, TODO)
-            if config[REACHY_CONFIG_MODEL] in [
-                FULL_KIT
-            ]:  # , STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI, STARTER_KIT_RIGHT_NO_HEAD]:
-                self.model = config[REACHY_CONFIG_MODEL]
-            else:
-                raise ValueError(
-                    'Bad robot model "{}". Expected values are {}'.format(
-                        config[REACHY_CONFIG_MODEL],
-                        [
-                            FULL_KIT,
-                            STARTER_KIT_RIGHT,
-                            STARTER_KIT_LEFT,
-                            HEADLESS,
-                            MINI,
-                            STARTER_KIT_RIGHT_NO_HEAD,
-                        ],
-                    )
-                )
-
-            # TODO Multiple config
-
-            # orbita zero
-            try:
-                self.neck_config = config[REACHY_CONFIG_NECK]
-
-            except KeyError as e:
-                raise KeyError("orbita3d neck config key not found :: {}".format(e))
-
-            # right shoulder
-            try:
-                self.right_shoulder_config = config[REACHY_CONFIG_RIGHT_SHOULDER]
-
-            except KeyError as e:
-                raise KeyError("orbita2d right shoulder key not found :: {}".format(e))
-
-            # right elbow
-            try:
-                self.right_elbow_config = config[REACHY_CONFIG_RIGHT_ELBOW]
-            except KeyError as e:
-                raise KeyError("orbita2d right elbow key not found :: {}".format(e))
-
-            # right wrist
-            try:
-                self.right_wrist_config = config[REACHY_CONFIG_RIGHT_WRIST]
-            except KeyError as e:
-                raise KeyError("orbita3d right wrist key not found :: {}".format(e))
-
-            # left shoulder
-            try:
-                self.left_shoulder_config = config[REACHY_CONFIG_LEFT_SHOULDER]
-
-            except KeyError as e:
-                raise KeyError("orbita2d left shoulder key not found :: {}".format(e))
-
-            # left elbow
-            try:
-                self.left_elbow_config = config[REACHY_CONFIG_LEFT_ELBOW]
-            except KeyError as e:
-                raise KeyError("orbita2d left elbow key not found :: {}".format(e))
-
-            # left wrist
-            try:
-                self.left_wrist_config = config[REACHY_CONFIG_LEFT_WRIST]
-            except KeyError as e:
-                raise KeyError("orbita3d left wrist key not found :: {}".format(e))
-
-    def __str__(self):
-        return (
-            "robot_model".ljust(25, " ")
-            + "{}\n".format(self.model)
-            + "neck_config".ljust(25, " ")
-            + "{}\n".format(self.neck_config)
-            + "right_shoulder_config".ljust(25, " ")
-            + "{}\n".format(self.right_shoulder_config)
-            + "right_elbow_config".ljust(25, " ")
-            + "{}\n".format(self.right_elbow_config)
-            + "right_wrist_config".ljust(25, " ")
-            + "{}\n".format(self.right_wrist_config)
-            + "left_shoulder_config".ljust(25, " ")
-            + "{}\n".format(self.left_shoulder_config)
-            + "left_elbow_config".ljust(25, " ")
-            + "{}\n".format(self.left_elbow_config)
-            + "left_wrist_config".ljust(25, " ")
-            + "{}\n".format(self.left_wrist_config)
-        )
 
 
 def launch_setup(context, *args, **kwargs):
@@ -229,7 +124,7 @@ def launch_setup(context, *args, **kwargs):
         package="reachy_sdk_server",
         executable="reachy_grpc_joint_sdk_server",
         output="both",
-        arguments=[PathJoinSubstitution([FindPackageShare("reachy_sdk_server"),"config", "reachy_full_kit.yaml"])],
+        arguments=[PathJoinSubstitution([FindPackageShare("reachy_sdk_server"), "config", "reachy_full_kit.yaml"])],
         condition=IfCondition(start_sdk_server_rl),
     )
 
