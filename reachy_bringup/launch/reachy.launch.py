@@ -163,9 +163,7 @@ def launch_setup(context, *args, **kwargs):
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution(
-                [FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]
-            ),
+            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
             *(
                 (" ", "use_fake_hardware:=true", " ")
                 if fake_py
@@ -206,8 +204,6 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare("reachy_bringup"),
             "config",
-            # f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
-            # f"reachy_{reachy_config.model}_controllers.yaml",
             f"reachy_{reachy_config.model}_controllers.yaml"
             if controllers_py == "default"
             else f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
@@ -229,13 +225,13 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    # sdk_server_node = Node(
-    #     package="reachy_sdk_server",
-    #     executable="reachy_sdk_server",
-    #     output="both",
-    #     arguments=[reachy_config.model],
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
+    sdk_server_node = Node(
+        package="reachy_sdk_server",
+        executable="reachy_grpc_joint_sdk_server",
+        output="both",
+        arguments=[PathJoinSubstitution([FindPackageShare("reachy_sdk_server"),"config", "reachy_full_kit.yaml"])],
+        condition=IfCondition(start_sdk_server_rl),
+    )
 
     # camera_publisher_node = Node(
     #     package='camera_controllers',
@@ -309,9 +305,7 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         arguments=["neck_forward_position_controller", "-c", "/controller_manager"],
-        condition=IfCondition(
-            PythonExpression(f"'{reachy_config.model}' != '{HEADLESS}'")
-        ),
+        condition=IfCondition(PythonExpression(f"'{reachy_config.model}' != '{HEADLESS}'")),
     )
 
     r_arm_forward_position_controller_spawner = Node(
@@ -319,9 +313,7 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         arguments=["r_arm_forward_position_controller", "-c", "/controller_manager"],
         condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']"
-            )
+            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']")
         ),
     )
 
@@ -330,9 +322,7 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         arguments=["l_arm_forward_position_controller", "-c", "/controller_manager"],
         condition=IfCondition(
-            PythonExpression(
-                f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']"
-            )
+            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']")
         ),
     )
 
@@ -357,24 +347,28 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         arguments=["forward_torque_controller", "-c", "/controller_manager"],
+        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
     )
 
     forward_torque_limit_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["forward_torque_limit_controller", "-c", "/controller_manager"],
+        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
     )
 
     forward_speed_limit_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["forward_speed_limit_controller", "-c", "/controller_manager"],
+        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
     )
 
     forward_pid_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["forward_pid_controller", "-c", "/controller_manager"],
+        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
     )
 
     # forward_fan_controller_spawner = Node(
@@ -409,9 +403,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]
-        ),
+        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
@@ -444,10 +436,10 @@ def launch_setup(context, *args, **kwargs):
                 l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
                 gripper_forward_position_controller_spawner,
-                *(forward_torque_controller_spawner if not fake_py else []),
-                *(forward_torque_limit_controller_spawner if not fake_py else []),
-                *(forward_speed_limit_controller_spawner if not fake_py else []),
-                *(forward_pid_controller_spawner if not fake_py else []),
+                forward_torque_controller_spawner,
+                forward_torque_limit_controller_spawner,
+                forward_speed_limit_controller_spawner,
+                forward_pid_controller_spawner,
                 # *(forward_fan_controller_spawner if not fake_py else []),
                 # *(fan_controller_spawner if not fake_py else []),
                 *(trajectory_controllers if controllers_py == "trajectory" else []),
@@ -456,13 +448,13 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
-    # delay_sdk_server_after_kinematics = RegisterEventHandler(
-    #     event_handler=OnStateTransition(
-    #         target_lifecycle_node=kinematics_node,
-    #         goal_state="inactive",
-    #         entities=[sdk_server_node],
-    #     )
-    # )
+    delay_sdk_server_after_kinematics = RegisterEventHandler(
+        event_handler=OnStateTransition(
+            target_lifecycle_node=kinematics_node,
+            goal_state="inactive",
+            entities=[sdk_server_node],
+        )
+    )
 
     # gripper_safe_controller_node = Node(
     #     package='gripper_safe_controller',
@@ -481,16 +473,14 @@ def launch_setup(context, *args, **kwargs):
     # )
 
     return [
-        *(
-            (control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)
-        ),  # does not seem to work...
+        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
         # fake_camera_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         # gripper_safe_controller_node,
-        # delay_sdk_server_after_kinematics,
+        delay_sdk_server_after_kinematics,
         # camera_publisher_node,
         # camera_focus_node,
         # camera_zoom_node,
@@ -502,9 +492,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     # for each file, if it is a .rviz file, add it to the list of choices without the .rviz extension
     rviz_config_choices = []
-    for file in os.listdir(
-        os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"
-    ):
+    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"):
         if file.endswith(".rviz"):
             rviz_config_choices.append(file[:-5])
 
