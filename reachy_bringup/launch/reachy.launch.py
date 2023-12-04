@@ -301,30 +301,34 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    neck_forward_position_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["neck_forward_position_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"'{reachy_config.model}' != '{HEADLESS}'")),
-    )
+    position_controllers = []
+    for controller, condition in [
+        ["neck_forward_position_controller", f"'{reachy_config.model}' != '{HEADLESS}'"],
+        [
+            "r_arm_forward_position_controller",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        ],
+        [
+            "l_arm_forward_position_controller",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        ],
+        ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
+        ["forward_torque_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["forward_torque_limit_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["forward_speed_limit_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
+    ]:
+        position_controllers.append(
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=[controller, "-c", "/controller_manager"],
+                condition=IfCondition(PythonExpression(condition)),
+            )
+        )
+        print(controller, condition)
 
-    r_arm_forward_position_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["r_arm_forward_position_controller", "-c", "/controller_manager"],
-        condition=IfCondition(
-            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']")
-        ),
-    )
 
-    l_arm_forward_position_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["l_arm_forward_position_controller", "-c", "/controller_manager"],
-        condition=IfCondition(
-            PythonExpression(f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']")
-        ),
-    )
 
     # antenna_forward_position_controller_spawner = Node(
     #     package='controller_manager',
@@ -335,41 +339,6 @@ def launch_setup(context, *args, **kwargs):
     #             f"'{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']")
     #     )
     # )
-
-    gripper_forward_position_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["gripper_forward_position_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"'{reachy_config.model}' != '{MINI}'")),
-    )
-
-    forward_torque_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["forward_torque_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
-    )
-
-    forward_torque_limit_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["forward_torque_limit_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
-    )
-
-    forward_speed_limit_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["forward_speed_limit_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
-    )
-
-    forward_pid_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["forward_pid_controller", "-c", "/controller_manager"],
-        condition=IfCondition(PythonExpression(f"not {fake_py} and not {gazebo_py}")),
-    )
 
     # forward_fan_controller_spawner = Node(
     #     package='controller_manager',
@@ -431,15 +400,16 @@ def launch_setup(context, *args, **kwargs):
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[
-                neck_forward_position_controller_spawner,
-                r_arm_forward_position_controller_spawner,
-                l_arm_forward_position_controller_spawner,
+                *position_controllers,
+                # neck_forward_position_controller_spawner,
+                # r_arm_forward_position_controller_spawner,
+                # l_arm_forward_position_controller_spawner,
                 # antenna_forward_position_controller_spawner,
-                gripper_forward_position_controller_spawner,
-                forward_torque_controller_spawner,
-                forward_torque_limit_controller_spawner,
-                forward_speed_limit_controller_spawner,
-                forward_pid_controller_spawner,
+                # gripper_forward_position_controller_spawner,
+                # *(forward_torque_controller_spawner if not fake_py else []),
+                # *(forward_torque_limit_controller_spawner if not fake_py else []),
+                # *(forward_speed_limit_controller_spawner if not fake_py else []),
+                # *(forward_pid_controller_spawner if not fake_py else []),
                 # *(forward_fan_controller_spawner if not fake_py else []),
                 # *(fan_controller_spawner if not fake_py else []),
                 *(trajectory_controllers if controllers_py == "trajectory" else []),
