@@ -326,9 +326,6 @@ def launch_setup(context, *args, **kwargs):
                 condition=IfCondition(PythonExpression(condition)),
             )
         )
-        print(controller, condition)
-
-
 
     # antenna_forward_position_controller_spawner = Node(
     #     package='controller_manager',
@@ -401,17 +398,6 @@ def launch_setup(context, *args, **kwargs):
             target_action=joint_state_broadcaster_spawner,
             on_exit=[
                 *position_controllers,
-                # neck_forward_position_controller_spawner,
-                # r_arm_forward_position_controller_spawner,
-                # l_arm_forward_position_controller_spawner,
-                # antenna_forward_position_controller_spawner,
-                # gripper_forward_position_controller_spawner,
-                # *(forward_torque_controller_spawner if not fake_py else []),
-                # *(forward_torque_limit_controller_spawner if not fake_py else []),
-                # *(forward_speed_limit_controller_spawner if not fake_py else []),
-                # *(forward_pid_controller_spawner if not fake_py else []),
-                # *(forward_fan_controller_spawner if not fake_py else []),
-                # *(fan_controller_spawner if not fake_py else []),
                 *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
@@ -434,12 +420,6 @@ def launch_setup(context, *args, **kwargs):
     #                 PythonExpression(
     #                     f"'{reachy_config.model}' != '{MINI}'")
     #     ),
-    # )
-
-    # fake_camera_node = Node(
-    #     package='reachy_fake',
-    #     executable='fake_camera',
-    #     condition=IfCondition(fake_rl),
     # )
 
     return [
