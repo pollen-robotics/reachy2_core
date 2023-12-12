@@ -25,6 +25,8 @@ REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
 REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
 REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
 
+REACHY_CONFIG_MOBILE_BASE = "mobile_base"
+
 
 class ReachyConfig:
     def __init__(self, config_file_path="~/.reachy.yaml"):
@@ -53,6 +55,15 @@ class ReachyConfig:
                 )
 
             # TODO Multiple config
+
+            # Mobile base
+            # orbita zero
+            try:
+                self.mobile_base_config = config[REACHY_CONFIG_MOBILE_BASE]
+
+            except KeyError as e:
+                raise KeyError("mobile_base config key not found :: {}".format(e))
+
 
             # orbita zero
             try:
