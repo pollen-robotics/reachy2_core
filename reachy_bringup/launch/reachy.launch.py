@@ -299,6 +299,11 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
+    print("Launching Mobile Base: {}".format("true" if None not in reachy_config.mobile_base_config.values() else "false"))
+    mobile_base_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
+        condition=IfCondition("true" if None not in reachy_config.mobile_base_config.values() else "false"))
+
     # gripper_safe_controller_node = Node(
     #     package='gripper_safe_controller',
     #     executable='gripper_safe_controller',
@@ -312,6 +317,7 @@ def launch_setup(context, *args, **kwargs):
     return [
         *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
         # fake_camera_node,
+        mobile_base_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
