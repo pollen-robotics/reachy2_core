@@ -30,8 +30,9 @@ REACHY_CONFIG_MOBILE_BASE = "mobile_base"
 
 class ReachyConfig:
     def __init__(self, config_file_path="~/.reachy.yaml"):
-        config_file = os.path.expanduser(config_file_path)
-        with open(config_file) as f:
+        self.config_file = os.path.expanduser(config_file_path)
+
+        with open(self.config_file) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
 
             # Robot model (Only full kit for now, TODO)
