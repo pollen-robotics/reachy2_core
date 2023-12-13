@@ -124,7 +124,7 @@ def launch_setup(context, *args, **kwargs):
         package="reachy_sdk_server",
         executable="reachy_grpc_joint_sdk_server",
         output="both",
-        arguments=[PathJoinSubstitution([FindPackageShare("reachy_sdk_server"), "config", "reachy_full_kit.yaml"])],
+        arguments=[reachy_config.config_file],
         condition=IfCondition(start_sdk_server_rl),
     )
 
