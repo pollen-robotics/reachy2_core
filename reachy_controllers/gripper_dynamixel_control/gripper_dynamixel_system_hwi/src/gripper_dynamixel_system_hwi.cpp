@@ -1,6 +1,6 @@
-#include "smart_gripper_dynamixel_system_hwi/smart_gripper_dynamixel_system_hwi.hpp"
+#include "gripper_dynamixel_system_hwi/gripper_dynamixel_system_hwi.hpp"
 
-#include "smart_gripper_dynamixel_hwi.h"
+#include "gripper_dynamixel.h"
 
 #include <cmath>
 #include <string>
@@ -26,10 +26,10 @@ std::vector<float> parse_string_as_vec(std::string s) {
 }
 
 
-namespace smart_gripper_dynamixel_system_hwi
+namespace gripper_dynamixel_system_hwi
 {
 CallbackReturn
-SmartGripperDynamixelSystem::on_init(const hardware_interface::HardwareInfo & info)
+GripperDynamixelSystem::on_init(const hardware_interface::HardwareInfo & info)
 {
   if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
   {
@@ -40,7 +40,7 @@ SmartGripperDynamixelSystem::on_init(const hardware_interface::HardwareInfo & in
   if (info.joints.size() != nb_joints_expected)
   {
     RCLCPP_ERROR(
-      rclcpp::get_logger("SmartGripperDynamixelSystem"),
+      rclcpp::get_logger("GripperDynamixelSystem"),
       "Incorrect number of joints, expected %ld, got \"%s\"", nb_joints_expected,
        std::to_string(info.joints.size()).c_str()
     );
@@ -48,8 +48,8 @@ SmartGripperDynamixelSystem::on_init(const hardware_interface::HardwareInfo & in
   }
 
 
-  const char *serial_port;
-  uint8_t id;
+  const char *serial_port = "";
+  uint8_t id = 0;
 
   for (auto const& params : info.hardware_parameters)
   {
@@ -62,19 +62,29 @@ SmartGripperDynamixelSystem::on_init(const hardware_interface::HardwareInfo & in
   }
 
   RCLCPP_INFO(
-    rclcpp::get_logger("SmartGripperDynamixelSystem"),
+    rclcpp::get_logger("GripperDynamixelSystem"),
     "Trying to connect on serial port \"%s\"",
     serial_port
   );
 
-  this->uid = smart_gripper_dynamixel_hwi_init(
+  int err = gripper_dynamixel_hwi_init(
     serial_port,
-    id
+    id,
+    &this->uid
   );
+
+  if (err != 0) {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("GripperDynamixelSystem"),
+      "Failed to connect to gripper on serial port \"%s\"",
+      serial_port
+    );
+    return CallbackReturn::ERROR;
+  }
 
   clock_ = rclcpp::Clock();
   RCLCPP_INFO(
-    rclcpp::get_logger("SmartGripperDynamixelSystem"),
+    rclcpp::get_logger("GripperDynamixelSystem"),
     "System \"%s\" init!", info_.name.c_str()
   );
 
@@ -82,7 +92,7 @@ SmartGripperDynamixelSystem::on_init(const hardware_interface::HardwareInfo & in
 }
 
 CallbackReturn
-SmartGripperDynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
+GripperDynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
   // Set some default values
 
@@ -100,33 +110,33 @@ SmartGripperDynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previ
   }
 
   // TODO: make sure there is no error here!
-  smart_gripper_dynamixel_hwi_get_goal_position(this->uid, hw_commands_position_);
-//   smart_gripper_dynamixel_hwi_get_max_speed(this->uid, hw_commands_speed_limit_);
-  // smart_gripper_dynamixel_hwi_get_max_torque(this->uid, hw_commands_torque_limit_);
-  smart_gripper_dynamixel_hwi_is_torque_on(this->uid, hw_commands_torque_);
-//   smart_gripper_dynamixel_hwi_get_pid(this->uid, hw_commands_p_gain_, hw_commands_i_gain_, hw_commands_d_gain_);
+  gripper_dynamixel_hwi_get_goal_position(this->uid, hw_commands_position_);
+  //   gripper_dynamixel_hwi_get_max_speed(this->uid, hw_commands_speed_limit_);
+  // gripper_dynamixel_hwi_get_max_torque(this->uid, hw_commands_torque_limit_);
+  gripper_dynamixel_hwi_is_torque_on(this->uid, hw_commands_torque_);
+  //   gripper_dynamixel_hwi_get_pid(this->uid, hw_commands_p_gain_, hw_commands_i_gain_, hw_commands_d_gain_);
 
   last_timestamp_ = clock_.now();
 
   RCLCPP_INFO(
-    rclcpp::get_logger("SmartGripperDynamixelSystem"),
+    rclcpp::get_logger("GripperDynamixelSystem"),
     "System \"%s\" successfully started!", info_.name.c_str()
   );
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn
-SmartGripperDynamixelSystem::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/)
+GripperDynamixelSystem::on_deactivate(const rclcpp_lifecycle::State & /*previous_state*/)
 {
   RCLCPP_INFO(
-    rclcpp::get_logger("SmartGripperDynamixelSystem"),
+    rclcpp::get_logger("GripperDynamixelSystem"),
     "System \"%s\" successfully deactivated!", info_.name.c_str()
   );
   return CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface>
-SmartGripperDynamixelSystem::export_state_interfaces()
+GripperDynamixelSystem::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
@@ -156,7 +166,7 @@ SmartGripperDynamixelSystem::export_state_interfaces()
       joint.name, "d_gain", &hw_states_d_gain_[i]));
 
     RCLCPP_INFO(
-      rclcpp::get_logger("SmartGripperDynamixelSystem"),
+      rclcpp::get_logger("GripperDynamixelSystem"),
       "export state interface (%s) \"%s\"!", info_.name.c_str(), joint.name.c_str()
       );
   }
@@ -165,7 +175,7 @@ SmartGripperDynamixelSystem::export_state_interfaces()
 }
 
 std::vector<hardware_interface::CommandInterface>
-SmartGripperDynamixelSystem::export_command_interfaces()
+GripperDynamixelSystem::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
@@ -189,7 +199,7 @@ SmartGripperDynamixelSystem::export_command_interfaces()
       joint.name, "d_gain", &hw_commands_d_gain_[i]));
 
     RCLCPP_INFO(
-      rclcpp::get_logger("SmartGripperDynamixelSystem"),
+      rclcpp::get_logger("GripperDynamixelSystem"),
       "export command interface (%s) \"%s\"!", info_.name.c_str(), joint.name.c_str()
       );
   }
@@ -198,16 +208,16 @@ SmartGripperDynamixelSystem::export_command_interfaces()
 }
 
 hardware_interface::return_type
-SmartGripperDynamixelSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
+GripperDynamixelSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
   current_timestamp = clock_.now();
   rclcpp::Duration duration = current_timestamp - last_timestamp_;
   last_timestamp_ = current_timestamp;
 
 
-  if (smart_gripper_dynamixel_hwi_get_position(this->uid, hw_states_position_) != 0) {
+  if (gripper_dynamixel_hwi_get_position(this->uid, hw_states_position_) != 0) {
     RCLCPP_INFO_THROTTLE(
-      rclcpp::get_logger("SmartGripperDynamixelSystem"),
+      rclcpp::get_logger("GripperDynamixelSystem"),
       clock_,
       LOG_THROTTLE_DURATION,
       "(%s) READ POSITION ERROR!", info_.name.c_str()
@@ -216,51 +226,51 @@ SmartGripperDynamixelSystem::read(const rclcpp::Time &, const rclcpp::Duration &
 
 
 
-    // if (smart_gripper_dynamixel_hwi_get_orientation_velocity_load(this->uid, hw_states_position_, hw_states_velocity_, hw_states_effort_) != 0) {
+    // if (gripper_dynamixel_hwi_get_orientation_velocity_load(this->uid, hw_states_position_, hw_states_velocity_, hw_states_effort_) != 0) {
   //   RCLCPP_INFO_THROTTLE(
-  //     rclcpp::get_logger("SmartGripperDynamixelSystem"),
+  //     rclcpp::get_logger("GripperDynamixelSystem"),
   //     clock_,
   //     LOG_THROTTLE_DURATION,
   //     "(%s) READ ORIENTATION/VELOCITY/EFFORT ERROR!", info_.name.c_str()
   //   );
   // }
 
-  // if (smart_gripper_dynamixel_hwi_get_temperature(this->uid, hw_states_temperature_) != 0) {
+  // if (gripper_dynamixel_hwi_get_temperature(this->uid, hw_states_temperature_) != 0) {
   //     RCLCPP_INFO_THROTTLE(
-  //       rclcpp::get_logger("SmartGripperDynamixelSystem"),
+  //       rclcpp::get_logger("GripperDynamixelSystem"),
   //       clock_,
   //       LOG_THROTTLE_DURATION,
   //       "(%s) READ TEMPERATURE ERROR!", info_.name.c_str()
   //     );
   // }
 
-  // if (smart_gripper_dynamixel_hwi_get_max_torque(this->uid, hw_states_torque_limit_) != 0) {
+  // if (gripper_dynamixel_hwi_get_max_torque(this->uid, hw_states_torque_limit_) != 0) {
   //   RCLCPP_INFO_THROTTLE(
-  //     rclcpp::get_logger("SmartGripperDynamixelSystem"),
+  //     rclcpp::get_logger("GripperDynamixelSystem"),
   //     clock_,
   //     LOG_THROTTLE_DURATION,
   //     "(%s) READ TORQUE LIMIT ERROR!", info_.name.c_str()
   //   );
   // }
-//   if (smart_gripper_dynamixel_hwi_get_max_speed(this->uid, hw_states_speed_limit_) != 0) {
+//   if (gripper_dynamixel_hwi_get_max_speed(this->uid, hw_states_speed_limit_) != 0) {
 //     RCLCPP_INFO_THROTTLE(
-//       rclcpp::get_logger("SmartGripperDynamixelSystem"),
+//       rclcpp::get_logger("GripperDynamixelSystem"),
 //       clock_,
 //       LOG_THROTTLE_DURATION,
 //       "(%s) READ SPEED LIMIT ERROR!", info_.name.c_str()
 //     );
 //   }
-  if (smart_gripper_dynamixel_hwi_is_torque_on(this->uid, hw_states_torque_) != 0) {
+  if (gripper_dynamixel_hwi_is_torque_on(this->uid, hw_states_torque_) != 0) {
       RCLCPP_INFO_THROTTLE(
-        rclcpp::get_logger("SmartGripperDynamixelSystem"),
+        rclcpp::get_logger("GripperDynamixelSystem"),
         clock_,
         LOG_THROTTLE_DURATION,
         "(%s) READ TORQUE (ON/OFF) ERROR!", info_.name.c_str()
       );
   }
-//   if (smart_gripper_dynamixel_hwi_get_pid(this->uid, hw_states_p_gain_, hw_states_i_gain_, hw_states_d_gain_) != 0) {
+//   if (gripper_dynamixel_hwi_get_pid(this->uid, hw_states_p_gain_, hw_states_i_gain_, hw_states_d_gain_) != 0) {
 //     RCLCPP_INFO_THROTTLE(
-//       rclcpp::get_logger("SmartGripperDynamixelSystem"),
+//       rclcpp::get_logger("GripperDynamixelSystem"),
 //       clock_,
 //       LOG_THROTTLE_DURATION,
 //       "(%s) READ PID ERROR!", info_.name.c_str()
@@ -271,28 +281,28 @@ SmartGripperDynamixelSystem::read(const rclcpp::Time &, const rclcpp::Duration &
 }
 
 hardware_interface::return_type
-SmartGripperDynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
+GripperDynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
-  if (smart_gripper_dynamixel_hwi_set_target_position(
+  if (gripper_dynamixel_hwi_set_target_position(
     this->uid, 
     *hw_commands_position_
   ) != 0) {
     RCLCPP_INFO_THROTTLE(
-      rclcpp::get_logger("SmartGripperDynamixelSystem"),
+      rclcpp::get_logger("GripperDynamixelSystem"),
       clock_,
       LOG_THROTTLE_DURATION,
       "(%s) WRITE POSITION LIMIT ERROR!", info_.name.c_str()
     );
   }
 
-  // if (smart_gripper_dynamixel_hwi_set_target_orientation_max_speed_max_torque(
+  // if (gripper_dynamixel_hwi_set_target_orientation_max_speed_max_torque(
   //   this->uid, 
   //   hw_commands_position_,
   //   hw_commands_speed_limit_,
   //   hw_commands_torque_limit_
   // ) != 0) {
   //   RCLCPP_INFO_THROTTLE(
-  //     rclcpp::get_logger("SmartGripperDynamixelSystem"),
+  //     rclcpp::get_logger("GripperDynamixelSystem"),
   //     clock_,
   //     LOG_THROTTLE_DURATION,
   //     "(%s) WRITE ORIENTATION/SPEED LIMIT/TORQUE LIMIT ERROR!", info_.name.c_str()
@@ -300,17 +310,17 @@ SmartGripperDynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration 
   // }
   
   
-  if (smart_gripper_dynamixel_hwi_set_torque(this->uid, *hw_commands_torque_) != 0) {
+  if (gripper_dynamixel_hwi_set_torque(this->uid, *hw_commands_torque_) != 0) {
     RCLCPP_INFO_THROTTLE(
-      rclcpp::get_logger("SmartGripperDynamixelSystem"),
+      rclcpp::get_logger("GripperDynamixelSystem"),
       clock_,
       LOG_THROTTLE_DURATION,
       "(%s) WRITE TORQUE ERROR!", info_.name.c_str()
     );
   }
-//   if (smart_gripper_dynamixel_hwi_set_pid(this->uid, hw_commands_p_gain_, hw_commands_i_gain_, hw_commands_d_gain_) != 0) {
+//   if (gripper_dynamixel_hwi_set_pid(this->uid, hw_commands_p_gain_, hw_commands_i_gain_, hw_commands_d_gain_) != 0) {
 //     RCLCPP_INFO_THROTTLE(
-//       rclcpp::get_logger("SmartGripperDynamixelSystem"),
+//       rclcpp::get_logger("GripperDynamixelSystem"),
 //       clock_,
 //       LOG_THROTTLE_DURATION,
 //       "(%s) WRITE PID ERROR!", info_.name.c_str()
@@ -325,5 +335,5 @@ SmartGripperDynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration 
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  smart_gripper_dynamixel_system_hwi::SmartGripperDynamixelSystem,
+  gripper_dynamixel_system_hwi::GripperDynamixelSystem,
   hardware_interface::SystemInterface)

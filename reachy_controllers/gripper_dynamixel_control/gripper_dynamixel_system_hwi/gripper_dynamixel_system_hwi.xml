@@ -1,11 +1,11 @@
-<library path="smart_gripper_dynamixel_system_hwi">
+<library path="gripper_dynamixel_system_hwi">
 
   <class
-    name="smart_gripper_dynamixel_system_hwi/SmartGripperDynamixelSystem"
-    type="smart_gripper_dynamixel_system_hwi::SmartGripperDynamixelSystem"
+    name="gripper_dynamixel_system_hwi/GripperDynamixelSystem"
+    type="gripper_dynamixel_system_hwi::GripperDynamixelSystem"
     base_class_type="hardware_interface::SystemInterface">
     <description>
-      Smart Gripper dynamixel hardware interface plugin.
+      Gripper dynamixel hardware interface plugin.
     </description>
   </class>
 

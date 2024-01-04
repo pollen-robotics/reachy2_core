@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(smart_gripper_dynamixel_system_hwi)
+project(gripper_dynamixel_system_hwi)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -18,21 +18,21 @@ find_package(rclcpp_lifecycle REQUIRED)
 add_library(
   ${PROJECT_NAME}
   SHARED
-  src/smart_gripper_dynamixel_system_hwi.cpp
+  src/gripper_dynamixel_system_hwi.cpp
 )
 target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
   include
-  ${CMAKE_SOURCE_DIR}/../reachy_2023_controllers_rs/smart_gripper_dynamixel_hwi/
+  ${CMAKE_SOURCE_DIR}/../gripper_dynamixel_controller/
 )
 
-add_library(smart_gripper_dynamixel_hwi STATIC IMPORTED)
-set_property(TARGET smart_gripper_dynamixel_hwi PROPERTY IMPORTED_LOCATION $ENV{PWD}/../../build/smart_gripper_dynamixel_hwi/release/libsmart_gripper_dynamixel_hwi.a )
+add_library(gripper_dynamixel_controller STATIC IMPORTED)
+set_property(TARGET gripper_dynamixel_controller PROPERTY IMPORTED_LOCATION $ENV{PWD}/../../install/gripper_dynamixel_controller/lib/gripper_dynamixel_controller/libgripper_dynamixel_controller.a )
 
 target_link_libraries(
   ${PROJECT_NAME}
-  smart_gripper_dynamixel_hwi
+  gripper_dynamixel_controller
   udev
   gcc_s
   util
@@ -51,7 +51,7 @@ target_link_libraries(
   rclcpp_lifecycle
 )
 
-pluginlib_export_plugin_description_file(hardware_interface smart_gripper_dynamixel_system_hwi.xml)
+pluginlib_export_plugin_description_file(hardware_interface gripper_dynamixel_system_hwi.xml)
 
 # INSTALL
 install(

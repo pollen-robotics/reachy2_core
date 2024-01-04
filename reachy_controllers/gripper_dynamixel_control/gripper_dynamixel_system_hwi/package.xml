@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>smart_gripper_dynamixel_system_hwi</name>
+  <name>gripper_dynamixel_system_hwi</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="pierre.rouanet@gmail.com">pierre</maintainer>
@@ -13,7 +13,7 @@
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_lifecycle</depend>
-  <depend>smart_gripper_dynamixel_hwi</depend>
+  <depend>gripper_dynamixel_controller</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
