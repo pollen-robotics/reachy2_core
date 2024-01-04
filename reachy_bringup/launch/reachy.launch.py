@@ -128,6 +128,13 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
+    goto_server_node = Node(
+        package="pollen_goto",
+        executable="goto_server",
+        output="both",
+        condition=IfCondition(start_sdk_server_rl),
+    )
+
     # camera_publisher_node = Node(
     #     package='camera_controllers',
     #     executable='camera_publisher',
@@ -324,6 +331,7 @@ def launch_setup(context, *args, **kwargs):
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         # gripper_safe_controller_node,
         sdk_server_node,
+        goto_server_node,
         # camera_publisher_node,
         # camera_focus_node,
         # camera_zoom_node,
