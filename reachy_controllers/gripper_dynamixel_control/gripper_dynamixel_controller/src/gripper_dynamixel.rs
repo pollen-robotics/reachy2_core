@@ -6,7 +6,7 @@ use serialport::SerialPort;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
-pub struct SmartGripperDynamixel {
+pub struct GripperDynamixel {
     serial_port: Box<dyn SerialPort>,
     io: DynamixelSerialIO,
     id: u8,
@@ -15,9 +15,9 @@ pub struct SmartGripperDynamixel {
     torque_on: Cache<u8, bool>,
 }
 
-impl SmartGripperDynamixel {
+impl GripperDynamixel {
     pub fn new(serial_port_name: &str, id: u8) -> Result<Self> {
-        Ok(SmartGripperDynamixel {
+        Ok(GripperDynamixel {
             serial_port: serialport::new(serial_port_name, 1_000_000)
                 .timeout(Duration::from_millis(10))
                 .open()?,

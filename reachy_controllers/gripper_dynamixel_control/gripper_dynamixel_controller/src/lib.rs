@@ -1,47 +1,37 @@
-use std::{collections::HashMap, ffi::CStr, sync::Mutex};
+use std::{ffi::CStr, sync::Mutex};
 
-use smart_gripper_dynamixel::SmartGripperDynamixel;
-mod smart_gripper_dynamixel;
+use gripper_dynamixel::GripperDynamixel;
+use once_cell::sync::Lazy;
+use sync_map::SyncMap;
+mod gripper_dynamixel;
+mod sync_map;
 
-#[macro_use]
-extern crate lazy_static;
-
-lazy_static! {
-    static ref UID: Mutex<u32> = Mutex::new(0);
-    static ref SMART_GRIPPER_DYNAMIXEL_CONTROLLER: Mutex<HashMap<u32, SmartGripperDynamixel>> =
-        Mutex::new(HashMap::new());
-}
+static UID: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
+static CONTROLLER: Lazy<SyncMap<u32, GripperDynamixel>> = Lazy::new(SyncMap::new);
 
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn smart_gripper_dynamixel_hwi_init(
+pub extern "C" fn gripper_dynamixel_hwi_init(
     serial_port: *const libc::c_char,
-    id: u8,
-) -> u32 {
+    dxl_id: u8,
+    uid: &mut u32,
+) -> i32 {
     let serial_port = unsafe { CStr::from_ptr(serial_port) }.to_str().unwrap();
 
-    let c = SmartGripperDynamixel::new(serial_port, id).unwrap();
-
-    let uid = get_available_uid();
-
-    SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-        .lock()
-        .unwrap()
-        .insert(uid, c);
-
-    uid
+    match GripperDynamixel::new(serial_port, dxl_id) {
+        Ok(gripper) => {
+            *uid = get_available_uid();
+            CONTROLLER.insert(*uid, gripper);
+            0
+        }
+        Err(_) => 1,
+    }
 }
 
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn smart_gripper_dynamixel_hwi_get_position(uid: u32, position: &mut f64) -> i32 {
-    match SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-        .lock()
-        .unwrap()
-        .get_mut(&uid)
-        .unwrap()
-        .get_current_position()
-    {
+pub extern "C" fn gripper_dynamixel_hwi_get_position(uid: u32, position: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_current_position() {
         Ok(pos) => {
             *position = pos;
             0
@@ -52,13 +42,11 @@ pub extern "C" fn smart_gripper_dynamixel_hwi_get_position(uid: u32, position: &
 
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn smart_gripper_dynamixel_hwi_get_goal_position(
+pub extern "C" fn gripper_dynamixel_hwi_get_goal_position(
     uid: u32,
     target_position: &mut f64,
 ) -> i32 {
-    match SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-        .lock()
-        .unwrap()
+    match CONTROLLER
         .get_mut(&uid)
         .unwrap()
         .get_current_target_position()
@@ -73,13 +61,8 @@ pub extern "C" fn smart_gripper_dynamixel_hwi_get_goal_position(
 
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn smart_gripper_dynamixel_hwi_set_target_position(
-    uid: u32,
-    target_position: f64,
-) -> i32 {
-    match SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-        .lock()
-        .unwrap()
+pub extern "C" fn gripper_dynamixel_hwi_set_target_position(uid: u32, target_position: f64) -> i32 {
+    match CONTROLLER
         .get_mut(&uid)
         .unwrap()
         .set_target_position(target_position)
@@ -91,14 +74,8 @@ pub extern "C" fn smart_gripper_dynamixel_hwi_set_target_position(
 
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn smart_gripper_dynamixel_hwi_is_torque_on(uid: u32, is_on: &mut f64) -> i32 {
-    match SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-        .lock()
-        .unwrap()
-        .get_mut(&uid)
-        .unwrap()
-        .is_torque_on()
-    {
+pub extern "C" fn gripper_dynamixel_hwi_is_torque_on(uid: u32, is_on: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().is_torque_on() {
         Ok(torque) => {
             *is_on = if torque { 1.0 } else { 0.0 };
             0
@@ -109,33 +86,17 @@ pub extern "C" fn smart_gripper_dynamixel_hwi_is_torque_on(uid: u32, is_on: &mut
 
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn smart_gripper_dynamixel_hwi_set_torque(uid: u32, on: f64) -> i32 {
+pub extern "C" fn gripper_dynamixel_hwi_set_torque(uid: u32, on: f64) -> i32 {
     let on = on != 0.0;
     match on {
-        true => {
-            match SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-                .lock()
-                .unwrap()
-                .get_mut(&uid)
-                .unwrap()
-                .enable_torque()
-            {
-                Ok(_) => 0,
-                Err(_) => 1,
-            }
-        }
-        false => {
-            match SMART_GRIPPER_DYNAMIXEL_CONTROLLER
-                .lock()
-                .unwrap()
-                .get_mut(&uid)
-                .unwrap()
-                .disable_torque()
-            {
-                Ok(_) => 0,
-                Err(_) => 1,
-            }
-        }
+        true => match CONTROLLER.get_mut(&uid).unwrap().enable_torque() {
+            Ok(_) => 0,
+            Err(_) => 1,
+        },
+        false => match CONTROLLER.get_mut(&uid).unwrap().disable_torque() {
+            Ok(_) => 0,
+            Err(_) => 1,
+        },
     }
 }
 
