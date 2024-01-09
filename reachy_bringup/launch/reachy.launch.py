@@ -128,6 +128,13 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
+    goto_server_node = Node(
+        package="pollen_goto",
+        executable="goto_server",
+        output="both",
+        condition=IfCondition(start_sdk_server_rl),
+    )
+
     # camera_publisher_node = Node(
     #     package='camera_controllers',
     #     executable='camera_publisher',
@@ -198,7 +205,10 @@ def launch_setup(context, *args, **kwargs):
 
     position_controllers = []
     for controller, condition in [
-        ["neck_forward_position_controller", f"'{reachy_config.model}' != '{HEADLESS}'"],
+        [
+            "neck_forward_position_controller",
+            f"'{reachy_config.model}' != '{HEADLESS}'",
+        ],
         [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
@@ -302,17 +312,14 @@ def launch_setup(context, *args, **kwargs):
     print("Launching Mobile Base: {}".format("true" if None not in reachy_config.mobile_base_config.values() else "false"))
     mobile_base_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-        condition=IfCondition("true" if None not in reachy_config.mobile_base_config.values() else "false"))
+        condition=IfCondition("true" if None not in reachy_config.mobile_base_config.values() else "false"),
+    )
 
-    # gripper_safe_controller_node = Node(
-    #     package='gripper_safe_controller',
-    #     executable='gripper_safe_controller',
-    #     arguments=['--controllers-file', robot_controllers],
-    #     condition=IfCondition(
-    #                 PythonExpression(
-    #                     f"'{reachy_config.model}' != '{MINI}'")
-    #     ),
-    # )
+    gripper_safe_controller_node = Node(
+        package="gripper_safe_controller",
+        executable="gripper_safe_controller",
+        arguments=["--controllers-file", robot_controllers],
+    )
 
     return [
         *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
@@ -322,8 +329,9 @@ def launch_setup(context, *args, **kwargs):
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-        # gripper_safe_controller_node,
+        gripper_safe_controller_node,
         sdk_server_node,
+        goto_server_node,
         # camera_publisher_node,
         # camera_focus_node,
         # camera_zoom_node,
