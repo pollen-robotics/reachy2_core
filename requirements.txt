@@ -7,3 +7,4 @@ v4l2py
 zoom_kurokesu
 pypot
 setuptools==58.2.0
+pillow
