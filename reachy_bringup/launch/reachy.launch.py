@@ -1,38 +1,24 @@
-from launch import LaunchDescription, LaunchContext
-from launch.actions import (
-    DeclareLaunchArgument,
-    RegisterEventHandler,
-    IncludeLaunchDescription,
-    TimerAction,
-    OpaqueFunction,
-    LogInfo,
-    SetEnvironmentVariable,
-)
+import os
+
+import yaml
+from launch import LaunchContext, LaunchDescription
+from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
+                            LogInfo, OpaqueFunction, RegisterEventHandler,
+                            SetEnvironmentVariable, TimerAction)
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit, OnProcessStart, OnExecutionComplete
-from launch.substitutions import (
-    Command,
-    FindExecutable,
-    LaunchConfiguration,
-    PathJoinSubstitution,
-    PythonExpression,
-)
+from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
+                                   OnProcessStart)
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import (Command, FindExecutable, LaunchConfiguration,
+                                  PathJoinSubstitution, PythonExpression)
+from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
-from launch_ros.actions import Node, SetUseSimTime, LifecycleNode
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.substitutions import FindPackageShare
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-import yaml
-import os
-from reachy_utils.config import (
-    ReachyConfig,
-    HEADLESS,
-    STARTER_KIT_RIGHT_NO_HEAD,
-    STARTER_KIT_RIGHT,
-    STARTER_KIT_LEFT,
-    FULL_KIT,
-    MINI,
-)
+
+from reachy_utils.config import (FULL_KIT, HEADLESS, MINI, STARTER_KIT_LEFT,
+                                 STARTER_KIT_RIGHT, STARTER_KIT_RIGHT_NO_HEAD,
+                                 ReachyConfig)
 
 
 def launch_setup(context, *args, **kwargs):
@@ -125,6 +111,20 @@ def launch_setup(context, *args, **kwargs):
         executable="reachy_grpc_joint_sdk_server",
         output="both",
         arguments=[reachy_config.config_file],
+        condition=IfCondition(start_sdk_server_rl),
+    )
+
+    sdk_server_audio_node = Node(
+        package="reachy_sdk_server",
+        executable="reachy_grpc_audio_sdk_server",
+        output="both",
+        condition=IfCondition(start_sdk_server_rl),
+    )
+
+    audio_node = Node(
+        package="sound_play",
+        executable="soundplay_node.py",
+        output="both",
         condition=IfCondition(start_sdk_server_rl),
     )
 
@@ -331,6 +331,8 @@ def launch_setup(context, *args, **kwargs):
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         # gripper_safe_controller_node,
         sdk_server_node,
+        sdk_server_audio_node,
+        audio_node,
         goto_server_node,
         # camera_publisher_node,
         # camera_focus_node,
