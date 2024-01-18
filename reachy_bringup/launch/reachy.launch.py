@@ -121,6 +121,13 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
+    sdk_server_video_node = Node(
+        package="reachy_sdk_server",
+        executable="reachy_grpc_video_sdk_server",
+        output="both",
+        condition=IfCondition(start_sdk_server_rl),
+    )
+
     audio_node = Node(
         package="sound_play",
         executable="soundplay_node.py",
@@ -332,6 +339,7 @@ def launch_setup(context, *args, **kwargs):
         # gripper_safe_controller_node,
         sdk_server_node,
         sdk_server_audio_node,
+        sdk_server_video_node,
         audio_node,
         goto_server_node,
         # camera_publisher_node,
