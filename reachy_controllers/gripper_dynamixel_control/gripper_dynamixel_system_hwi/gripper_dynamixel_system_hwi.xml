@@ -1,0 +1,12 @@
+<library path="gripper_dynamixel_system_hwi">
+
+  <class
+    name="gripper_dynamixel_system_hwi/GripperDynamixelSystem"
+    type="gripper_dynamixel_system_hwi::GripperDynamixelSystem"
+    base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Gripper dynamixel hardware interface plugin.
+    </description>
+  </class>
+
+</library>

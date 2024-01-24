@@ -5,7 +5,7 @@
 
   <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro"/>
   <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro"/>
-  <xacro:include filename="$(find reachy_description)/urdf/smartgripper.urdf.xacro"/>
+  <xacro:include filename="$(find reachy_description)/urdf/dynamixel_gripper.urdf.xacro"/>
 
 
 
@@ -98,7 +98,7 @@
     config_file="${orbita3d_wrist_config}"
   />
 
-  <xacro:smartgripper
+  <xacro:dynamixel_gripper
     prefix="${p}" parent="${p}_wrist_ball_link" side="${side}"
     damping="${damping}" friction="${friction}"
     gripper_port="${gripper_port}"

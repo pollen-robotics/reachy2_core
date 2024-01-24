@@ -1,5 +1,5 @@
-#ifndef _SMART_GRIPPER_DYNAMIXEL_SYSTEM_HWI
-#define _SMART_GRIPPER_DYNAMIXEL_SYSTEM_HWI
+#ifndef _GRIPPER_DYNAMIXEL_SYSTEM_HWI
+#define _GRIPPER_DYNAMIXEL_SYSTEM_HWI
 
 #include "rclcpp/macros.hpp"
 
@@ -10,13 +10,13 @@
 
 #define LOG_THROTTLE_DURATION 30000
 
-namespace smart_gripper_dynamixel_system_hwi
+namespace gripper_dynamixel_system_hwi
 {
   using namespace hardware_interface;
-class SmartGripperDynamixelSystem : public hardware_interface::SystemInterface
+class GripperDynamixelSystem : public hardware_interface::SystemInterface
 {
 public:
-    RCLCPP_SHARED_PTR_DEFINITIONS(SmartGripperDynamixelSystem)
+    RCLCPP_SHARED_PTR_DEFINITIONS(GripperDynamixelSystem)
 
     CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override;
 
@@ -59,4 +59,4 @@ private:
 
 }
 
-#endif // _SMART_GRIPPER_DYNAMIXEL_SYSTEM_HWI
+#endif // _GRIPPER_DYNAMIXEL_SYSTEM_HWI

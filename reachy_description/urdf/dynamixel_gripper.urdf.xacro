@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<xacro:macro name="smartgripper" params="prefix parent side damping friction gripper_port gripper_id">
+<xacro:macro name="dynamixel_gripper" params="prefix parent side damping friction gripper_port gripper_id">
 
-  <xacro:include filename="$(find reachy_description)/ros2_control/smartgripper.ros2_control.xacro"/>
+  <xacro:include filename="$(find reachy_description)/ros2_control/dynamixel_gripper.ros2_control.xacro"/>
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro"/>
 
   <xacro:property name="gripper_length" value="0.12"/>
@@ -117,7 +117,7 @@
   </joint>
 
 
-  <xacro:smart_gripper_control
+  <xacro:dynamixel_gripper_control
     name="${p}"
     gripper_port="${gripper_port}"
     gripper_id="${gripper_id}"
