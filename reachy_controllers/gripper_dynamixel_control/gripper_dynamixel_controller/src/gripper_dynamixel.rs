@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use cache_cache::Cache;
 use rustypot::{device::mx, DynamixelSerialIO};
+use serde::{Deserialize, Serialize};
 use serialport::SerialPort;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -13,6 +14,12 @@ pub struct GripperDynamixel {
 
     target_position: Cache<u8, f64>,
     torque_on: Cache<u8, bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GripperDynamixelConfig {
+    pub serial_port_name: String,
+    pub id: u8,
 }
 
 impl GripperDynamixel {
@@ -27,6 +34,14 @@ impl GripperDynamixel {
             torque_on: Cache::keep_last(),
         })
     }
+
+    pub fn with_config(configfile: &str) -> Result<Self> {
+        let f = std::fs::File::open(configfile)?;
+        let config: GripperDynamixelConfig = serde_yaml::from_reader(f)?;
+
+        GripperDynamixel::new(config.serial_port_name.as_str(), config.id)
+    }
+
     /// Checks if the torque is on.
     pub fn is_torque_on(&mut self) -> Result<bool> {
         self.torque_on.entry(self.id).or_try_insert_with(|_| {

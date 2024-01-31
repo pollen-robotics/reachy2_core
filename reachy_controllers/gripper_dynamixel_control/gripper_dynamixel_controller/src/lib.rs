@@ -3,7 +3,7 @@ use std::{ffi::CStr, sync::Mutex};
 use gripper_dynamixel::GripperDynamixel;
 use once_cell::sync::Lazy;
 use sync_map::SyncMap;
-mod gripper_dynamixel;
+pub mod gripper_dynamixel;
 mod sync_map;
 
 static UID: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
