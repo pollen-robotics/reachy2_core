@@ -1,14 +1,15 @@
 use std::time::Duration;
 
 use cache_cache::Cache;
+use log::info;
 use rustypot::{device::mx, DynamixelSerialIO};
 use serde::{Deserialize, Serialize};
-use serialport::SerialPort;
+use serialport::TTYPort;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub struct GripperDynamixel {
-    serial_port: Box<dyn SerialPort>,
+    serial_port: Box<TTYPort>,
     io: DynamixelSerialIO,
     id: u8,
 
@@ -24,15 +25,23 @@ pub struct GripperDynamixelConfig {
 
 impl GripperDynamixel {
     pub fn new(serial_port_name: &str, id: u8) -> Result<Self> {
-        Ok(GripperDynamixel {
-            serial_port: serialport::new(serial_port_name, 1_000_000)
-                .timeout(Duration::from_millis(10))
-                .open()?,
+        let mut controller = GripperDynamixel {
+            serial_port: Box::new(
+                serialport::new(serial_port_name, 2_000_000)
+                    .timeout(Duration::from_millis(10))
+                    .open_native()?,
+            ),
             io: DynamixelSerialIO::v1(),
             id,
             target_position: Cache::keep_last(),
             torque_on: Cache::keep_last(),
-        })
+        };
+
+        controller.serial_port.set_exclusive(false)?;
+
+        info!("GripperDynamixel {} {} initialized", serial_port_name, id);
+
+        Ok(controller)
     }
 
     pub fn with_config(configfile: &str) -> Result<Self> {

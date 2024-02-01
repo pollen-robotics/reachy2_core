@@ -14,6 +14,7 @@ rustypot = "0.4.0"
 serialport = "4.2.1"
 serde = { version = "1.0.183", features = ["derive"] }
 serde_yaml = "0.9.25"
+log = "0.4.20"
 
 [build-dependencies]
 cbindgen = "0.24.3"
