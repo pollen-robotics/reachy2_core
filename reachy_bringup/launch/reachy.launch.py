@@ -2,23 +2,39 @@ import os
 
 import yaml
 from launch import LaunchContext, LaunchDescription
-from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
-                            LogInfo, OpaqueFunction, RegisterEventHandler,
-                            SetEnvironmentVariable, TimerAction)
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    LogInfo,
+    OpaqueFunction,
+    RegisterEventHandler,
+    SetEnvironmentVariable,
+    TimerAction,
+)
 from launch.conditions import IfCondition
-from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
-                                   OnProcessStart)
+from launch.event_handlers import OnExecutionComplete, OnProcessExit, OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (Command, FindExecutable, LaunchConfiguration,
-                                  PathJoinSubstitution, PythonExpression)
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    PythonExpression,
+)
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.substitutions import FindPackageShare
 
-from reachy_utils.config import (FULL_KIT, HEADLESS, MINI, STARTER_KIT_LEFT,
-                                 STARTER_KIT_RIGHT, STARTER_KIT_RIGHT_NO_HEAD,
-                                 ReachyConfig)
+from reachy_utils.config import (
+    FULL_KIT,
+    HEADLESS,
+    MINI,
+    STARTER_KIT_LEFT,
+    STARTER_KIT_RIGHT,
+    STARTER_KIT_RIGHT_NO_HEAD,
+    ReachyConfig,
+)
 
 
 def launch_setup(context, *args, **kwargs):
@@ -44,7 +60,9 @@ def launch_setup(context, *args, **kwargs):
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
+            PathJoinSubstitution(
+                [FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]
+            ),
             *(
                 (" ", "use_fake_hardware:=true", " ")
                 if fake_py
@@ -114,7 +132,7 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
-
+    """
     sdk_server_audio_node = Node(
         package="reachy_sdk_server",
         executable="reachy_grpc_audio_sdk_server",
@@ -128,6 +146,7 @@ def launch_setup(context, *args, **kwargs):
         output="both",
         condition=IfCondition(start_sdk_server_rl),
     )
+    """
 
     goto_server_node = Node(
         package="pollen_goto",
@@ -275,7 +294,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
+        PythonLaunchDescriptionSource(
+            [FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]
+        ),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
@@ -299,21 +320,29 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
-    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[
-                *position_controllers,
-                *(trajectory_controllers if controllers_py == "trajectory" else []),
-                kinematics_node,
-            ],
-        ),
+    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = (
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=joint_state_broadcaster_spawner,
+                on_exit=[
+                    *position_controllers,
+                    *(trajectory_controllers if controllers_py == "trajectory" else []),
+                    kinematics_node,
+                ],
+            ),
+        )
     )
 
-    print("Launching Mobile Base: {}".format("true" if None not in reachy_config.mobile_base_config.values() else "false"))
+    print(
+        "Launching Mobile Base: {}".format(
+            "true" if None not in reachy_config.mobile_base_config.values() else "false"
+        )
+    )
     mobile_base_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-        condition=IfCondition("true" if None not in reachy_config.mobile_base_config.values() else "false"),
+        condition=IfCondition(
+            "true" if None not in reachy_config.mobile_base_config.values() else "false"
+        ),
     )
 
     gripper_safe_controller_node = Node(
@@ -323,7 +352,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
+        *(
+            (control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)
+        ),  # does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
@@ -332,8 +363,8 @@ def launch_setup(context, *args, **kwargs):
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         gripper_safe_controller_node,
         sdk_server_node,
-        sdk_server_audio_node,
-        audio_node,
+        # sdk_server_audio_node,
+        # audio_node,
         goto_server_node,
         # camera_publisher_node,
         # camera_focus_node,
@@ -346,7 +377,9 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     # for each file, if it is a .rviz file, add it to the list of choices without the .rviz extension
     rviz_config_choices = []
-    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"):
+    for file in os.listdir(
+        os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"
+    ):
         if file.endswith(".rviz"):
             rviz_config_choices.append(file[:-5])
 
