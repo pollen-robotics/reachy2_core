@@ -1,7 +1,7 @@
-from functools import partial
-import yaml
 import os
+from functools import partial
 
+import yaml
 
 config_file = os.path.expanduser("~/.reachy.yaml")
 
@@ -29,7 +29,7 @@ REACHY_CONFIG_MOBILE_BASE = "mobile_base"
 
 
 class ReachyConfig:
-    def __init__(self, config_file_path="~/.reachy.yaml"):
+    def __init__(self, config_file_path="~/.reachy_config/.reachy.yaml"):
         self.config_file = os.path.expanduser(config_file_path)
 
         with open(self.config_file) as f:
@@ -64,7 +64,6 @@ class ReachyConfig:
 
             except KeyError as e:
                 raise KeyError("mobile_base config key not found :: {}".format(e))
-
 
             # orbita zero
             try:
@@ -130,7 +129,6 @@ class ReachyConfig:
             + "left_wrist_config".ljust(25, " ")
             + "{}\n".format(self.left_wrist_config)
         )
-
 
 
 def get_reachy_config():

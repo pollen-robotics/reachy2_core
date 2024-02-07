@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="dynamixel_gripper_control" params="name gripper_port gripper_id min_grasping_finger max_grasping_finger">
+
+  <xacro:include filename="$(find pollen_generic_description)/ros2_control/joint.ros2_control.xacro"/>
+
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <!-- Use real hardware. -->
+        <xacro:unless value="$(arg use_fake_hardware)">
+          <plugin>gripper_dynamixel_system_hwi/GripperDynamixelSystem</plugin>
+          <param name="gripper_port">${gripper_port}</param>
+          <param name="gripper_id">${gripper_id}</param>
+          <param name="min_grasping_finger">${min_grasping_finger}</param>
+          <param name="max_grasping_finger">${max_grasping_finger}</param>
+        </xacro:unless>
+
+        <xacro:if value="$(arg use_fake_hardware)">
+          <!-- Use gazebo as hardware simulation. -->
+          <xacro:if value="$(arg use_gazebo)">
+            <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+          </xacro:if>
+
+          <!-- Use fake components. -->
+          <xacro:unless value="$(arg use_gazebo)">
+            <plugin>fake_components/GenericSystem</plugin>
+          </xacro:unless>
+        </xacro:if>
+      </hardware>
+
+      <xacro:position_joint_control name="${name}_finger"/>
+
+    </ros2_control>
+  </xacro:macro>
+</robot>
