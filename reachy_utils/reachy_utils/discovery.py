@@ -1,10 +1,11 @@
 import os
-from serial import SerialException
-from subprocess import run, PIPE
+from subprocess import PIPE, run
 from typing import Dict
-import yaml
 
-from pypot.dynamixel import DxlIO, Dxl320IO
+import yaml
+from pypot.dynamixel import Dxl320IO, DxlIO
+from serial import SerialException
+
 from reachy_utils.config import get_reachy_model
 
 _latest_discovery_file = os.path.expanduser("~/.reachy-latest-discovery.yaml")
@@ -23,7 +24,7 @@ robot_config_to_parts = {
     "starter_kit_right": ["right_arm", "head"],
     "headless": ["right_arm", "left_arm"],
     "mini": ["head"],
-    "starter_kit_right_no_head": ["right_arm", "orbita"]
+    "starter_kit_right_no_head": ["right_arm", "orbita"],
 }
 
 motor_id_to_name = {
@@ -58,9 +59,7 @@ def get_missing_motors_arm(arm: str, missing_motors: Dict):
     try:
         dxl_io = DxlIO(port=f"/dev/usb2ax_{arm}")
     except SerialException:
-        print(
-            f"Port /dev/usb2ax_{arm} not found. Make sure that the udev rules is set and the usb2ax board plugged."
-        )
+        print(f"Port /dev/usb2ax_{arm} not found. Make sure that the udev rules is set and the usb2ax board plugged.")
         missing = [motor_id_to_name[motor_id] for motor_id in motor_ids_per_part[arm]]
         missing_motors[arm] = missing
         return missing_motors
@@ -78,9 +77,7 @@ def get_missing_motors_head(missing_motors: Dict):
     try:
         dxl320_io = Dxl320IO(port="/dev/usb2ax_head")
     except SerialException:
-        print(
-            "Port /dev/usb2ax_head not found. Make sure that the udev rules is set and the usb2ax board plugged."
-        )
+        print("Port /dev/usb2ax_head not found. Make sure that the udev rules is set and the usb2ax board plugged.")
         missing_motors["head"] = [motor_id_to_name[motor_id] for motor_id in motor_ids_per_part["head"]]
         return missing_motors
 
@@ -88,11 +85,9 @@ def get_missing_motors_head(missing_motors: Dict):
     dxl320_io.close()
 
     try:
-        dxl_io = DxlIO(port='/dev/usb2ax_head')
+        dxl_io = DxlIO(port="/dev/usb2ax_head")
     except SerialException:
-        print(
-            "Port /dev/usb2ax_head not found. Make sure that the udev rules is set and the usb2ax board plugged."
-        )
+        print("Port /dev/usb2ax_head not found. Make sure that the udev rules is set and the usb2ax board plugged.")
         missing_motors["head"] = [motor_id_to_name[motor_id] for motor_id in motor_ids_per_part["head"]]
         return missing_motors
 
@@ -108,13 +103,11 @@ def check_if_orbita_missing(missing_motors: Dict):
     try:
         dxl_io = DxlIO(port="/dev/orbita_neck")
     except SerialException:
-        print(
-            "Port /dev/orbita_neck not found. Make sure that the udev rules is set and orbita plugged."
-        )
+        print("Port /dev/orbita_neck not found. Make sure that the udev rules is set and orbita plugged.")
         missing_motors["head"] += ["orbita_neck"]
         return missing_motors
 
-    scan = dxl_io.scan(motor_ids_per_part['orbita_neck'])
+    scan = dxl_io.scan(motor_ids_per_part["orbita_neck"])
     dxl_io.close()
 
     if scan == []:
@@ -147,9 +140,7 @@ def get_missing_motors_reachy(check_service: bool = True):
         if status[0] == "active":
             service_was_active = True
             print("Disabling reachy_sdk_server.service to access the usb2ax boards.")
-            run(
-                ["systemctl --user stop reachy_sdk_server.service"], stdout=PIPE, shell=True
-            )
+            run(["systemctl --user stop reachy_sdk_server.service"], stdout=PIPE, shell=True)
 
     for part in robot_config_to_parts[reachy_model]:
         if "arm" in part:
@@ -163,11 +154,9 @@ def get_missing_motors_reachy(check_service: bool = True):
             missing_motors = check_if_orbita_missing(missing_motors)
 
     if service_was_active:
-        run(
-                ["systemctl --user start reachy_sdk_server.service"], stdout=PIPE, shell=True
-        )
+        run(["systemctl --user start reachy_sdk_server.service"], stdout=PIPE, shell=True)
 
-    with open(_latest_discovery_file, 'w') as f:
+    with open(_latest_discovery_file, "w") as f:
         yaml.dump(missing_motors, f)
 
     return missing_motors
