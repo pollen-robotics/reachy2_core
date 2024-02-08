@@ -4,7 +4,7 @@ Run this script with sudo.
 """
 
 import glob
-from subprocess import run, PIPE
+from subprocess import PIPE, run
 
 
 def _get_serial_number(port):
@@ -67,9 +67,7 @@ def write_udev_rules_usb2ax(robot_part):
     and write it in the local udev file /etc/udev/rules.d/10-reachy-local.rules.
     """
     if robot_part not in ["left_arm", "right_arm", "head"]:
-        print(
-            "Robot part should be in ['left_arm', 'right_arm', 'head'], got {robot_part}."
-        )
+        print("Robot part should be in ['left_arm', 'right_arm', 'head'], got {robot_part}.")
         return
 
     with open("/etc/udev/rules.d/10-reachy-local.rules", "r") as f:
@@ -96,12 +94,12 @@ def write_udev_rules_usb2ax(robot_part):
 
 
 def write_udev_rules_right_arm():
-    write_udev_rules_usb2ax('right_arm')
+    write_udev_rules_usb2ax("right_arm")
 
 
 def write_udev_rules_left_arm():
-    write_udev_rules_usb2ax('left_arm')
+    write_udev_rules_usb2ax("left_arm")
 
 
 def write_udev_rules_head():
-    write_udev_rules_usb2ax('head')
+    write_udev_rules_usb2ax("head")

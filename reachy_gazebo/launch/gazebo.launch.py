@@ -1,25 +1,26 @@
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
 from launch.launch_description import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, OpaqueFunction
-from launch.substitutions import PathJoinSubstitution, LaunchConfiguration
-from launch_ros.substitutions import FindPackageShare
-from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def launch_setup(context, *args, **kwargs):
-    robot_config = LaunchConfiguration('robot_config', default='full_kit')
+    robot_config = LaunchConfiguration("robot_config", default="full_kit")
 
     # Launch Gazebo
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            PathJoinSubstitution([
-                FindPackageShare("gazebo_ros"),
-                "launch",
-                "gazebo.launch.py",
-            ])
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("gazebo_ros"),
+                    "launch",
+                    "gazebo.launch.py",
+                ]
+            )
         ),
-        launch_arguments={'verbose': 'true'}.items(),
-
+        launch_arguments={"verbose": "true"}.items(),
     )
 
     # Note: Environment variable GAZEBO_MODEL_PATH is extended as in
@@ -30,17 +31,19 @@ def launch_setup(context, *args, **kwargs):
         package="gazebo_ros",
         executable="spawn_entity.py",
         arguments=[
-            "-topic", "robot_description",
-            "-entity", LaunchConfiguration("robot_name"),
+            "-topic",
+            "robot_description",
+            "-entity",
+            LaunchConfiguration("robot_name"),
         ],
-        output="screen"
+        output="screen",
     )
 
     fake_gz_interface = Node(
         package="reachy_gazebo",
         executable="fake_gz_interface",
         output="screen",
-        parameters=[{'robot_config': f'{robot_config.perform(context)}'}]
+        parameters=[{"robot_config": f"{robot_config.perform(context)}"}],
     )
 
     return [
@@ -51,17 +54,10 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-
     return LaunchDescription(
         [
-            DeclareLaunchArgument(
-                "robot_name",
-                default_value="reachy",
-                description="Set robot name."),
-            DeclareLaunchArgument(
-                "robot_config",
-                default_value="full_kit",
-                description="Robot configuration."),
+            DeclareLaunchArgument("robot_name", default_value="reachy", description="Set robot name."),
+            DeclareLaunchArgument("robot_config", default_value="full_kit", description="Robot configuration."),
             OpaqueFunction(function=launch_setup),
         ]
     )

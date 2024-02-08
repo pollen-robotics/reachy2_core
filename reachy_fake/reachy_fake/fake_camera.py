@@ -1,20 +1,19 @@
-import rclpy
-from rclpy.node import Node
-from cv_bridge import CvBridge
 import cv2
 import numpy as np
-
+import rclpy
+from cv_bridge import CvBridge
+from rclpy.node import Node
 from sensor_msgs.msg._compressed_image import CompressedImage
 
 
 class FakeCamera(Node):
     def __init__(self):
-        super().__init__('fake_camera')
+        super().__init__("fake_camera")
 
         self.logger = self.get_logger()
 
-        self.left_pub = self.create_publisher(CompressedImage, '/left_image/image_raw/compressed', 10)
-        self.right_pub = self.create_publisher(CompressedImage, '/right_image/image_raw/compressed', 10)
+        self.left_pub = self.create_publisher(CompressedImage, "/left_image/image_raw/compressed", 10)
+        self.right_pub = self.create_publisher(CompressedImage, "/right_image/image_raw/compressed", 10)
 
         self.img = np.zeros((480, 640, 3), np.uint8)
 
@@ -26,20 +25,23 @@ class FakeCamera(Node):
         thickness = 1
         lineType = 2
 
-        cv2.putText(self.img, 'Cameras unavailable in fake mode',
-                    bottomLeftCornerOfText,
-                    font,
-                    fontScale,
-                    fontColor,
-                    thickness,
-                    lineType)
+        cv2.putText(
+            self.img,
+            "Cameras unavailable in fake mode",
+            bottomLeftCornerOfText,
+            font,
+            fontScale,
+            fontColor,
+            thickness,
+            lineType,
+        )
         self.img_msg = CompressedImage()
 
         self.img_msg = self.bridge.cv2_to_compressed_imgmsg(np.array(self.img), "jpeg")
 
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.logger.info(f'Fake camera ready')
+        self.logger.info(f"Fake camera ready")
 
     def timer_callback(self):
         self.left_pub.publish(self.img_msg)
@@ -60,5 +62,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

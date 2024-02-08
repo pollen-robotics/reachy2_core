@@ -1,28 +1,23 @@
 """Read and store orbita zero in config file."""
 
-from contextlib import closing
 import os
 import shutil
 import struct
+from contextlib import closing
 from typing import Dict, Tuple
-import yaml
 
+import yaml
 from pypot.dynamixel import DxlIO
 from pypot.dynamixel.protocol.v1 import DxlReadDataPacket
-
 
 PRESENT_POSITION_ADDR = 71
 
 
-def get_orbita_current_position(
-    serial_port: str, id: int, reduction: float
-) -> Tuple[float, float, float]:
+def get_orbita_current_position(serial_port: str, id: int, reduction: float) -> Tuple[float, float, float]:
     """Connect and read the current orbita disks position."""
     print(f'Connecting on "{serial_port}" (id={id}, reduction={reduction})')
     with closing(DxlIO(serial_port)) as dxl_io:
-        read_disk_pos_packet = DxlReadDataPacket(
-            id, PRESENT_POSITION_ADDR, struct.calcsize("fff")
-        )
+        read_disk_pos_packet = DxlReadDataPacket(id, PRESENT_POSITION_ADDR, struct.calcsize("fff"))
         resp = dxl_io._send_packet(read_disk_pos_packet)
         disks = struct.unpack("fff", bytearray(resp.parameters))
         disks = [d / reduction for d in disks]
