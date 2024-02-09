@@ -1,108 +1,74 @@
-use std::{ffi::CStr, sync::Mutex};
+use dynamixel::{GripperDynamixel, GripperDynamixelConfig};
+use motor_toolbox_rs::{FakeMotorsController, MotorsController, Result};
+use serde::{Deserialize, Serialize};
 
-use gripper_dynamixel::GripperDynamixel;
-use once_cell::sync::Lazy;
-use sync_map::SyncMap;
-pub mod gripper_dynamixel;
-mod sync_map;
+mod dynamixel;
 
-static UID: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
-static CONTROLLER: Lazy<SyncMap<u32, GripperDynamixel>> = Lazy::new(SyncMap::new);
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GripperConfig {
+    pub io: GripperIOConfig,
+}
 
-#[no_mangle]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn gripper_dynamixel_hwi_init(
-    serial_port: *const libc::c_char,
-    dxl_id: u8,
-    uid: &mut u32,
-) -> i32 {
-    let serial_port = unsafe { CStr::from_ptr(serial_port) }.to_str().unwrap();
+#[derive(Debug, Deserialize, Serialize)]
+pub enum GripperIOConfig {
+    DynamixelSerialIO(GripperDynamixelConfig),
+    FakeIO(GripperFakeConfig),
+}
 
-    match GripperDynamixel::new(serial_port, dxl_id) {
-        Ok(gripper) => {
-            *uid = get_available_uid();
-            CONTROLLER.insert(*uid, gripper);
-            0
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GripperFakeConfig {}
+
+pub struct Gripper {
+    inner: Box<dyn MotorsController<1> + Send>,
+}
+
+impl Gripper {
+    pub fn new(config: GripperConfig) -> Result<Self> {
+        let inner: Box<dyn MotorsController<1> + Send> = match config.io {
+            GripperIOConfig::DynamixelSerialIO(config) => {
+                Box::new(GripperDynamixel::with_config(config)?)
+            }
+            GripperIOConfig::FakeIO(_) => Box::new(FakeMotorsController::new()),
+        };
+        Ok(Gripper { inner })
+    }
+}
+
+impl Gripper {
+    /// Check if the torque is ON or OFF
+    pub fn is_torque_on(&mut self) -> Result<bool> {
+        let torques = self.inner.is_torque_on()?;
+        Ok(torques[0])
+    }
+    /// Enable the torque
+    ///
+    /// # Arguments
+    /// * reset_target: if true, the target position will be reset to the current position
+    pub fn enable_torque(&mut self, reset_target: bool) -> Result<()> {
+        if reset_target {
+            let thetas = self.inner.get_current_position()?;
+            self.inner.set_target_position(thetas)?;
         }
-        Err(_) => 1,
+        self.inner.set_torque([true])
     }
-}
-
-#[no_mangle]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn gripper_dynamixel_hwi_get_position(uid: u32, position: &mut f64) -> i32 {
-    match CONTROLLER.get_mut(&uid).unwrap().get_current_position() {
-        Ok(pos) => {
-            *position = pos;
-            0
-        }
-        Err(_) => 1,
+    /// Disable the torque
+    pub fn disable_torque(&mut self) -> Result<()> {
+        self.inner.set_torque([false])
     }
-}
 
-#[no_mangle]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn gripper_dynamixel_hwi_get_goal_position(
-    uid: u32,
-    target_position: &mut f64,
-) -> i32 {
-    match CONTROLLER
-        .get_mut(&uid)
-        .unwrap()
-        .get_current_target_position()
-    {
-        Ok(pos) => {
-            *target_position = pos;
-            0
-        }
-        Err(_) => 1,
+    /// Get the current position (in rads)
+    pub fn get_current_orientation(&mut self) -> Result<f64> {
+        let pos = self.inner.get_current_position()?;
+        Ok(pos[0])
     }
-}
 
-#[no_mangle]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn gripper_dynamixel_hwi_set_target_position(uid: u32, target_position: f64) -> i32 {
-    match CONTROLLER
-        .get_mut(&uid)
-        .unwrap()
-        .set_target_position(target_position)
-    {
-        Ok(_) => 0,
-        Err(_) => 1,
+    /// Get the target position (in rads)
+    pub fn get_target_orientation(&mut self) -> Result<f64> {
+        let pos = self.inner.get_target_position()?;
+        Ok(pos[0])
     }
-}
-
-#[no_mangle]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn gripper_dynamixel_hwi_is_torque_on(uid: u32, is_on: &mut f64) -> i32 {
-    match CONTROLLER.get_mut(&uid).unwrap().is_torque_on() {
-        Ok(torque) => {
-            *is_on = if torque { 1.0 } else { 0.0 };
-            0
-        }
-        Err(_) => 1,
+    /// Set the target position (in rads)
+    pub fn set_target_orientation(&mut self, target: f64) -> Result<()> {
+        self.inner.set_target_position([target])
     }
-}
-
-#[no_mangle]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn gripper_dynamixel_hwi_set_torque(uid: u32, on: f64) -> i32 {
-    let on = on != 0.0;
-    match on {
-        true => match CONTROLLER.get_mut(&uid).unwrap().enable_torque() {
-            Ok(_) => 0,
-            Err(_) => 1,
-        },
-        false => match CONTROLLER.get_mut(&uid).unwrap().disable_torque() {
-            Ok(_) => 0,
-            Err(_) => 1,
-        },
-    }
-}
-
-fn get_available_uid() -> u32 {
-    let mut uid = UID.lock().unwrap();
-
-    *uid += 1;
-    *uid
 }
