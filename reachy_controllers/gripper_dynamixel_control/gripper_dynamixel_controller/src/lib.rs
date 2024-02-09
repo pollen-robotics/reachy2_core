@@ -23,7 +23,7 @@ pub struct Gripper {
 }
 
 impl Gripper {
-    pub fn new(config: GripperConfig) -> Result<Self> {
+    pub fn with_config(config: GripperConfig) -> Result<Self> {
         let inner: Box<dyn MotorsController<1> + Send> = match config.io {
             GripperIOConfig::DynamixelSerialIO(config) => {
                 Box::new(GripperDynamixel::with_config(config)?)
@@ -31,6 +31,11 @@ impl Gripper {
             GripperIOConfig::FakeIO(_) => Box::new(FakeMotorsController::new()),
         };
         Ok(Gripper { inner })
+    }
+    pub fn with_config_file(config_file: &str) -> Result<Self> {
+        let f = std::fs::File::open(config_file)?;
+        let config: GripperConfig = serde_yaml::from_reader(f)?;
+        Gripper::with_config(config)
     }
 }
 
