@@ -72,3 +72,21 @@ impl Gripper {
         self.inner.set_target_position([target])
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn parse_fake_config_file() {
+        let f = std::fs::File::open("./config/fake.yaml").unwrap();
+
+        let config: Result<crate::GripperConfig, _> = serde_yaml::from_reader(f);
+        assert!(config.is_ok());
+
+        let config = config.unwrap();
+
+        if let crate::GripperIOConfig::FakeIO(_) = config.io {
+        } else {
+            panic!("Wrong config type");
+        }
+    }
+}

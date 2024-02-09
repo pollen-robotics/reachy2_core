@@ -161,3 +161,23 @@ impl RawMotorsIO<1> for GripperDynamixel {
         Err(MissingResisterErrror("pid_gains".to_string()).into())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn parse_dynamixel_config_file() {
+        let f = std::fs::File::open("./config/dynamixel.yaml").unwrap();
+
+        let config: Result<crate::GripperConfig, _> = serde_yaml::from_reader(f);
+        assert!(config.is_ok());
+
+        let config = config.unwrap();
+
+        if let crate::GripperIOConfig::DynamixelSerialIO(c) = config.io {
+            assert_eq!(c.serial_port_name, "/dev/left_gripper");
+            assert_eq!(c.id, 23);
+        } else {
+            panic!("Wrong config type");
+        }
+    }
+}
