@@ -32,7 +32,7 @@ impl GripperDynamixel {
                     .timeout(Duration::from_millis(10))
                     .open_native()?,
             ),
-            io: DynamixelSerialIO::v1(),
+            io: DynamixelSerialIO::v1().with_post_delay(Duration::from_millis(1)),
             id,
             target_position: Cache::keep_last(),
             torque_on: Cache::keep_last(),
