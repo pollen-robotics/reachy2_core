@@ -52,6 +52,7 @@ r_arm_forward_position_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
+      # - r_hand_finger   
     interface_name: position
     use_sim_time: false
 
@@ -66,6 +67,7 @@ l_arm_forward_position_controller:
       - l_wrist_roll
       - l_wrist_pitch
       - l_wrist_yaw
+      # - l_hand_finger
     interface_name: position
     use_sim_time: false
 
@@ -73,8 +75,8 @@ l_arm_forward_position_controller:
 gripper_forward_position_controller:
   ros__parameters:
     joints:
-      - r_gripper_finger
-      - l_gripper_finger
+      - r_hand_finger
+      - l_hand_finger
     interface_name: position
     use_sim_time: false
 
@@ -85,11 +87,11 @@ forward_torque_controller:
       - r_shoulder
       - r_elbow
       - r_wrist
-      - r_gripper_finger
+      - r_hand
       - l_shoulder
       - l_elbow
       - l_wrist
-      - l_gripper_finger
+      - l_hand
 
     interface_name: torque
     use_sim_time: false
@@ -107,7 +109,7 @@ forward_torque_limit_controller:
       - r_wrist_raw_motor_1
       - r_wrist_raw_motor_2
       - r_wrist_raw_motor_3
-      - r_gripper_finger
+      - r_hand_raw_motor_1
       - l_shoulder_raw_motor_1
       - l_shoulder_raw_motor_2
       - l_elbow_raw_motor_1
@@ -115,7 +117,7 @@ forward_torque_limit_controller:
       - l_wrist_raw_motor_1
       - l_wrist_raw_motor_2
       - l_wrist_raw_motor_3
-      - l_gripper_finger
+      - l_hand_raw_motor_1
 
     interface_name: torque_limit
     use_sim_time: false
@@ -133,7 +135,7 @@ forward_speed_limit_controller:
       - r_wrist_raw_motor_1
       - r_wrist_raw_motor_2
       - r_wrist_raw_motor_3
-      - r_gripper_finger
+      - r_hand_raw_motor_1
       - l_shoulder_raw_motor_1
       - l_shoulder_raw_motor_2
       - l_elbow_raw_motor_1
@@ -141,7 +143,7 @@ forward_speed_limit_controller:
       - l_wrist_raw_motor_1
       - l_wrist_raw_motor_2
       - l_wrist_raw_motor_3
-      - l_gripper_finger
+      - l_hand_raw_motor_1
 
     interface_name: speed_limit
     use_sim_time: false
@@ -160,7 +162,7 @@ forward_pid_controller:
       - r_wrist_raw_motor_1
       - r_wrist_raw_motor_2
       - r_wrist_raw_motor_3
-      - r_gripper_finger
+      - r_hand_raw_motor_1
       - l_shoulder_raw_motor_1
       - l_shoulder_raw_motor_2
       - l_elbow_raw_motor_1
@@ -168,6 +170,6 @@ forward_pid_controller:
       - l_wrist_raw_motor_1
       - l_wrist_raw_motor_2
       - l_wrist_raw_motor_3
-      - l_gripper_finger
+      - l_hand_raw_motor_1
 
     use_sim_time: false

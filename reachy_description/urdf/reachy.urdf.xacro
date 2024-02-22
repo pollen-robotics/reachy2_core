@@ -33,6 +33,17 @@
   <xacro:property name="left_gripper_port" value="/dev/left_gripper"/>
 
 
+ <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
+  <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro" />
+  <xacro:include filename="$(find arm_description)/urdf/arm.urdf.xacro" />
+
+
+  <!-- Orbita2d config -->
+  <!-- <xacro:arg name="config_file" default="fake.yaml"/> -->
+
+  <xacro:arg name="right_arm_config" default="fake.yaml" />
+  <xacro:arg name="left_arm_config" default="fake.yaml" />
+
 
   <!-- config  -->
 
@@ -114,8 +125,21 @@
 
   <!-- <xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config gripper_port gripper_id"> -->
 
-  <!-- RIGHT ARM -->
+ <xacro:arm
+    prefix="r" parent="torso" side="right"
+    damping="${damping}" friction="${friction}"
+    config_file="$(arg right_arm_config)"
+  />
+
   <xacro:arm
+    prefix="l" parent="torso" side="left"
+    damping="${damping}" friction="${friction}"
+    config_file="$(arg left_arm_config)"
+  />
+
+
+  <!-- RIGHT ARM -->
+  <!-- <xacro:arm
           prefix="r" parent="torso" side="right"
           damping="${damping}" friction="${friction}"
           orbita2d_shoulder_config="$(arg r_shoulder_config)"
@@ -123,11 +147,11 @@
           orbita3d_wrist_config="$(arg r_wrist_config)"
           gripper_id="${right_gripper_id}"
           gripper_port="${right_gripper_port}"
-  />
+  /> -->
 
 
   <!-- LEFT ARM -->
-  <xacro:arm
+  <!-- <xacro:arm
           prefix="l" parent="torso" side="left"
           damping="${damping}" friction="${friction}"
           orbita2d_shoulder_config="$(arg l_shoulder_config)"
@@ -135,7 +159,7 @@
           orbita3d_wrist_config="$(arg l_wrist_config)"
           gripper_id="${left_gripper_id}"
           gripper_port="${left_gripper_port}"
-  />
+  /> -->
 
 
   <!-- <link name="r_wrist_cam_frame"/> -->

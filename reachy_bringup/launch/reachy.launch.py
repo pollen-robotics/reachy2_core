@@ -60,18 +60,11 @@ def launch_setup(context, *args, **kwargs):
             " ",
             'neck_config:="{}"'.format(reachy_config.neck_config),
             " ",
-            'r_shoulder_config:="{}"'.format(reachy_config.right_shoulder_config),
+            'right_arm_config:="{}" '.format("/home/reachy/reachy_ws/src/arm_control/arm_controller/config/right_arm.yaml"),
             " ",
-            'r_elbow_config:="{}"'.format(reachy_config.right_elbow_config),
-            " ",
-            'r_wrist_config:="{}"'.format(reachy_config.right_wrist_config),
-            " ",
-            'l_shoulder_config:="{}"'.format(reachy_config.left_shoulder_config),
-            " ",
-            'l_elbow_config:="{}"'.format(reachy_config.left_elbow_config),
-            " ",
-            'l_wrist_config:="{}"'.format(reachy_config.left_wrist_config),
-            " ",
+            'left_arm_config:="{}"'.format("/home/reachy/reachy_ws/src/arm_control/arm_controller/config/left_arm.yaml"),
+            " "
+          
         ]
     )
 
@@ -86,6 +79,8 @@ def launch_setup(context, *args, **kwargs):
             FindPackageShare("reachy_bringup"),
             "config",
             f"reachy_{reachy_config.model}_controllers.yaml"
+
+
             if controllers_py == "default"
             else f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
         ]
@@ -115,19 +110,27 @@ def launch_setup(context, *args, **kwargs):
     )
 
 
-    sdk_server_audio_node = Node(
+    video_sdk_server_node = Node(
         package="reachy_sdk_server",
-        executable="reachy_grpc_audio_sdk_server",
+        executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
     )
 
-    audio_node = Node(
-        package="sound_play",
-        executable="soundplay_node.py",
-        output="both",
-        condition=IfCondition(start_sdk_server_rl),
-    )
+
+    # sdk_server_audio_node = Node(
+    #     package="reachy_sdk_server",
+    #     executable="reachy_grpc_audio_sdk_server",
+    #     output="both",
+    #     condition=IfCondition(start_sdk_server_rl),
+    # )
+
+    # audio_node = Node(
+    #     package="sound_play",
+    #     executable="soundplay_node.py",
+    #     output="both",
+    #     condition=IfCondition(start_sdk_server_rl),
+    # )
 
     goto_server_node = Node(
         package="pollen_goto",
@@ -332,8 +335,9 @@ def launch_setup(context, *args, **kwargs):
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         gripper_safe_controller_node,
         sdk_server_node,
-        sdk_server_audio_node,
-        audio_node,
+        video_sdk_server_node,
+        # sdk_server_audio_node,
+        # audio_node,
         goto_server_node,
         # camera_publisher_node,
         # camera_focus_node,
