@@ -1,9 +1,6 @@
-import os
-
-from launch import LaunchContext, LaunchDescription
+from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
-    EmitEvent,
     IncludeLaunchDescription,
     LogInfo,
     OpaqueFunction,
@@ -12,10 +9,7 @@ from launch.actions import (
     TimerAction,
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnExecutionComplete, OnProcessExit, OnProcessStart
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, PythonExpression
-from launch.events import Shutdown
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
@@ -26,9 +20,7 @@ from launch.substitutions import (
 )
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
-from launch_ros.event_handlers import OnStateTransition
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -44,7 +36,6 @@ from reachy_utils.launch import (
     get_fake,
     get_node_list,
     get_rviz_conf_choices,
-    parseTacus,
     title_print,
 )
 
@@ -81,17 +72,13 @@ def launch_setup(context, *args, **kwargs):
         f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
         f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
     )
-    LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(
-        context=context
-    )
+    LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
 
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution(
-                [FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]
-            ),
+            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
             *reachy_urdf_config,
         ]
     )
@@ -128,11 +115,8 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    start_mobile_base = (
-        "true" if None not in reachy_config.mobile_base_config.values() else "false"
-    )
+    start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
     LogInfo(msg=f"Launching Mobile Base: {start_mobile_base}").execute(context=context)
-
 
     #############
     ### Nodes ###
@@ -325,9 +309,7 @@ def launch_setup(context, *args, **kwargs):
                     name="rviz2",
                     output="log",
                     arguments=["-d", rviz_config_file],
-                    condition=IfCondition(
-                        PythonExpression(f"'{start_rviz_py}' != 'false'")
-                    ),
+                    condition=IfCondition(PythonExpression(f"'{start_rviz_py}' != 'false'")),
                 )
             ],
         ),
@@ -339,17 +321,13 @@ def launch_setup(context, *args, **kwargs):
     )
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]
-        ),
+        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
     nodes = [
-        *(
-            (control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)
-        ),  # SetUseSimTime does not seem to work...
+        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
