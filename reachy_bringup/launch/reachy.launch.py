@@ -2,23 +2,40 @@ import os
 
 import yaml
 from launch import LaunchContext, LaunchDescription
-from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
-                            LogInfo, OpaqueFunction, RegisterEventHandler,
-                            SetEnvironmentVariable, TimerAction)
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    LogInfo,
+    OpaqueFunction,
+    RegisterEventHandler,
+    SetEnvironmentVariable,
+    TimerAction,
+)
 from launch.conditions import IfCondition
-from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
-                                   OnProcessStart)
+from launch.event_handlers import OnExecutionComplete, OnProcessExit, OnProcessStart
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import (Command, FindExecutable, LaunchConfiguration,
-                                  PathJoinSubstitution, PythonExpression)
+from launch.substitutions import (
+    Command,
+    FindExecutable,
+    LaunchConfiguration,
+    PathJoinSubstitution,
+    PythonExpression,
+)
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.substitutions import FindPackageShare
-
-from reachy_utils.config import (FULL_KIT, HEADLESS, MINI, STARTER_KIT_LEFT,
-                                 STARTER_KIT_RIGHT, STARTER_KIT_RIGHT_NO_HEAD,
-                                 ReachyConfig)
+from reachy_utils.config import (
+    FULL_KIT,
+    HEADLESS,
+    MINI,
+    STARTER_KIT_LEFT,
+    STARTER_KIT_RIGHT,
+    STARTER_KIT_RIGHT_NO_HEAD,
+    ReachyConfig,
+    log_config,
+)
+from reachy_utils.launch import get_fake
 
 
 def launch_setup(context, *args, **kwargs):
@@ -36,39 +53,31 @@ def launch_setup(context, *args, **kwargs):
     controllers_rl = LaunchConfiguration("controllers")
     controllers_py = controllers_rl.perform(context)
 
-    # Robot config
+    ### Robot config
     reachy_config = ReachyConfig()
     LogInfo(msg="Reachy config : \n{}".format(reachy_config)).execute(context=context)
+
+    xacro_config = (
+        f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
+        f" use_gazebo:=true" if gazebo_py else " ",
+        f" depth_camera:=true" if gazebo_py else " ",
+        f" robot_config:={reachy_config.model}",
+        f' neck_config:="{reachy_config.neck_config if not fake_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+        f' right_arm_config:="{reachy_config.right_arm_config if not fake_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
+        f' left_arm_config:="{reachy_config.left_arm_config if not fake_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
+    )
+    # LogInfo(msg=f"Xacro config : \n{log_config(xacro_config)}").execute(context=context)
 
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
-            *(
-                (" ", "use_fake_hardware:=true", " ")
-                if fake_py
-                else (
-                    " ",
-                    "use_fake_hardware:=true use_gazebo:=true depth_camera:=true ",
-                    " ",
-                )
-                if gazebo_py
-                else (" ",)
+            PathJoinSubstitution(
+                [FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]
             ),
-            f"robot_config:={reachy_config.model}",
-            " ",
-            'neck_config:="{}"'.format(reachy_config.neck_config),
-            " ",
-            'right_arm_config:="{}" '.format("/home/reachy/reachy_ws/src/arm_control/arm_controller/config/right_arm.yaml"),
-            " ",
-            'left_arm_config:="{}"'.format("/home/reachy/reachy_ws/src/arm_control/arm_controller/config/left_arm.yaml"),
-            " "
-          
+            *xacro_config,
         ]
     )
-
-    # print(robot_description_content.perform(context=context))
 
     robot_description = {
         "robot_description": ParameterValue(robot_description_content, value_type=str),
@@ -78,11 +87,11 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare("reachy_bringup"),
             "config",
-            f"reachy_{reachy_config.model}_controllers.yaml"
-
-
-            if controllers_py == "default"
-            else f"ros2_controllers_ultimate_combo_top_moumoute.yaml",
+            (
+                f"reachy_{reachy_config.model}_controllers.yaml"
+                if controllers_py == "default"
+                else f"ros2_controllers_ultimate_combo_top_moumoute.yaml"
+            ),
         ]
     )
 
@@ -94,6 +103,7 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    ### Nodes
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -109,14 +119,12 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
-
     video_sdk_server_node = Node(
         package="reachy_sdk_server",
         executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
     )
-
 
     # sdk_server_audio_node = Node(
     #     package="reachy_sdk_server",
@@ -278,7 +286,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
+        PythonLaunchDescriptionSource(
+            [FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]
+        ),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
@@ -302,21 +312,29 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
-    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[
-                *position_controllers,
-                *(trajectory_controllers if controllers_py == "trajectory" else []),
-                kinematics_node,
-            ],
-        ),
+    delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = (
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=joint_state_broadcaster_spawner,
+                on_exit=[
+                    *position_controllers,
+                    *(trajectory_controllers if controllers_py == "trajectory" else []),
+                    kinematics_node,
+                ],
+            ),
+        )
     )
 
-    print("Launching Mobile Base: {}".format("true" if None not in reachy_config.mobile_base_config.values() else "false"))
+    print(
+        "Launching Mobile Base: {}".format(
+            "true" if None not in reachy_config.mobile_base_config.values() else "false"
+        )
+    )
     mobile_base_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-        condition=IfCondition("true" if None not in reachy_config.mobile_base_config.values() else "false"),
+        condition=IfCondition(
+            "true" if None not in reachy_config.mobile_base_config.values() else "false"
+        ),
     )
 
     gripper_safe_controller_node = Node(
@@ -326,7 +344,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # does not seem to work...
+        *(
+            (control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)
+        ),  # does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
@@ -350,7 +370,9 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     # for each file, if it is a .rviz file, add it to the list of choices without the .rviz extension
     rviz_config_choices = []
-    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"):
+    for file in os.listdir(
+        os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"
+    ):
         if file.endswith(".rviz"):
             rviz_config_choices.append(file[:-5])
 

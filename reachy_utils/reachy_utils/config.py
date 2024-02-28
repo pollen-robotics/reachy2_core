@@ -137,6 +137,21 @@ def get_reachy_config():
         return config
 
 
+def log_config(xacro_config):
+    log = ""
+    # log += "Reachy Configuration\n"
+
+    for line in xacro_config:
+        if line != " ":
+            key, value = line.split(":=")
+            # log += f"{key.ljust(25, " ")}{value}\n"
+            # log += line.replace(":=", "\t").replace(" ", "\n")
+            print(value)
+            # log += "value"
+
+    return log
+
+
 def _get_config_parameter(parameter: str, part=None):
     config = get_reachy_config()
     try:
