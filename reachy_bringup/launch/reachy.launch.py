@@ -54,6 +54,8 @@ def launch_setup(context, *args, **kwargs):
     start_sdk_server_py = start_sdk_server_rl.perform(context) == "true"
     controllers_rl = LaunchConfiguration("controllers")
     controllers_py = controllers_rl.perform(context)
+    foxglove_rl = LaunchConfiguration("foxglove")
+    foxglove_py = foxglove_rl.perform(context)
 
     ####################
     ### Robot config ###
@@ -315,6 +317,15 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
+    # start foxglove bridge like this ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+    foxglove_bridge_node = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        output="both",
+        arguments=["foxglove_bridge_launch.xml"],
+        condition=IfCondition(foxglove_rl),
+    )
+
     mobile_base_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
         condition=IfCondition(start_mobile_base),
@@ -341,6 +352,7 @@ def launch_setup(context, *args, **kwargs):
         sdk_server_video_node,
         goto_server_node,
         dynamic_state_router_node,
+        foxglove_bridge_node,
     ]
 
     return [*build_watchers_from_node_list(get_node_list(nodes, context)), *nodes]
@@ -375,6 +387,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start RViz2 automatically with this launch file.",
                 choices=["true", "false", *get_rviz_conf_choices()],
+            ),
+            DeclareLaunchArgument(
+                "foxglove",
+                default_value="false",
+                description="Start FoxGlove bridge with this launch file.",
+                choices=["true", "false"],
             ),
             DeclareLaunchArgument(
                 "controllers",
