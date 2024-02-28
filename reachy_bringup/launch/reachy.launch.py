@@ -13,6 +13,8 @@ from launch.actions import (
 )
 from launch.conditions import IfCondition
 from launch.event_handlers import OnExecutionComplete, OnProcessExit, OnProcessStart
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution, PythonExpression
 from launch.events import Shutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
@@ -26,6 +28,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.substitutions import FindPackageShare
+
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -129,6 +132,7 @@ def launch_setup(context, *args, **kwargs):
         "true" if None not in reachy_config.mobile_base_config.values() else "false"
     )
     LogInfo(msg=f"Launching Mobile Base: {start_mobile_base}").execute(context=context)
+
 
     #############
     ### Nodes ###
@@ -282,7 +286,7 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    video_sdk_server_node = Node(
+    sdk_server_video_node = Node(
         package="reachy_sdk_server",
         executable="reachy_grpc_video_sdk_server",
         output="both",
@@ -354,9 +358,9 @@ def launch_setup(context, *args, **kwargs):
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
         gripper_safe_controller_node,
         sdk_server_node,
-        video_sdk_server_node,
         # sdk_server_audio_node,
         # audio_node,
+        sdk_server_video_node,
         goto_server_node,
         dynamic_state_router_node,
     ]
