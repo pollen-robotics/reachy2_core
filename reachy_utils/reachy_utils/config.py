@@ -3,7 +3,7 @@ from functools import partial
 
 import yaml
 
-config_file = os.path.expanduser("~/.reachy.yaml")
+# config_file = os.path.expanduser("~/.reachy.yaml")
 
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = (
@@ -31,7 +31,7 @@ REACHY_CONFIG_MOBILE_BASE = "mobile_base"
 
 
 class ReachyConfig:
-    def __init__(self, config_file_path="~/.reachy_config/.reachy.yaml"):
+    def __init__(self, config_file_path="~/.reachy_config/reachy.yaml"):
         self.config_file = os.path.expanduser(config_file_path)
 
         with open(self.config_file) as f:
