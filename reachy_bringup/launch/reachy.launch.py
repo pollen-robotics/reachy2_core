@@ -171,7 +171,7 @@ def launch_setup(context, *args, **kwargs):
             f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
-        ["forward_torque_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["forward_torque_controller", "True"],
         ["forward_torque_limit_controller", f"not {fake_py} and not {gazebo_py}"],
         ["forward_speed_limit_controller", f"not {fake_py} and not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
