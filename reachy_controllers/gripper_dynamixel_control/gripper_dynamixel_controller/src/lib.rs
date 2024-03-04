@@ -76,6 +76,29 @@ impl Gripper {
     pub fn set_target_orientation(&mut self, target: f64) -> Result<()> {
         self.inner.set_target_position([target])
     }
+
+    /// Get the velocity limit of each raw motor [motor_a, motor_b] (in radians/s)
+    /// caution: this is the raw value used by the motors used inside the actuator, not a limit in orbita2d orientation!
+    pub fn get_raw_motors_velocity_limit(&mut self) -> Result<f64> {
+        let vel = self.inner.get_velocity_limit()?;
+        Ok(vel[0])
+    }
+    /// Set the velocity limit of each raw motor [motor_a, motor_b] (in radians/s)
+    /// caution: this is the raw value used by the motors used inside the actuator, not a limit in orbita2d orientation!
+    pub fn set_raw_motors_velocity_limit(&mut self, velocity_limit: f64) -> Result<()> {
+        self.inner.set_velocity_limit([velocity_limit])
+    }
+    /// Get the torque limit of each raw motor [motor_a, motor_b] (in Nm)
+    /// caution: this is the raw value used by the motors used inside the actuator, not a limit in orbita2d orientation!
+    pub fn get_raw_motors_torque_limit(&mut self) -> Result<f64> {
+        let torque = self.inner.get_torque_limit()?;
+        Ok(torque[0])
+    }
+    /// Set the torque limit of each raw motor [motor_a, motor_b] (in Nm)
+    /// caution: this is the raw value used by the motors used inside the actuator, not a limit in orbita2d orientation!
+    pub fn set_raw_motors_torque_limit(&mut self, torque_limit: f64) -> Result<()> {
+        self.inner.set_torque_limit([torque_limit])
+    }
 }
 
 #[cfg(test)]

@@ -16,6 +16,9 @@ pub struct GripperDynamixel {
 
     target_position: Cache<u8, f64>,
     torque_on: Cache<u8, bool>,
+
+    velocity_limit: Cache<u8, f64>,
+    torque_limit: Cache<u8, f64>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -36,6 +39,8 @@ impl GripperDynamixel {
             id,
             target_position: Cache::keep_last(),
             torque_on: Cache::keep_last(),
+            velocity_limit: Cache::keep_last(),
+            torque_limit: Cache::keep_last(),
         };
 
         controller.serial_port.set_exclusive(false)?;
@@ -143,16 +148,58 @@ impl RawMotorsIO<1> for GripperDynamixel {
     }
 
     fn get_velocity_limit(&mut self) -> Result<[f64; 1]> {
-        Err(MissingResisterErrror("velocity_limit".to_string()).into())
+        self.velocity_limit
+            .entry(self.id)
+            .or_try_insert_with(|_| {
+                Ok(mx::conv::dxl_abs_speed_to_rad_per_sec(
+                    mx::read_moving_speed(&self.io, self.serial_port.as_mut(), self.id)?,
+                ))
+            })
+            .map(|x| [x])
     }
-    fn set_velocity_limit(&mut self, _velocity_limit: [f64; 1]) -> Result<()> {
-        Err(MissingResisterErrror("velocity_limit".to_string()).into())
+    fn set_velocity_limit(&mut self, velocity_limit: [f64; 1]) -> Result<()> {
+        let current_velocity_limit = RawMotorsIO::get_velocity_limit(self)?;
+
+        if current_velocity_limit != velocity_limit {
+            mx::write_moving_speed(
+                &self.io,
+                self.serial_port.as_mut(),
+                self.id,
+                mx::conv::rad_per_sec_to_dxl_abs_speed(velocity_limit[0]),
+            )?;
+
+            self.velocity_limit.insert(self.id, velocity_limit[0]);
+        }
+
+        Ok(())
     }
     fn get_torque_limit(&mut self) -> Result<[f64; 1]> {
-        Err(MissingResisterErrror("torque_limit".to_string()).into())
+        self.torque_limit
+            .entry(self.id)
+            .or_try_insert_with(|_| {
+                Ok(mx::conv::dxl_load_to_abs_torque(mx::read_torque_limit(
+                    &self.io,
+                    self.serial_port.as_mut(),
+                    self.id,
+                )?))
+            })
+            .map(|x| [x])
     }
-    fn set_torque_limit(&mut self, _torque_limit: [f64; 1]) -> Result<()> {
-        Err(MissingResisterErrror("torque_limit".to_string()).into())
+    fn set_torque_limit(&mut self, torque_limit: [f64; 1]) -> Result<()> {
+        let current_torque_limit = RawMotorsIO::get_torque_limit(self)?;
+
+        if current_torque_limit != torque_limit {
+            mx::write_torque_limit(
+                &self.io,
+                self.serial_port.as_mut(),
+                self.id,
+                mx::conv::torque_to_dxl_abs_load(torque_limit[0]),
+            )?;
+
+            self.torque_limit.insert(self.id, torque_limit[0]);
+        }
+
+        Ok(())
     }
     fn get_pid_gains(&mut self) -> Result<[PID; 1]> {
         Err(MissingResisterErrror("pid_gains".to_string()).into())
