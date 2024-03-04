@@ -108,7 +108,7 @@ def watcher_report(nb_node: int, delay: float = 5.0) -> TimerAction:
     def print_report(context):
         reporting_nodes = len(failed_nodes) + len(success_nodes)
         unmonitored_nodes = nb_node - reporting_nodes
-        report_message = f"Node Watcher Report\n Success[{len(success_nodes)}/{reporting_nodes}]: {success_nodes}\n Failed[{len(failed_nodes)}/{reporting_nodes}]: {failed_nodes}\n Un-monitored nodes[{unmonitored_nodes}/{nb_node}]"
+        report_message = f"Node Watcher Report\n Un-monitored nodes[{unmonitored_nodes}/{nb_node}]\n Success[{len(success_nodes)}/{reporting_nodes}]: {success_nodes}\n Failed[{len(failed_nodes)}/{reporting_nodes}]: {failed_nodes}"
         return [title_print(report_message)]
 
     return TimerAction(
