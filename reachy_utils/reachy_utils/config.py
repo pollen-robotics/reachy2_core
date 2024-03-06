@@ -3,7 +3,7 @@ from functools import partial
 
 import yaml
 
-config_file = os.path.expanduser("~/.reachy.yaml")
+# config_file = os.path.expanduser("~/.reachy.yaml")
 
 
 FULL_KIT, STARTER_KIT_RIGHT, STARTER_KIT_LEFT, HEADLESS, MINI = (
@@ -17,19 +17,21 @@ STARTER_KIT_RIGHT_NO_HEAD = "starter_kit_right_no_head"
 
 REACHY_CONFIG_MODEL = "model"
 REACHY_CONFIG_NECK = "neck_config"
-REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
-REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
-REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
+# REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
+# REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
+# REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
 
-REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
-REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
-REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
+# REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
+# REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
+# REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
+REACHY_CONFIG_LEFT_ARM = "left_arm_config"
+REACHY_CONFIG_RIGHT_ARM = "right_arm_config"
 
 REACHY_CONFIG_MOBILE_BASE = "mobile_base"
 
 
 class ReachyConfig:
-    def __init__(self, config_file_path="~/.reachy_config/.reachy.yaml"):
+    def __init__(self, config_file_path="~/.reachy_config/reachy.yaml"):
         self.config_file = os.path.expanduser(config_file_path)
 
         with open(self.config_file) as f:
@@ -72,43 +74,17 @@ class ReachyConfig:
             except KeyError as e:
                 raise KeyError("orbita3d neck config key not found :: {}".format(e))
 
-            # right shoulder
+            # Right arm
             try:
-                self.right_shoulder_config = config[REACHY_CONFIG_RIGHT_SHOULDER]
-
+                self.right_arm_config = config[REACHY_CONFIG_RIGHT_ARM]
             except KeyError as e:
-                raise KeyError("orbita2d right shoulder key not found :: {}".format(e))
+                raise KeyError("right_arm config key not found :: {}".format(e))
 
-            # right elbow
+            # Left arm
             try:
-                self.right_elbow_config = config[REACHY_CONFIG_RIGHT_ELBOW]
+                self.left_arm_config = config[REACHY_CONFIG_LEFT_ARM]
             except KeyError as e:
-                raise KeyError("orbita2d right elbow key not found :: {}".format(e))
-
-            # right wrist
-            try:
-                self.right_wrist_config = config[REACHY_CONFIG_RIGHT_WRIST]
-            except KeyError as e:
-                raise KeyError("orbita3d right wrist key not found :: {}".format(e))
-
-            # left shoulder
-            try:
-                self.left_shoulder_config = config[REACHY_CONFIG_LEFT_SHOULDER]
-
-            except KeyError as e:
-                raise KeyError("orbita2d left shoulder key not found :: {}".format(e))
-
-            # left elbow
-            try:
-                self.left_elbow_config = config[REACHY_CONFIG_LEFT_ELBOW]
-            except KeyError as e:
-                raise KeyError("orbita2d left elbow key not found :: {}".format(e))
-
-            # left wrist
-            try:
-                self.left_wrist_config = config[REACHY_CONFIG_LEFT_WRIST]
-            except KeyError as e:
-                raise KeyError("orbita3d left wrist key not found :: {}".format(e))
+                raise KeyError("left_arm config key not found :: {}".format(e))
 
     def __str__(self):
         return (
@@ -116,18 +92,10 @@ class ReachyConfig:
             + "{}\n".format(self.model)
             + "neck_config".ljust(25, " ")
             + "{}\n".format(self.neck_config)
-            + "right_shoulder_config".ljust(25, " ")
-            + "{}\n".format(self.right_shoulder_config)
-            + "right_elbow_config".ljust(25, " ")
-            + "{}\n".format(self.right_elbow_config)
-            + "right_wrist_config".ljust(25, " ")
-            + "{}\n".format(self.right_wrist_config)
-            + "left_shoulder_config".ljust(25, " ")
-            + "{}\n".format(self.left_shoulder_config)
-            + "left_elbow_config".ljust(25, " ")
-            + "{}\n".format(self.left_elbow_config)
-            + "left_wrist_config".ljust(25, " ")
-            + "{}\n".format(self.left_wrist_config)
+            + "right_arm_config".ljust(25, " ")
+            + "{}\n".format(self.right_arm_config)
+            + "left_arm_config".ljust(25, " ")
+            + "{}\n".format(self.left_arm_config)
         )
 
 
@@ -135,6 +103,17 @@ def get_reachy_config():
     with open(config_file) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         return config
+
+
+def log_config(xacro_config):
+    log = ""
+    for line in xacro_config:
+        if line != " ":
+            key, value = line.split(":=")
+            key = key.strip()
+            log += f"{key.ljust(25, ' ')}{value}\n"
+
+    return log
 
 
 def _get_config_parameter(parameter: str, part=None):

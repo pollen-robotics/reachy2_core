@@ -1,50 +1,35 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="reachy2">
 
-  <xacro:arg name="use_fake_hardware" default="false"/>
-  <xacro:arg name="use_gazebo" default="false"/>
-  <xacro:arg name="use_moveit_gazebo" default="false"/>
+  <xacro:arg name="use_fake_hardware" default="false" />
+  <xacro:arg name="use_gazebo" default="false" />
+  <xacro:arg name="use_moveit_gazebo" default="false" />
 
 
-  <xacro:include filename="$(find reachy_description)/urdf/arm.urdf.xacro"/>
-  <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro"/>
+  <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro" />
+  <xacro:include filename="$(find arm_description)/urdf/arm.urdf.xacro" />
 
 
-  <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro"/>
-  <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro"/>
-
+  <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
+  <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro" />
+  <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro" />
 
 
   <!-- config  -->
-  <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake.yaml"/>
-  <xacro:arg name="r_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml"/>
-  <xacro:arg name="r_elbow_config" default="$(find orbita2d_description)/config/fake.yaml"/>
-  <xacro:arg name="r_wrist_config" default="$(find orbita3d_description)/config/fake.yaml"/>
-
-  <xacro:property name="right_gripper_id" value="11"/>
-  <xacro:property name="right_gripper_port" value="/dev/right_gripper"/>
-
-
-  <xacro:arg name="l_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml"/>
-  <xacro:arg name="l_elbow_config" default="$(find orbita2d_description)/config/fake.yaml"/>
-  <xacro:arg name="l_wrist_config" default="$(find orbita3d_description)/config/fake.yaml"/>
-
-  <xacro:property name="left_gripper_id" value="12"/>
-  <xacro:property name="left_gripper_port" value="/dev/left_gripper"/>
-
-
-
+  <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake.yaml" />
+  <xacro:arg name="right_arm_config" default="$(find arm_controller)/config/fake_arm.yaml" />
+  <xacro:arg name="left_arm_config" default="$(find arm_controller)/config/fake_arm.yaml" />
   <!-- config  -->
 
 
   <!-- MODEL PARAMETERS -->
-  <xacro:property name="base_collision" value="true"/>
-  <xacro:property name="base_visual" value="true"/>
-  <xacro:property name="damping" value="0.1"/>
-  <xacro:property name="friction" value="0.1"/>
+  <xacro:property name="base_collision" value="true" />
+  <xacro:property name="base_visual" value="true" />
+  <xacro:property name="damping" value="0.1" />
+  <xacro:property name="friction" value="0.1" />
 
-  <xacro:property name="arm_length" value="0.28"/>
-  <xacro:property name="forearm_length" value="0.28"/>
+  <xacro:property name="arm_length" value="0.28" />
+  <xacro:property name="forearm_length" value="0.28" />
   <!-- MODEL PARAMETERS -->
 
   <!-- <material name="torsoblack"> -->
@@ -52,21 +37,20 @@
   <!-- </material> -->
 
 
-
-  <link name="world"/>
+  <link name="world" />
   <joint name="world_joint" type="fixed">
-    <origin xyz="0 0 1.0" rpy="0 0 0"/>
-    <parent link="world"/>
-    <child link="torso"/>
+    <origin xyz="0 0 1.0" rpy="0 0 0" />
+    <parent link="world" />
+    <child link="torso" />
   </joint>
 
   <!-- TORSO -->
   <link name="torso">
     <xacro:if value="${base_collision}">
       <collision>
-        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0"/>
+        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0" />
         <geometry>
-          <box size="0.1 0.2 0.22"/>
+          <box size="0.1 0.2 0.22" />
         </geometry>
 
         <!-- <origin xyz="0 0 -0.5" rpy="0 0 0"/> -->
@@ -75,66 +59,56 @@
         <!-- </geometry> -->
       </collision>
       <collision>
-        <origin xyz="-0.15 0 -0.5" rpy="0 0 0"/>
+        <origin xyz="-0.15 0 -0.5" rpy="0 0 0" />
         <geometry>
-          <cylinder length="1" radius="0.03"/>
+          <cylinder length="1" radius="0.03" />
         </geometry>
       </collision>
     </xacro:if>
     <xacro:if value="${base_visual}">
       <visual>
-        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0"/>
+        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0" />
         <geometry>
-          <box size="0.1 0.2 0.22"/>
+          <box size="0.1 0.2 0.22" />
         </geometry>
         <!-- <material name="torsoblack"/> -->
-        <xacro:torsoblack/>
+        <xacro:torsoblack />
       </visual>
       <visual>
-        <origin xyz="-0.15 0 -0.5" rpy="0 0 0"/>
+        <origin xyz="-0.15 0 -0.5" rpy="0 0 0" />
         <geometry>
-          <cylinder length="1" radius="0.03"/>
+          <cylinder length="1" radius="0.03" />
         </geometry>
-        <xacro:torsoblack/>
+        <xacro:torsoblack />
       </visual>
     </xacro:if>
-    <xacro:inertial_cuboid mass="10" xyz="0 0 0.5"  rpy="0 0 0" x_length="0.05" y_length="0.05" z_length="1"/>
+    <xacro:inertial_cuboid mass="10" xyz="0 0 0.5" rpy="0 0 0" x_length="0.05" y_length="0.05"
+      z_length="1" />
   </link>
   <gazebo reference="torso">
     <material>Gazebo/Black</material>
     <static>true</static>
   </gazebo>
+
   <!-- TORSO -->
-
   <xacro:head
-          parent="torso"
-          damping="${damping}" friction="${friction}"
-          neck_config="$(arg neck_config)"
+    parent="torso"
+    damping="${damping}" friction="${friction}"
+    neck_config="$(arg neck_config)"
   />
-
-  <!-- <xacro:macro name="arm" params="prefix parent side damping friction orbita2d_shoulder_config orbita2d_elbow_config orbita3d_wrist_config gripper_port gripper_id"> -->
 
   <!-- RIGHT ARM -->
   <xacro:arm
-          prefix="r" parent="torso" side="right"
-          damping="${damping}" friction="${friction}"
-          orbita2d_shoulder_config="$(arg r_shoulder_config)"
-          orbita2d_elbow_config="$(arg r_elbow_config)"
-          orbita3d_wrist_config="$(arg r_wrist_config)"
-          gripper_id="${right_gripper_id}"
-          gripper_port="${right_gripper_port}"
+    prefix="r" parent="torso" side="right"
+    damping="${damping}" friction="${friction}"
+    config_file="$(arg right_arm_config)"
   />
-
 
   <!-- LEFT ARM -->
   <xacro:arm
-          prefix="l" parent="torso" side="left"
-          damping="${damping}" friction="${friction}"
-          orbita2d_shoulder_config="$(arg l_shoulder_config)"
-          orbita2d_elbow_config="$(arg l_elbow_config)"
-          orbita3d_wrist_config="$(arg l_wrist_config)"
-          gripper_id="${left_gripper_id}"
-          gripper_port="${left_gripper_port}"
+    prefix="l" parent="torso" side="left"
+    damping="${damping}" friction="${friction}"
+    config_file="$(arg left_arm_config)"
   />
 
 
@@ -158,9 +132,12 @@
 
     <gazebo>
       <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-        <!-- <parameters>$(find reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
-<!--                  <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>-->
+        <!-- <parameters>$(find
+        reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
+        <!--                  <parameters>$(find
+        reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>-->
         <parameters>$(find reachy_bringup)/config/ros2_controllers_ultimate_combo_top_moumoute.yaml</parameters>
+        <!-- TODO FIX ME PROPER controller import  -->
         <robotNamespace>/reachy</robotNamespace>
       </plugin>
     </gazebo>
