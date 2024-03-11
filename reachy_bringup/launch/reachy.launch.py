@@ -7,6 +7,7 @@ from launch.actions import (
     RegisterEventHandler,
     SetEnvironmentVariable,
     TimerAction,
+    ExecuteProcess
 )
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
@@ -37,6 +38,7 @@ from reachy_utils.launch import (
     get_node_list,
     get_rviz_conf_choices,
     title_print,
+    get_current_run_log_dir
 )
 
 
@@ -337,6 +339,11 @@ def launch_setup(context, *args, **kwargs):
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
+    rosbag = ExecuteProcess(
+            cmd=['ros2', 'bag', 'record', '-o', f"{get_current_run_log_dir()}/reachy.bag", "/r_arm/target_pose", "/l_arm/target_pose", "/head/target_pose", "/joint_commands"],
+            output='screen'
+        )
+
     nodes = [
         *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
@@ -353,6 +360,7 @@ def launch_setup(context, *args, **kwargs):
         goto_server_node,
         dynamic_state_router_node,
         foxglove_bridge_node,
+        rosbag
     ]
 
     return [*build_watchers_from_node_list(get_node_list(nodes, context)), *nodes]

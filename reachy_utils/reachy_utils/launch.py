@@ -1,5 +1,6 @@
 import os
-import threading
+import threading    
+from rclpy.logging import get_logging_directory
 
 from launch import LaunchContext, LaunchDescription
 from launch.actions import (
@@ -9,6 +10,7 @@ from launch.actions import (
     OpaqueFunction,
     RegisterEventHandler,
     TimerAction,
+    ExecuteProcess
 )
 from launch.event_handlers import OnProcessExit
 from launch.substitutions import PathJoinSubstitution
@@ -67,7 +69,7 @@ def parseTacus(tacus, context):
     elif isinstance(tacus, TimerAction):
         browse_sub_tacus(tacus.actions)
 
-    elif isinstance(tacus, (DeclareLaunchArgument, LogInfo)):
+    elif isinstance(tacus, (DeclareLaunchArgument, LogInfo, ExecuteProcess)):
         pass
     else:
         print("Unhandled type of tacus. Exiting.")
@@ -108,7 +110,7 @@ def watcher_report(nb_node: int, delay: float = 5.0) -> TimerAction:
     def print_report(context):
         reporting_nodes = len(failed_nodes) + len(success_nodes)
         unmonitored_nodes = nb_node - reporting_nodes
-        report_message = f"Node Watcher Report\n Un-monitored nodes[{unmonitored_nodes}/{nb_node}]\n Success[{len(success_nodes)}/{reporting_nodes}]: {success_nodes}\n Failed[{len(failed_nodes)}/{reporting_nodes}]: {failed_nodes}"
+        report_message = f"Node Watcher Report\n Logging to {get_current_run_log_dir()}\n Un-monitored nodes[{unmonitored_nodes}/{nb_node}]\n Success[{len(success_nodes)}/{reporting_nodes}]: {success_nodes}\n Failed[{len(failed_nodes)}/{reporting_nodes}]: {failed_nodes}"
         return [title_print(report_message)]
 
     return TimerAction(
@@ -139,3 +141,16 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
     watchmen.append(watcher_report(len(node_list)))
 
     return watchmen
+
+
+
+def get_current_run_log_dir()->str:
+    
+    log_dir = get_logging_directory()
+
+    # List all items in the log directory
+    paths = [os.path.join(log_dir, name) for name in os.listdir(log_dir)]
+    # Filter out files, keep only directories
+    dirs = [path for path in paths if os.path.isdir(path)]
+    # Sort directories by modification time, newest first
+    return max(dirs, key=os.path.getmtime)
