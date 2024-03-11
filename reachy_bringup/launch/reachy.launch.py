@@ -398,7 +398,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "foxglove",
-                default_value="false",
+                default_value="true",
                 description="Start FoxGlove bridge with this launch file.",
                 choices=["true", "false"],
             ),
