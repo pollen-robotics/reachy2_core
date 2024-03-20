@@ -5,6 +5,7 @@ import threading
 from launch import LaunchContext, LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
+    EmitEvent,
     ExecuteProcess,
     IncludeLaunchDescription,
     LogInfo,
@@ -12,8 +13,9 @@ from launch.actions import (
     RegisterEventHandler,
     TimerAction,
 )
-from launch.event_handlers import OnProcessExit
-from launch.substitutions import PathJoinSubstitution
+from launch.event_handlers import OnProcessExit, OnShutdown
+from launch.events import Shutdown
+from launch.substitutions import LocalSubstitution, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from rclpy.logging import get_logging_directory
@@ -101,7 +103,8 @@ def check_node_status(context):
             if name not in non_critical_nodes:
                 LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
                 # instead of exit , just send a ctrl+c signal to the launch file, exit left zombies
-                os.kill(os.getpid(), signal.SIGINT)
+                EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
+                # os.kill(os.getpid(), signal.SIGINT)
 
 
 def watcher_report(nb_node: int, delay: float = 5.0) -> TimerAction:
@@ -137,7 +140,20 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
         )
 
     watchmen.append(watcher_report(len(node_list)))
-
+    watchmen.append(
+        RegisterEventHandler(
+            OnShutdown(
+                on_shutdown=[
+                    LogInfo(
+                        msg=[
+                            "Launch was asked to shutdown: ",
+                            LocalSubstitution("event.reason"),
+                        ]
+                    )
+                ],
+            )
+        ),
+    )
     return watchmen
 
 

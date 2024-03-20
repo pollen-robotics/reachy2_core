@@ -1,21 +1,22 @@
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
+    ExecuteProcess,
     IncludeLaunchDescription,
     LogInfo,
     OpaqueFunction,
     RegisterEventHandler,
     SetEnvironmentVariable,
     TimerAction,
-    ExecuteProcess
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit
+from launch.event_handlers import OnProcessExit, OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
     FindExecutable,
     LaunchConfiguration,
+    LocalSubstitution,
     PathJoinSubstitution,
     PythonExpression,
 )
@@ -34,11 +35,11 @@ from reachy_utils.config import (
 )
 from reachy_utils.launch import (
     build_watchers_from_node_list,
+    get_current_run_log_dir,
     get_fake,
     get_node_list,
     get_rviz_conf_choices,
     title_print,
-    get_current_run_log_dir
 )
 
 
@@ -340,12 +341,22 @@ def launch_setup(context, *args, **kwargs):
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
     rosbag = ExecuteProcess(
-            cmd=['ros2', 'bag', 'record', '-o', f"{get_current_run_log_dir()}/reachy.bag", "/r_arm/target_pose", "/l_arm/target_pose", "/head/target_pose", "/joint_commands"],
-            output='screen'
-        )
+        cmd=[
+            "ros2",
+            "bag",
+            "record",
+            "-o",
+            f"{get_current_run_log_dir()}/reachy.bag",
+            "/r_arm/target_pose",
+            "/l_arm/target_pose",
+            "/head/target_pose",
+            "/joint_commands",
+        ],
+        output="screen",
+    )
 
     nodes = [
-        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
+        # *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
@@ -360,10 +371,21 @@ def launch_setup(context, *args, **kwargs):
         goto_server_node,
         dynamic_state_router_node,
         foxglove_bridge_node,
-        rosbag
+        rosbag,
     ]
+    start_everything_after_control = TimerAction(
+        period=1.5,
+        actions=[
+            *nodes,
+        ],
+        cancel_on_shutdown=True,
+    )
 
-    return [*build_watchers_from_node_list(get_node_list(nodes, context)), *nodes]
+    return [
+        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node]),
+        control_node,
+        start_everything_after_control,
+    ]
 
 
 def generate_launch_description():
