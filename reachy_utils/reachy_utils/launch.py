@@ -1,4 +1,5 @@
 import os
+import signal
 import threading
 
 from launch import LaunchContext, LaunchDescription
@@ -99,7 +100,8 @@ def check_node_status(context):
             failed_nodes.append(name)
             if name not in non_critical_nodes:
                 LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
-                exit(1)
+                # instead of exit , just send a ctrl+c signal to the launch file, exit left zombies
+                os.kill(os.getpid(), signal.SIGINT)
 
 
 def watcher_report(nb_node: int, delay: float = 5.0) -> TimerAction:
