@@ -84,7 +84,7 @@ def get_node_list(nodes, context: LaunchContext):
     return flattened_list
 
 
-critical_nodes = ["ros2_control_node"]
+non_critical_nodes = ["foxglove_bridge", "rviz2"]
 
 
 def check_node_status(context):
@@ -97,7 +97,7 @@ def check_node_status(context):
             success_nodes.append(name)
         else:
             failed_nodes.append(name)
-            if name in critical_nodes:
+            if name not in non_critical_nodes:
                 LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
                 exit(1)
 
