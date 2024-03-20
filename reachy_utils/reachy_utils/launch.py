@@ -84,6 +84,9 @@ def get_node_list(nodes, context: LaunchContext):
     return flattened_list
 
 
+critical_nodes = ["ros2_control_node"]
+
+
 def check_node_status(context):
     name = context.get_locals_as_dict()["event"].action.name
     # some clean up
@@ -94,6 +97,9 @@ def check_node_status(context):
             success_nodes.append(name)
         else:
             failed_nodes.append(name)
+            if name in critical_nodes:
+                LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
+                exit(1)
 
 
 def watcher_report(nb_node: int, delay: float = 5.0) -> TimerAction:
