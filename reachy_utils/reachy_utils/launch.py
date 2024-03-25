@@ -107,7 +107,7 @@ def check_node_status(context):
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
-def watcher_report(nb_node: int, delay: float = 5.0) -> TimerAction:
+def watcher_report(nb_node: int, delay: float = 8.0) -> TimerAction:
     """Sets up a timer to log a report on node statuses after a delay."""
 
     def print_report(context):
