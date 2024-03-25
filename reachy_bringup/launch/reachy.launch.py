@@ -133,6 +133,7 @@ def launch_setup(context, *args, **kwargs):
         executable="ros2_control_node",
         parameters=[robot_description, robot_controllers],
         output="screen",
+        emulate_tty=True,
     )
 
     robot_state_publisher_node = Node(
