@@ -52,7 +52,7 @@ r_arm_forward_position_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-      # - r_hand_finger   
+      # - r_hand_finger
     interface_name: position
     use_sim_time: false
 

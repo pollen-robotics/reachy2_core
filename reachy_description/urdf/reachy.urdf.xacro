@@ -12,7 +12,7 @@
 
   <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro" />
-  <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro" />
+  <!-- <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro" /> -->
 
 
   <!-- config  -->
@@ -30,67 +30,163 @@
 
   <xacro:property name="arm_length" value="0.28" />
   <xacro:property name="forearm_length" value="0.28" />
+
+  <xacro:property name="base_height" value="0.7" />
+  <!-- <xacro:property name="base_height" value="1.1" /> -->
+  <xacro:property name="back_bar_min_length" value="0.536" />
+  <xacro:property name="back_bar_max_length" value="0.936" />
+  <xacro:property name="bar_angle" value="${radians(27.458)}" />
+  <xacro:property name="bar_triangle_base" value="0.226186" />
+  <xacro:property name="bar_small_triangle_base" value="0.13857" />
+  <xacro:property name="back_bar_length" value="0.6" />
+  <!-- <xacro:property name="front_bar_length" value="${sqrt(back_bar_length*back_bar_length+bar_triangle_base*bar_triangle_base)}" /> -->
+  <xacro:property name="front_bar_length" value="${sqrt(back_bar_length*back_bar_length+bar_small_triangle_base*bar_small_triangle_base)}" />
+
   <!-- MODEL PARAMETERS -->
 
-  <!-- <material name="torsoblack"> -->
-  <!--     <color rgba="0.5 0.5 0.5 1.0"/> -->
-  <!-- </material> -->
 
+  <!-- <link name="world" /> -->
+  <!-- <joint name="world_joint" type="fixed"> -->
+  <!--   <origin xyz="0 0 1.0" rpy="0 0 0" /> -->
+  <!--   <parent link="world" /> -->
+  <!--   <child link="torso" /> -->
+  <!-- </joint> -->
 
   <link name="world" />
   <joint name="world_joint" type="fixed">
     <origin xyz="0 0 1.0" rpy="0 0 0" />
     <parent link="world" />
-    <child link="torso" />
+    <child link="base_link" />
   </joint>
+
+
+
+
+<link name="base_link">
+	<visual>
+	  <origin xyz="0 0 0" rpy="0 0 0"/>
+	  <geometry>
+	    <!-- <cylinder radius="0.1" length="0.1"/> -->
+	    <mesh filename="package://reachy_description/meshes/zuuu.dae" />
+	  </geometry>
+
+	</visual>
+	<!-- <collision> -->
+	<!--   <origin xyz="0 0 0" rpy="0 0 0"/> -->
+	<!--   <geometry> -->
+	<!--     <cylinder radius="0.1" length="0.1"/> -->
+	<!--   </geometry> -->
+	<!-- </collision> -->
+	<!-- <inertial> -->
+	<!--   <origin xyz="0 0 0" rpy="0 0 0"/> -->
+	<!--   <mass value="1"/> -->
+	<!--   <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/> -->
+	<!-- </inertial> -->
+</link>
+
+<!-- <joint name="base_link_joint" type="fixed"> -->
+<!-- 	<origin xyz="1 0 0" rpy="0 0 0"/> -->
+<!-- 	<parent link="world"/> -->
+<!-- 	<child link="base_link"/> -->
+<!-- </joint> -->
+
+
+<link name="back_bar">
+	<visual>
+	  <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0"/>
+	  <geometry>
+	    <box size="0.04 0.04 ${back_bar_length}"/>
+	  </geometry>
+
+	</visual>
+</link>
+<link name="left_bar">
+	<visual>
+	  <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0"/>
+	  <geometry>
+	    <box size="0.04 0.04 ${front_bar_length}"/>
+	  </geometry>
+	</visual>
+</link>
+
+<link name="right_bar">
+	<visual>
+	  <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0"/>
+	  <geometry>
+	    <box size="0.04 0.04 ${front_bar_length}"/>
+	  </geometry>
+	</visual>
+</link>
+
+<joint name="back_bar_joint" type="fixed">
+	<origin xyz="-0.122 0 0.057" rpy="0 0 0"/>
+	<parent link="base_link"/>
+	<child link="back_bar"/>
+</joint>
+<joint name="left_bar_joint" type="fixed">
+	<!-- <origin xyz="0.203 0.11718 0.01" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/> -->
+	<origin xyz="0.080966 0.11718 0.057" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/>
+	<parent link="base_link"/>
+	<child link="left_bar"/>
+</joint>
+<joint name="right_bar_joint" type="fixed">
+	<!-- <origin xyz="0.203 -0.11718 0.01" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/> -->
+	<origin xyz="0.080966 -0.11718 0.057" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/>
+	<parent link="base_link"/>
+	<child link="right_bar"/>
+</joint>
+
+
 
   <!-- TORSO -->
   <link name="torso">
-    <xacro:if value="${base_collision}">
-      <collision>
-        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0" />
-        <geometry>
-          <box size="0.1 0.2 0.22" />
-        </geometry>
+    <visual>
+      <origin xyz="0 0 0 " rpy="0 0 0"/>
+      <geometry>
+	<!-- <mesh filename="package://reachy_description/meshes/Torso.dae" /> -->
+	<mesh filename="package://reachy_description/meshes/Torso_visual_simplify.dae" />
+	<!-- <mesh filename="package://reachy_description/meshes/Torso_nobedrock_nocam.dae" /> -->
+      </geometry>
 
-        <!-- <origin xyz="0 0 -0.5" rpy="0 0 0"/> -->
-        <!-- <geometry> -->
-        <!--   <cylinder length="1" radius="0.03"/> -->
-        <!-- </geometry> -->
-      </collision>
-      <collision>
-        <origin xyz="-0.15 0 -0.5" rpy="0 0 0" />
-        <geometry>
-          <cylinder length="1" radius="0.03" />
-        </geometry>
-      </collision>
-    </xacro:if>
-    <xacro:if value="${base_visual}">
-      <visual>
-        <origin xyz="-0.05 0 -0.05" rpy="0 0.0 0" />
-        <geometry>
-          <box size="0.1 0.2 0.22" />
-        </geometry>
-        <!-- <material name="torsoblack"/> -->
-        <xacro:torsoblack />
-      </visual>
-      <visual>
-        <origin xyz="-0.15 0 -0.5" rpy="0 0 0" />
-        <geometry>
-          <cylinder length="1" radius="0.03" />
-        </geometry>
-        <xacro:torsoblack />
-      </visual>
-    </xacro:if>
-    <xacro:inertial_cuboid mass="10" xyz="0 0 0.5" rpy="0 0 0" x_length="0.05" y_length="0.05"
-      z_length="1" />
+    </visual>
+
+    <inertial>
+
+      <origin xyz="-0.098614 -0.000471 -0.018363" rpy="0 0 0"/>
+      <mass value="6.314"/>
+      <inertia ixx="0.07397673" ixy="-4.624e-4" ixz="-0.00175905"
+	       iyx="-0.00046237" iyy="0.04454533" iyz="0.00008675"
+	       izx="-0.00175905" izy="0.00008675" izz="0.05494939"/>
+
+
+    </inertial>
+
+    <collision>
+      <origin xyz="0 0 0 " rpy="0 0 0"/>
+      <geometry>
+	<!-- <mesh filename="package://reachy_description/meshes/Torso_convex.dae" /> -->
+	<mesh filename="package://reachy_description/meshes/Torso_double_convex_simplify.dae" />
+      </geometry>
+
+    </collision>
+
+
+
   </link>
-  <gazebo reference="torso">
-    <material>Gazebo/Black</material>
-    <static>true</static>
-  </gazebo>
 
-  <!-- TORSO -->
+  <joint name="torso_base" type="fixed">
+    <origin xyz="0.1265 0 ${0.2+back_bar_length}" rpy="0 0 0" />
+    <parent link="back_bar" />
+    <child link="torso" />
+  </joint>
+
+
+  <!-- <gazebo reference="torso"> -->
+  <!--   <!-\- <material>Gazebo/Black</material> -\-> -->
+  <!--   <static>true</static> -->
+  <!-- </gazebo> -->
+
+  <!-- Head -->
   <xacro:head
     parent="torso"
     damping="${damping}" friction="${friction}"
@@ -110,6 +206,22 @@
     damping="${damping}" friction="${friction}"
     config_file="$(arg left_arm_config)"
   />
+
+
+  <link name="sr_cam_l_frame"/>
+  <joint name="sr_cam_l_frame_joint" type="fixed">
+    <origin xyz="0.002597 0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}"/>
+    <parent link="torso"/>
+    <child link="sr_cam_l_frame"/>
+  </joint>
+
+  <link name="sr_cam_r_frame"/>
+  <joint name="sr_cam_r_frame_joint" type="fixed">
+    <origin xyz="0.002597 -0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}"/>
+    <parent link="torso"/>
+    <child link="sr_cam_r_frame"/>
+  </joint>
+
 
 
   <!-- <link name="r_wrist_cam_frame"/> -->
