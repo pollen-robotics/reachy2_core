@@ -38,7 +38,14 @@
   <xacro:property name="bar_angle" value="${radians(27.458)}" />
   <xacro:property name="bar_triangle_base" value="0.226186" />
   <xacro:property name="bar_small_triangle_base" value="0.13857" />
-  <xacro:property name="back_bar_length" value="0.6" />
+  <xacro:property name="back_bar_length" value="0.720" />
+  <xacro:property name="back_bar_z" value="0.164" />
+  <xacro:property name="back_bar_x" value="-0.122" />
+  <xacro:property name="left_bar_x" value="0.080966" />
+  <xacro:property name="left_bar_y" value="0.117182" />
+  <xacro:property name="right_bar_x" value="0.080966" />
+  <xacro:property name="right_bar_y" value="-0.117182" />
+
   <!-- <xacro:property name="front_bar_length" value="${sqrt(back_bar_length*back_bar_length+bar_triangle_base*bar_triangle_base)}" /> -->
   <xacro:property name="front_bar_length" value="${sqrt(back_bar_length*back_bar_length+bar_small_triangle_base*bar_small_triangle_base)}" />
 
@@ -54,7 +61,7 @@
 
   <link name="world" />
   <joint name="world_joint" type="fixed">
-    <origin xyz="0 0 1.0" rpy="0 0 0" />
+    <origin xyz="0 0 0.0" rpy="0 0 0" />
     <parent link="world" />
     <child link="base_link" />
   </joint>
@@ -62,26 +69,35 @@
 
 
 
-<link name="base_link">
+  <link name="base_link">
 	<visual>
 	  <origin xyz="0 0 0" rpy="0 0 0"/>
 	  <geometry>
 	    <!-- <cylinder radius="0.1" length="0.1"/> -->
-	    <mesh filename="package://reachy_description/meshes/zuuu.dae" />
+	    <!-- <mesh filename="package://reachy_description/meshes/zuuu.dae" /> -->
+	    <mesh filename="package://reachy_description/meshes/mobile_base_visual.dae" />
+	  </geometry>
+	  <xacro:reachy_grey/>
+	</visual>
+
+	<collision>
+	  <origin xyz="0 0 0.13045" rpy="0 0 0"/>
+	  <geometry>
+	    <cylinder radius="0.245" length="0.2609"/>
 	  </geometry>
 
-	</visual>
-	<!-- <collision> -->
-	<!--   <origin xyz="0 0 0" rpy="0 0 0"/> -->
-	<!--   <geometry> -->
-	<!--     <cylinder radius="0.1" length="0.1"/> -->
-	<!--   </geometry> -->
-	<!-- </collision> -->
-	<!-- <inertial> -->
-	<!--   <origin xyz="0 0 0" rpy="0 0 0"/> -->
-	<!--   <mass value="1"/> -->
-	<!--   <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/> -->
-	<!-- </inertial> -->
+	</collision>
+
+	<inertial>
+      <origin xyz="0.008 -0.00048 0.112" rpy="0 0 0"/>
+      <mass value="24.0"/>
+      <inertia ixx="0.40791094" ixy="-0.00167148" ixz="-0.00178789"
+	       iyx="-0.00167148" iyy="0.4236827" iyz="0.00026596"
+	       izx="-0.00178789" izy="0.00026596" izz="0.70990763"/>
+
+
+    </inertial>
+
 </link>
 
 <!-- <joint name="base_link_joint" type="fixed"> -->
@@ -97,8 +113,17 @@
 	  <geometry>
 	    <box size="0.04 0.04 ${back_bar_length}"/>
 	  </geometry>
-
+	  <xacro:reachy_grey/>
 	</visual>
+
+	<collision>
+	  <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0"/>
+	  <geometry>
+	    <box size="0.04 0.04 ${back_bar_length}"/>
+	  </geometry>
+	</collision>
+
+
 </link>
 <link name="left_bar">
 	<visual>
@@ -106,7 +131,16 @@
 	  <geometry>
 	    <box size="0.04 0.04 ${front_bar_length}"/>
 	  </geometry>
+
+	  <xacro:reachy_grey/>
 	</visual>
+	<collision>
+	  <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0"/>
+	  <geometry>
+	    <box size="0.04 0.04 ${front_bar_length}"/>
+	  </geometry>
+	</collision>
+
 </link>
 
 <link name="right_bar">
@@ -115,23 +149,34 @@
 	  <geometry>
 	    <box size="0.04 0.04 ${front_bar_length}"/>
 	  </geometry>
+	  <xacro:reachy_grey/>
 	</visual>
+	<collision>
+	  <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0"/>
+	  <geometry>
+	    <box size="0.04 0.04 ${front_bar_length}"/>
+	  </geometry>
+	</collision>
+
 </link>
 
 <joint name="back_bar_joint" type="fixed">
-	<origin xyz="-0.122 0 0.057" rpy="0 0 0"/>
+	<!-- <origin xyz="-0.122 0 0.057" rpy="0 0 0"/> -->
+	<origin xyz="${back_bar_x} 0 ${back_bar_z}" rpy="0 0 0"/>
 	<parent link="base_link"/>
 	<child link="back_bar"/>
 </joint>
 <joint name="left_bar_joint" type="fixed">
-	<!-- <origin xyz="0.203 0.11718 0.01" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/> -->
-	<origin xyz="0.080966 0.11718 0.057" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/>
+
+	<!-- <origin xyz="0.080966 0.11718 0.057" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/> -->
+	<origin xyz="${left_bar_x} ${left_bar_y} ${back_bar_z}" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/>
 	<parent link="base_link"/>
 	<child link="left_bar"/>
 </joint>
 <joint name="right_bar_joint" type="fixed">
-	<!-- <origin xyz="0.203 -0.11718 0.01" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/> -->
-	<origin xyz="0.080966 -0.11718 0.057" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/>
+
+	<!-- <origin xyz="0.080966 -0.11718 0.057" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/> -->
+	<origin xyz="${right_bar_x} ${right_bar_y} ${back_bar_z}" rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/>
 	<parent link="base_link"/>
 	<child link="right_bar"/>
 </joint>
@@ -144,7 +189,7 @@
       <origin xyz="0 0 0 " rpy="0 0 0"/>
       <geometry>
 	<!-- <mesh filename="package://reachy_description/meshes/Torso.dae" /> -->
-	<mesh filename="package://reachy_description/meshes/Torso_visual_simplify.dae" />
+	<mesh filename="package://reachy_description/meshes/torso_visual_high.dae" />
 	<!-- <mesh filename="package://reachy_description/meshes/Torso_nobedrock_nocam.dae" /> -->
       </geometry>
 
@@ -152,7 +197,8 @@
 
     <inertial>
 
-      <origin xyz="-0.098614 -0.000471 -0.018363" rpy="0 0 0"/>
+      <!-- <origin xyz="-0.098614 -0.000471 -0.018363" rpy="0 0 0"/> -->
+      <origin xyz="-0.051614 -0.000471 -0.018363" rpy="0 0 0"/>
       <mass value="6.314"/>
       <inertia ixx="0.07397673" ixy="-4.624e-4" ixz="-0.00175905"
 	       iyx="-0.00046237" iyy="0.04454533" iyz="0.00008675"
@@ -165,7 +211,8 @@
       <origin xyz="0 0 0 " rpy="0 0 0"/>
       <geometry>
 	<!-- <mesh filename="package://reachy_description/meshes/Torso_convex.dae" /> -->
-	<mesh filename="package://reachy_description/meshes/Torso_double_convex_simplify.dae" />
+	<!-- <mesh filename="package://reachy_description/meshes/torso_collider.dae" /> -->
+	<mesh filename="package://reachy_description/meshes/torso_collider_no_cone.dae" />
       </geometry>
 
     </collision>
@@ -175,9 +222,17 @@
   </link>
 
   <joint name="torso_base" type="fixed">
-    <origin xyz="0.1265 0 ${0.2+back_bar_length}" rpy="0 0 0" />
+    <origin xyz="0.0768 0 ${0.2+back_bar_length}" rpy="0 0 0" />
     <parent link="back_bar" />
     <child link="torso" />
+  </joint>
+
+  <link name="logo">
+  </link>
+  <joint name="logo_joint" type="fixed">
+    <origin xyz="0.047 0 0.0" rpy="0 0 0" />
+    <parent link="torso" />
+    <child link="logo" />
   </joint>
 
 
