@@ -17,8 +17,8 @@
 
   <!-- config  -->
   <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake.yaml" />
-  <xacro:arg name="right_arm_config" default="$(find arm_controller)/config/fake_arm.yaml" />
-  <xacro:arg name="left_arm_config" default="$(find arm_controller)/config/fake_arm.yaml" />
+  <xacro:arg name="right_arm_config" default="$(find arm_description)/config/fake_arm.yaml" />
+  <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_arm.yaml" />
   <!-- config  -->
 
 
@@ -39,6 +39,7 @@
   <xacro:property name="bar_triangle_base" value="0.226186" />
   <xacro:property name="bar_small_triangle_base" value="0.13857" />
   <xacro:property name="back_bar_length" value="0.720" />
+
   <xacro:property name="back_bar_z" value="0.164" />
   <xacro:property name="back_bar_x" value="-0.122" />
   <xacro:property name="left_bar_x" value="0.080966" />
