@@ -30,10 +30,11 @@
 
   <xacro:macro name="head" params="parent damping friction neck_config">
 
+    <!-- xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="${pi} ${neck_offset_pitch} ${neck_offset_yaw}" -->
   <xacro:orbita3d
     name="neck" parent="${parent}"
     length="${neck_length}" radius="${neck_radius}" mass="${neck_mass}"
-    xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="${pi} ${neck_offset_pitch} ${neck_offset_yaw}"
+    xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="0 ${neck_offset_pitch} ${neck_offset_yaw}"
     damping="${damping}" friction="${friction}"
     config_file="${neck_config}"
     />
