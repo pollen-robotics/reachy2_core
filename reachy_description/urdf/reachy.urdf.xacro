@@ -12,7 +12,6 @@
 
   <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro" />
-  <!-- <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro" /> -->
 
 
   <!-- config  -->
@@ -28,17 +27,18 @@
   <xacro:property name="damping" value="0.1" />
   <xacro:property name="friction" value="0.1" />
 
-  <xacro:property name="arm_length" value="0.28" />
-  <xacro:property name="forearm_length" value="0.28" />
 
-  <xacro:property name="base_height" value="0.7" />
-  <!-- <xacro:property name="base_height" value="1.1" /> -->
+
+
+  <!-- Height of the Torso Origin Min=0.9 Max=1.3 (TODO: make it a parameter at launch)  -->
+  <xacro:property name="base_height" value="1.0" />
+
+  <!-- Parameters for the 3 bar base height -->
   <xacro:property name="back_bar_min_length" value="0.536" />
   <xacro:property name="back_bar_max_length" value="0.936" />
   <xacro:property name="bar_angle" value="${radians(27.458)}" />
   <xacro:property name="bar_triangle_base" value="0.226186" />
   <xacro:property name="bar_small_triangle_base" value="0.13857" />
-  <xacro:property name="back_bar_length" value="0.720" />
 
   <xacro:property name="back_bar_z" value="0.164" />
   <xacro:property name="back_bar_x" value="-0.122" />
@@ -47,10 +47,11 @@
   <xacro:property name="right_bar_x" value="0.080966" />
   <xacro:property name="right_bar_y" value="-0.117182" />
 
-  <!-- <xacro:property name="front_bar_length" value="${sqrt(back_bar_length*back_bar_length+bar_triangle_base*bar_triangle_base)}" /> -->
+  <xacro:property name="back_bar_length" value="${base_height-0.2-back_bar_z}" />
+
   <xacro:property name="front_bar_length" value="${sqrt(back_bar_length*back_bar_length+bar_small_triangle_base*bar_small_triangle_base)}" />
 
-  <!-- MODEL PARAMETERS -->
+
 
 
   <!-- <link name="world" /> -->
@@ -74,9 +75,8 @@
 	<visual>
 	  <origin xyz="0 0 0" rpy="0 0 0"/>
 	  <geometry>
-	    <!-- <cylinder radius="0.1" length="0.1"/> -->
-	    <!-- <mesh filename="package://reachy_description/meshes/zuuu.dae" /> -->
-	    <mesh filename="package://reachy_description/meshes/mobile_base_visual.dae" />
+
+	    <mesh filename="file://$(find reachy_description)/meshes/mobile_base_visual.dae" />
 	  </geometry>
 	  <xacro:reachy_grey/>
 	</visual>
@@ -189,9 +189,8 @@
     <visual>
       <origin xyz="0 0 0 " rpy="0 0 0"/>
       <geometry>
-	<!-- <mesh filename="package://reachy_description/meshes/Torso.dae" /> -->
-	<mesh filename="package://reachy_description/meshes/torso_visual_high.dae" />
-	<!-- <mesh filename="package://reachy_description/meshes/Torso_nobedrock_nocam.dae" /> -->
+	<!-- <mesh filename="package://reachy_description/meshes/torso_visual_high.dae" /> -->
+	<mesh filename="file://$(find reachy_description)/meshes/torso_visual_high.dae" />
       </geometry>
 
     </visual>
@@ -211,9 +210,8 @@
     <collision>
       <origin xyz="0 0 0 " rpy="0 0 0"/>
       <geometry>
-	<!-- <mesh filename="package://reachy_description/meshes/Torso_convex.dae" /> -->
-	<!-- <mesh filename="package://reachy_description/meshes/torso_collider.dae" /> -->
-	<mesh filename="package://reachy_description/meshes/torso_collider_no_cone.dae" />
+	<!-- <mesh filename="package://reachy_description/meshes/torso_collider_no_cone.dae" /> -->
+	<mesh filename="file://$(find reachy_description)/meshes/torso_collider_no_cone.dae" />
       </geometry>
 
     </collision>
@@ -229,6 +227,11 @@
   </joint>
 
   <link name="logo">
+            <inertial>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <mass value="0.001"/>
+                <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+            </inertial>
   </link>
   <joint name="logo_joint" type="fixed">
     <origin xyz="0.047 0 0.0" rpy="0 0 0" />
@@ -264,19 +267,225 @@
   />
 
 
-  <link name="sr_cam_l_frame"/>
-  <joint name="sr_cam_l_frame_joint" type="fixed">
+  <link name="sr_cam_l_optical">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+                <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+    </inertial>
+  </link>
+  <link name="sr_cam_l_frame">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+                <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+    </inertial>
+  </link>
+  <joint name="sr_cam_l_optical_joint" type="fixed">
     <origin xyz="0.002597 0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}"/>
-    <parent link="torso"/>
+    <parent link="logo"/>
+    <child link="sr_cam_l_optical"/>
+  </joint>
+  <joint name="sr_cam_l_frame_joint" type="fixed">
+    <origin xyz="0.002597 0.009989 0.038089" rpy="0.0 ${radians(48.0)} 0.0"/>
+    <parent link="logo"/>
     <child link="sr_cam_l_frame"/>
   </joint>
 
-  <link name="sr_cam_r_frame"/>
-  <joint name="sr_cam_r_frame_joint" type="fixed">
+
+  <link name="sr_cam_r_optical">
+            <inertial>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <mass value="0.001"/>
+                <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+            </inertial>
+  </link>
+  <link name="sr_cam_r_frame">
+            <inertial>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <mass value="0.001"/>
+                <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+            </inertial>
+  </link>
+  <joint name="sr_cam_r_optical_joint" type="fixed">
     <origin xyz="0.002597 -0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}"/>
-    <parent link="torso"/>
+    <parent link="logo"/>
+    <child link="sr_cam_r_optical"/>
+  </joint>
+  <joint name="sr_cam_r_frame_joint" type="fixed">
+    <origin xyz="0.002597 -0.009989 0.038089" rpy="0.0 ${radians(48.0)} 0.0 "/>
+    <parent link="logo"/>
     <child link="sr_cam_r_frame"/>
   </joint>
+
+
+
+      <gazebo reference="sr_cam_l_frame">
+	<!-- <link name="left_camera"> -->
+	<sensor type="camera" name="left_camera">
+
+
+          <!-- Set always_on only sensor, not on plugin -->
+          <always_on>0</always_on>
+
+          <!-- Set update_rate only sensor, not on plugin -->
+          <update_rate>30</update_rate>
+
+          <camera name="sr_cam_l">
+            <horizontal_fov>1.3962634</horizontal_fov>
+            <image>
+              <width>800</width>
+              <height>800</height>
+              <format>R8G8B8</format>
+            </image>
+            <distortion>
+              <k1>0.0</k1>
+              <k2>0.0</k2>
+              <k3>0.0</k3>
+              <p1>0.0</p1>
+              <p2>0.0</p2>
+              <center>0.5 0.5</center>
+            </distortion>
+
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+
+          </camera>
+
+          <!-- Use camera, not camera_triggered -->
+          <plugin name="sr_left_camera_controller" filename="libgazebo_ros_camera.so">
+              <ros>
+                <namespace>/</namespace>
+                <remapping>image_raw:=image_raw</remapping>
+                <remapping>camera_info:=camera_info</remapping>
+              </ros>
+              <camera_name>sr_left_image</camera_name>
+
+
+            <!-- <ros> -->
+            <!--   <namespace>custom_ns</namespace> -->
+            <!--   <argument>image_raw:=custom_img</argument> -->
+            <!--   <argument>camera_info:=custom_info</argument> -->
+            <!-- </ros> -->
+
+            <!-- Set camera name. If empty, defaults to sensor name (i.e. "sensor_name") -->
+            <!-- <camera_name>left_camera</camera_name> -->
+
+            <!-- Set TF frame name. If empty, defaults to link name (i.e. "link_name") -->
+            <frame_name>sr_cam_l_optical</frame_name>
+
+            <hack_baseline>0.07</hack_baseline>
+
+            <!-- No need to repeat distortion parameters or to set autoDistortion -->
+          </plugin>
+        </sensor>
+      </gazebo>
+
+
+      <gazebo reference="sr_cam_r_frame">
+	<!-- <link name="left_camera"> -->
+	<sensor type="camera" name="right_camera">
+
+
+          <!-- Set always_on only sensor, not on plugin -->
+          <always_on>0</always_on>
+
+          <!-- Set update_rate only sensor, not on plugin -->
+          <update_rate>30</update_rate>
+
+          <camera name="sr_cam_r">
+            <horizontal_fov>1.3962634</horizontal_fov>
+            <image>
+              <width>800</width>
+              <height>800</height>
+              <format>R8G8B8</format>
+            </image>
+            <distortion>
+              <k1>0.0</k1>
+              <k2>0.0</k2>
+              <k3>0.0</k3>
+              <p1>0.0</p1>
+              <p2>0.0</p2>
+              <center>0.5 0.5</center>
+            </distortion>
+
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.007</stddev>
+            </noise>
+
+          </camera>
+
+          <!-- Use camera, not camera_triggered -->
+          <plugin name="sr_right_camera_controller" filename="libgazebo_ros_camera.so">
+              <ros>
+                <namespace>/</namespace>
+                <remapping>image_raw:=image_raw</remapping>
+                <remapping>camera_info:=camera_info</remapping>
+              </ros>
+              <camera_name>sr_right_image</camera_name>
+
+
+            <!-- <ros> -->
+            <!--   <namespace>custom_ns</namespace> -->
+            <!--   <argument>image_raw:=custom_img</argument> -->
+            <!--   <argument>camera_info:=custom_info</argument> -->
+            <!-- </ros> -->
+
+            <!-- Set camera name. If empty, defaults to sensor name (i.e. "sensor_name") -->
+            <!-- <camera_name>left_camera</camera_name> -->
+
+            <!-- Set TF frame name. If empty, defaults to link name (i.e. "link_name") -->
+            <frame_name>sr_cam_r_optical</frame_name>
+
+            <hack_baseline>0.07</hack_baseline>
+
+            <!-- No need to repeat distortion parameters or to set autoDistortion -->
+          </plugin>
+        </sensor>
+      </gazebo>
+
+
+	<gazebo reference="sr_cam_l_frame">
+	  <sensor name="depth_camera" type="depth">
+            <always_on>true</always_on>
+            <update_rate>15</update_rate>
+            <pose>0 0 0 0 0 0</pose>
+            <camera name="realsense_depth_camera">
+              <horizontal_fov>1.46608</horizontal_fov>
+              <image>
+                <width>424</width>
+                <height>240</height>
+                <format>B8G8R8</format>
+              </image>
+              <clip>
+                <near>0.05</near>
+                <far>8</far>
+              </clip>
+            </camera>
+            <!-- https://github.com/mlherd/ros2_turtlebot3_waffle_intel_realsense -->
+            <!-- <plugin name="intel_realsense_d430_depth_driver" filename="libgazebo_ros_camera.so"> -->
+            <plugin name="intel_realsense_r200_depth_driver" filename="libgazebo_ros_camera.so">
+              <ros>
+                <namespace>depth_camera</namespace>
+                <remapping>depth_camera/image_raw:=color/image_raw</remapping>
+                <remapping>depth_camera/depth/image_raw:=depth/image_rect_raw</remapping>
+                <remapping>depth_camera/camera_info:=camera_info</remapping>
+                <remapping>depth_camera/depth/camera_info:=depth/camera_info</remapping>
+                <remapping>depth_camera/points:=depth/points</remapping>
+              </ros>
+              <camera_name>depth_camera</camera_name>
+              <frame_name>sr_cam_l_optical</frame_name>
+              <hack_baseline>0.07</hack_baseline>
+              <min_depth>0.05</min_depth>
+              <max_depth>8.0</max_depth>
+            </plugin>
+	  </sensor>
+	</gazebo>
 
 
 
@@ -300,11 +509,9 @@
 
     <gazebo>
       <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-        <!-- <parameters>$(find
-        reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
-        <!--                  <parameters>$(find
-        reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>-->
-        <parameters>$(find reachy_bringup)/config/ros2_controllers_ultimate_combo_top_moumoute.yaml</parameters>
+        <!-- <parameters>$(find -->
+        <!-- reachy_bringup)/config/reachy_${robot_config}_controllers.yaml</parameters> -->
+        <parameters>$(find reachy_bringup)/config/reachy_full_kit_controllers.yaml</parameters>
         <!-- TODO FIX ME PROPER controller import  -->
         <robotNamespace>/reachy</robotNamespace>
       </plugin>
