@@ -384,7 +384,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node] ),
+        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node]),
         control_node,
         start_everything_after_control,
     ]
