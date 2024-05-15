@@ -42,18 +42,12 @@ from sensor_msgs.msg import JointState
 # ]
 
 
-DUMMY_JOINT_INTERFACE_NAMES = [
+DUMMY_JOINT_INTERFACE_NAMES = []
 
-]
-
-DUMMY_JOINT_INTERFACE_NAMES_raw_motor = [
-
-]
+DUMMY_JOINT_INTERFACE_NAMES_raw_motor = []
 
 
-DUMMY_JOINT_INTERFACE_NAMES_meta_joint = [
-
-]
+DUMMY_JOINT_INTERFACE_NAMES_meta_joint = []
 
 
 DUMMY_SPECIAL_INTERFACES = {
@@ -86,9 +80,7 @@ DUMMY_SPECIAL_INTERFACES = {
         "l_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_hand": ["torque"],
         "l_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-
     },
-
     # "full_kit": {
     #     "neck":"state",
     #     "neck_raw_motor_1":"state",
@@ -118,9 +110,7 @@ DUMMY_SPECIAL_INTERFACES = {
     #     "l_wrist_raw_motol_3":"state",
     #     "l_hand":"state",
     #     "l_hand_raw_motol_1":"state",
-
     # },
-
     "headless": {
         # "l_shoulder_fan": "state",
         # "l_elbow_fan": "state",
@@ -152,15 +142,11 @@ DUMMY_SPECIAL_INTERFACES = {
 class FakeGzInterface(Node):
     def __init__(self):
         super().__init__("fake_gz_interface")
-        latching_qos = QoSProfile(
-            depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
-        self.dyn_publisher = self.create_publisher(
-            DynamicJointState, "/dynamic_joint_states", qos_profile=latching_qos)
+        latching_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
+        self.dyn_publisher = self.create_publisher(DynamicJointState, "/dynamic_joint_states", qos_profile=latching_qos)
 
-        self.js_publisher = self.create_publisher(
-            JointState, "/joint_states", qos_profile=latching_qos)
-        param_descriptor = ParameterDescriptor(
-            description="The robot configuration.")
+        self.js_publisher = self.create_publisher(JointState, "/joint_states", qos_profile=latching_qos)
+        param_descriptor = ParameterDescriptor(description="The robot configuration.")
 
         self.declare_parameter("robot_config", "full_kit", param_descriptor)
 
@@ -194,8 +180,7 @@ class FakeGzInterface(Node):
 
         self._curr_l_force = 0.0
         self._curr_r_force = 0.0
-        self.logger.info(
-            f"Fake Gazebo interface for /dynamic_joint_states and /joint_states and camera services")
+        self.logger.info(f"Fake Gazebo interface for /dynamic_joint_states and /joint_states and camera services")
 
     def force_cb(self, msg, side):
         # We simulate the gripper force sensor using the Gazebo plugin ft_sensor (force sensor plugin seems broken...)
@@ -234,7 +219,6 @@ class FakeGzInterface(Node):
             # add dummy special interfaces
 
             for k, v in DUMMY_SPECIAL_INTERFACES[self.robot_config].items():
-
                 fake.joint_names.append(k)
                 inter = InterfaceValue()
                 for it in v:
@@ -255,10 +239,8 @@ class FakeGzInterface(Node):
             should_publish = True
 
         if not dummy_joint_interface_present:  # there is none of the special interface for the joint
-
             # add dummy joint interfaces
             for j in joints:
-
                 fake.joint_names.append(j)
 
                 inter = InterfaceValue()
@@ -269,7 +251,6 @@ class FakeGzInterface(Node):
 
                 # add standard joint interfaces
                 for it_name in joint_interface[j].keys():
-
                     inter.interface_names.append(it_name)
                     inter.values.append(joint_interface[j][it_name])
 

@@ -102,11 +102,9 @@ def check_node_status(context):
         else:
             failed_nodes.append(name)
             if name not in non_critical_nodes:
-                LogInfo(msg=f"Critical node failed : [{name}]").execute(
-                    context)
+                LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
                 # instead of exit , just send a ctrl+c signal to the launch file, exit left zombies
-                EmitEvent(event=Shutdown(
-                    reason=f"Node failed : [{name}]")).execute(context)
+                EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
@@ -136,8 +134,7 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
                 event_handler=OnProcessExit(
                     target_action=node,
                     on_exit=[
-                        OpaqueFunction(
-                            function=lambda context: check_node_status(context)),
+                        OpaqueFunction(function=lambda context: check_node_status(context)),
                     ],
                 )
             )
@@ -162,7 +159,6 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
 
 
 def get_current_run_log_dir() -> str:
-
     log_dir = get_logging_directory()
 
     # List all items in the log directory
