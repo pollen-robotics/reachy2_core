@@ -358,7 +358,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     nodes = [
-        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
+        # *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
@@ -384,8 +384,8 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        # *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node if not gazebo_py else gazebo_node] ),
-        # control_node,
+        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node] ),
+        control_node,
         start_everything_after_control,
     ]
 
