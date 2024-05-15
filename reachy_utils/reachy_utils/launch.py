@@ -81,7 +81,8 @@ def title_print(title: str) -> LogInfo:
 
 
 def get_node_list(nodes, context: LaunchContext):
-    packed_node_list = [parseTacus(node, context) for node in nodes]  # "Unpack not allowed in comprehension" :facepalm:
+    # "Unpack not allowed in comprehension" :facepalm:
+    packed_node_list = [parseTacus(node, context) for node in nodes]
     # print(packed_node_list)
     flattened_list = [node for sublist in packed_node_list for node in sublist]
     return flattened_list
@@ -101,9 +102,11 @@ def check_node_status(context):
         else:
             failed_nodes.append(name)
             if name not in non_critical_nodes:
-                LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
+                LogInfo(msg=f"Critical node failed : [{name}]").execute(
+                    context)
                 # instead of exit , just send a ctrl+c signal to the launch file, exit left zombies
-                EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
+                EmitEvent(event=Shutdown(
+                    reason=f"Node failed : [{name}]")).execute(context)
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
@@ -133,7 +136,8 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
                 event_handler=OnProcessExit(
                     target_action=node,
                     on_exit=[
-                        OpaqueFunction(function=lambda context: check_node_status(context)),
+                        OpaqueFunction(
+                            function=lambda context: check_node_status(context)),
                     ],
                 )
             )

@@ -58,34 +58,34 @@ DUMMY_JOINT_INTERFACE_NAMES_meta_joint = [
 
 DUMMY_SPECIAL_INTERFACES = {
     "full_kit": {
-        "neck":["torque"],
-        "neck_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "neck_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "neck_raw_motor_3":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_shoulder":["torque"],
-        "r_shoulder_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_shoulder_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_elbow":["torque"],
-        "r_elbow_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_elbow_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_wrist":["torque"],
-        "r_wrist_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_wrist_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_wrist_raw_motor_3":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_hand":["torque"],
-        "r_hand_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_shoulder":["torque"],
-        "l_shoulder_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_shoulder_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_elbow":["torque"],
-        "l_elbow_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_elbow_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_wrist":["torque"],
-        "l_wrist_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_wrist_raw_motor_2":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_wrist_raw_motor_3":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_hand":["torque"],
-        "l_hand_raw_motor_1":["speed_limit","torque_limit", "p_gain", "i_gain", "d_gain"],
+        "neck": ["torque"],
+        "neck_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "neck_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "neck_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_shoulder": ["torque"],
+        "r_shoulder_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_shoulder_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_elbow": ["torque"],
+        "r_elbow_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_elbow_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_wrist": ["torque"],
+        "r_wrist_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_wrist_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "r_hand": ["torque"],
+        "r_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_shoulder": ["torque"],
+        "l_shoulder_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_shoulder_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_elbow": ["torque"],
+        "l_elbow_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_elbow_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_wrist": ["torque"],
+        "l_wrist_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_wrist_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "l_hand": ["torque"],
+        "l_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
 
     },
 
@@ -152,11 +152,15 @@ DUMMY_SPECIAL_INTERFACES = {
 class FakeGzInterface(Node):
     def __init__(self):
         super().__init__("fake_gz_interface")
-        latching_qos = QoSProfile(depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
-        self.dyn_publisher = self.create_publisher(DynamicJointState, "/dynamic_joint_states", qos_profile=latching_qos)
+        latching_qos = QoSProfile(
+            depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
+        self.dyn_publisher = self.create_publisher(
+            DynamicJointState, "/dynamic_joint_states", qos_profile=latching_qos)
 
-        self.js_publisher = self.create_publisher(JointState, "/joint_states", qos_profile=latching_qos)
-        param_descriptor = ParameterDescriptor(description="The robot configuration.")
+        self.js_publisher = self.create_publisher(
+            JointState, "/joint_states", qos_profile=latching_qos)
+        param_descriptor = ParameterDescriptor(
+            description="The robot configuration.")
 
         self.declare_parameter("robot_config", "full_kit", param_descriptor)
 
@@ -190,7 +194,8 @@ class FakeGzInterface(Node):
 
         self._curr_l_force = 0.0
         self._curr_r_force = 0.0
-        self.logger.info(f"Fake Gazebo interface for /dynamic_joint_states and /joint_states and camera services")
+        self.logger.info(
+            f"Fake Gazebo interface for /dynamic_joint_states and /joint_states and camera services")
 
     def force_cb(self, msg, side):
         # We simulate the gripper force sensor using the Gazebo plugin ft_sensor (force sensor plugin seems broken...)
@@ -213,7 +218,8 @@ class FakeGzInterface(Node):
             joints.append(j)
             interfaces = {}
             if any(i in interface.interface_names for i in DUMMY_JOINT_INTERFACE_NAMES):
-                dummy_joint_interface_present = True  # we assume that if there is one special interface, they are all present
+                # we assume that if there is one special interface, they are all present
+                dummy_joint_interface_present = True
 
             for interface_name, value in zip(interface.interface_names, interface.values):
                 interfaces[interface_name] = value
@@ -227,10 +233,7 @@ class FakeGzInterface(Node):
         ):  # there is none of the special interface
             # add dummy special interfaces
 
-
-
             for k, v in DUMMY_SPECIAL_INTERFACES[self.robot_config].items():
-
 
                 fake.joint_names.append(k)
                 inter = InterfaceValue()
@@ -243,12 +246,13 @@ class FakeGzInterface(Node):
                     elif k == "l_force_gripper":
                         inter.values.append(self._curr_l_force)
                     else:
-                        inter.values.append(0.0)
+                        if v == "torque":
+                            inter.values.append(1.0)
+                        else:
+                            inter.values.append(0.0)
                 fake.interface_values.append(inter)
             # print(f'DEBUG DUMMY fake: {fake}')
             should_publish = True
-
-
 
         if not dummy_joint_interface_present:  # there is none of the special interface for the joint
 
@@ -262,7 +266,6 @@ class FakeGzInterface(Node):
                     # print(f'DEBUG DUMMY std: {j} {it_name}')
                     inter.interface_names.append(it_name)
                     inter.values.append(0.0)
-
 
                 # add standard joint interfaces
                 for it_name in joint_interface[j].keys():
