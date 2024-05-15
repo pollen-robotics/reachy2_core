@@ -23,6 +23,7 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -66,7 +67,7 @@ def launch_setup(context, *args, **kwargs):
 
     title_print("Configuration").execute(context=context)
     reachy_config = ReachyConfig()
-    LogInfo(msg="Reachy config : \n{}".format(reachy_config)).execute(context=context)
+    LogInfo(msg="Reachy config {} : \n{}".format(reachy_config.config_file, reachy_config)).execute(context=context)
 
     reachy_urdf_config = (
         f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
@@ -357,7 +358,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     nodes = [
-        # *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
+        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
@@ -383,14 +384,13 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node]),
-        control_node,
+        # *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node if not gazebo_py else gazebo_node] ),
+        # control_node,
         start_everything_after_control,
     ]
 
 
 def generate_launch_description():
-
     return LaunchDescription(
         [
             # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79

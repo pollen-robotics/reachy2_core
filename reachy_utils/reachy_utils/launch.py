@@ -81,7 +81,8 @@ def title_print(title: str) -> LogInfo:
 
 
 def get_node_list(nodes, context: LaunchContext):
-    packed_node_list = [parseTacus(node, context) for node in nodes]  # "Unpack not allowed in comprehension" :facepalm:
+    # "Unpack not allowed in comprehension" :facepalm:
+    packed_node_list = [parseTacus(node, context) for node in nodes]
     # print(packed_node_list)
     flattened_list = [node for sublist in packed_node_list for node in sublist]
     return flattened_list
@@ -158,7 +159,6 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
 
 
 def get_current_run_log_dir() -> str:
-
     log_dir = get_logging_directory()
 
     # List all items in the log directory
