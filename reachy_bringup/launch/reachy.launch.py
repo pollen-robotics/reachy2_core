@@ -279,7 +279,7 @@ def launch_setup(context, *args, **kwargs):
 
     sdk_server_video_node = Node(
         package="reachy_sdk_server",
-        executable="reachy_grpc_video_sdk_server",
+        executable="reachy_grpc_video_sdk_server" if not gazebo_py else "reachy_grpc_video_sdk_server_gz",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
     )
