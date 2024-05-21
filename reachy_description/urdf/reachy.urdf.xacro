@@ -191,6 +191,7 @@
       <geometry>
 	<!-- <mesh filename="package://reachy_description/meshes/torso_visual_high.dae" /> -->
 	<mesh filename="file://$(find reachy_description)/meshes/torso_visual_high.dae" />
+	<!-- <mesh filename="file://$(find reachy_description)/meshes/torso_visual_high2.dae" /> -->
       </geometry>
 
     </visual>
@@ -332,9 +333,9 @@
           <update_rate>30</update_rate>
 
           <camera name="sr_cam_l">
-            <horizontal_fov>1.3962634</horizontal_fov>
+            <horizontal_fov>${77.0*pi/180}</horizontal_fov>
             <image>
-              <width>800</width>
+              <width>1280</width>
               <height>800</height>
               <format>R8G8B8</format>
             </image>
@@ -397,9 +398,9 @@
           <update_rate>30</update_rate>
 
           <camera name="sr_cam_r">
-            <horizontal_fov>1.3962634</horizontal_fov>
+            <horizontal_fov>${77.0*pi/180}</horizontal_fov>
             <image>
-              <width>800</width>
+              <width>1280</width>
               <height>800</height>
               <format>R8G8B8</format>
             </image>
@@ -456,16 +457,25 @@
             <update_rate>15</update_rate>
             <pose>0 0 0 0 0 0</pose>
             <camera name="realsense_depth_camera">
-              <horizontal_fov>1.46608</horizontal_fov>
+              <horizontal_fov>${77.0*pi/180}</horizontal_fov>
               <image>
-                <width>424</width>
-                <height>240</height>
+                <width>1280</width>
+                <height>800</height>
                 <format>B8G8R8</format>
               </image>
               <clip>
                 <near>0.05</near>
                 <far>8</far>
               </clip>
+
+
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.7</stddev>
+            </noise>
+
+
             </camera>
             <!-- https://github.com/mlherd/ros2_turtlebot3_waffle_intel_realsense -->
             <!-- <plugin name="intel_realsense_d430_depth_driver" filename="libgazebo_ros_camera.so"> -->
