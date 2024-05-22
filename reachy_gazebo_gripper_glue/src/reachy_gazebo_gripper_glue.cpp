@@ -148,8 +148,11 @@ namespace gazebo
                 return false;
             }
 
-            this->robot_link_thumb = robot_model->GetLink("reachy::r_gripper_index_link");
-            this->robot_link_finger = robot_model->GetLink("reachy::r_gripper_index_mimic_link");
+            // this->robot_link_thumb = robot_model->GetLink("reachy::r_gripper_index_link");
+            // this->robot_link_finger = robot_model->GetLink("reachy::r_gripper_index_mimic_link");
+
+            this->robot_link_thumb = robot_model->GetLink("reachy::r_hand_distal_link");
+            this->robot_link_finger = robot_model->GetLink("reachy::r_hand_distal_mimic_link");
 
             if (!this->robot_link_thumb || !this->robot_link_finger)
             {

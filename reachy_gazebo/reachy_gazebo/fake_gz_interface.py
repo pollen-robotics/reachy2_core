@@ -230,10 +230,15 @@ class FakeGzInterface(Node):
                     elif k == "l_force_gripper":
                         inter.values.append(self._curr_l_force)
                     else:
-                        if v == "torque":
+                        if it == "torque":
                             inter.values.append(1.0)
                         else:
                             inter.values.append(0.0)
+                    # elif k == "torque":
+                    #     inter.values.append(1.0)
+                    # else:
+                    #     inter.values.append(0.0)
+
                 fake.interface_values.append(inter)
             # print(f'DEBUG DUMMY fake: {fake}')
             should_publish = True

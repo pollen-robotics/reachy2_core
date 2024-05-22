@@ -80,6 +80,10 @@ def launch_setup(context, *args, **kwargs):
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
 
+    if gazebo_py:
+        LogInfo(msg="Starting Gazebo simulation, setting UseSimTime").execute(context=context)
+        SetUseSimTime(True)
+
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
@@ -358,7 +362,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     nodes = [
-        *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
+        *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
         mobile_base_node,
         robot_state_publisher_node,
@@ -385,6 +389,7 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         # *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node if not gazebo_py else gazebo_node] ),
+        *build_watchers_from_node_list(get_node_list(nodes, context)),
         # control_node,
         start_everything_after_control,
     ]
