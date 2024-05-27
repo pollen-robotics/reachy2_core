@@ -31,7 +31,7 @@
 
 
   <!-- Height of the Torso Origin Min=0.9 Max=1.3 (TODO: make it a parameter at launch)  -->
-  <xacro:property name="base_height" value="1.0" />
+  <xacro:property name="base_height" value="1.2" />
 
   <!-- Parameters for the 3 bar base height -->
   <xacro:property name="back_bar_min_length" value="0.536" />

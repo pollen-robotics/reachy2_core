@@ -234,10 +234,6 @@ class FakeGzInterface(Node):
                             inter.values.append(1.0)
                         else:
                             inter.values.append(0.0)
-                    # elif k == "torque":
-                    #     inter.values.append(1.0)
-                    # else:
-                    #     inter.values.append(0.0)
 
                 fake.interface_values.append(inter)
             # print(f'DEBUG DUMMY fake: {fake}')
