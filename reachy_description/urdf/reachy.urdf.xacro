@@ -282,6 +282,7 @@
                 <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
     </inertial>
   </link>
+
   <joint name="sr_cam_l_optical_joint" type="fixed">
     <origin xyz="0.002597 0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}"/>
     <parent link="logo"/>
@@ -337,7 +338,7 @@
             <image>
               <width>1280</width>
               <height>800</height>
-              <format>R8G8B8</format>
+              <format>B8G8R8</format>
             </image>
             <distortion>
               <k1>0.0</k1>
@@ -402,7 +403,7 @@
             <image>
               <width>1280</width>
               <height>800</height>
-              <format>R8G8B8</format>
+              <format>B8G8R8</format>
             </image>
             <distortion>
               <k1>0.0</k1>
