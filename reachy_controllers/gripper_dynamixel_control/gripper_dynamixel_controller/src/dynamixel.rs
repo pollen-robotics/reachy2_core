@@ -3,7 +3,7 @@ use std::time::Duration;
 use cache_cache::Cache;
 use log::info;
 use motor_toolbox_rs::{MissingResisterErrror, MotorsController, RawMotorsIO, PID};
-use rustypot::{device::mx, DynamixelSerialIO};
+use rustypot::{device::xm, device::mx, DynamixelSerialIO};
 use serde::{Deserialize, Serialize};
 use serialport::TTYPort;
 
@@ -79,7 +79,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
         self.torque_on
             .entry(self.id)
             .or_try_insert_with(|_| {
-                mx::read_torque_enable(&self.io, self.serial_port.as_mut(), self.id)
+                xm::read_torque_enable(&self.io, self.serial_port.as_mut(), self.id)
                     .map(|torque| torque != 0)
             })
             .map(|x| [x])
@@ -88,7 +88,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
         let current_torque = RawMotorsIO::is_torque_on(self)?;
 
         if torque != current_torque {
-            mx::write_torque_enable(
+            xm::write_torque_enable(
                 &self.io,
                 self.serial_port.as_mut(),
                 self.id,
@@ -102,7 +102,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
     }
 
     fn get_current_position(&mut self) -> Result<[f64; 1]> {
-        Ok([mx::conv::dxl_pos_to_radians(mx::read_present_position(
+        Ok([xm::conv::dxl_pos_to_radians(xm::read_present_position(
             &self.io,
             self.serial_port.as_mut(),
             self.id,
@@ -121,7 +121,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
         self.target_position
             .entry(self.id)
             .or_try_insert_with(|_| {
-                Ok(mx::conv::dxl_pos_to_radians(mx::read_goal_position(
+                Ok(xm::conv::dxl_pos_to_radians(xm::read_goal_position(
                     &self.io,
                     self.serial_port.as_mut(),
                     self.id,
@@ -134,11 +134,11 @@ impl RawMotorsIO<1> for GripperDynamixel {
         let current_target = RawMotorsIO::get_target_position(self)?;
 
         if current_target != target_position {
-            mx::write_goal_position(
+            xm::write_goal_position(
                 &self.io,
                 self.serial_port.as_mut(),
                 self.id,
-                mx::conv::radians_to_dxl_pos(target_position[0]),
+                xm::conv::radians_to_dxl_pos(target_position[0]),
             )?;
 
             self.target_position.insert(self.id, target_position[0]);
@@ -151,8 +151,8 @@ impl RawMotorsIO<1> for GripperDynamixel {
         self.velocity_limit
             .entry(self.id)
             .or_try_insert_with(|_| {
-                Ok(mx::conv::dxl_abs_speed_to_rad_per_sec(
-                    mx::read_moving_speed(&self.io, self.serial_port.as_mut(), self.id)?,
+                Ok(xm::conv::dxl_abs_speed_to_rad_per_sec(
+                    xm::read_moving_speed(&self.io, self.serial_port.as_mut(), self.id)?,
                 ))
             })
             .map(|x| [x])
@@ -161,11 +161,11 @@ impl RawMotorsIO<1> for GripperDynamixel {
         let current_velocity_limit = RawMotorsIO::get_velocity_limit(self)?;
 
         if current_velocity_limit != velocity_limit {
-            mx::write_moving_speed(
+            xm::write_moving_speed(
                 &self.io,
                 self.serial_port.as_mut(),
                 self.id,
-                mx::conv::rad_per_sec_to_dxl_abs_speed(velocity_limit[0]),
+                xm::conv::rad_per_sec_to_dxl_abs_speed(velocity_limit[0]),
             )?;
 
             self.velocity_limit.insert(self.id, velocity_limit[0]);
@@ -177,7 +177,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
         self.torque_limit
             .entry(self.id)
             .or_try_insert_with(|_| {
-                Ok(mx::conv::dxl_load_to_abs_torque(mx::read_torque_limit(
+                Ok(xm::conv::dxl_load_to_abs_torque(xm::read_torque_limit(
                     &self.io,
                     self.serial_port.as_mut(),
                     self.id,
@@ -189,11 +189,11 @@ impl RawMotorsIO<1> for GripperDynamixel {
         let current_torque_limit = RawMotorsIO::get_torque_limit(self)?;
 
         if current_torque_limit != torque_limit {
-            mx::write_torque_limit(
+            xm::write_torque_limit(
                 &self.io,
                 self.serial_port.as_mut(),
                 self.id,
-                mx::conv::torque_to_dxl_abs_load(torque_limit[0]),
+                xm::conv::torque_to_dxl_abs_load(torque_limit[0]),
             )?;
 
             self.torque_limit.insert(self.id, torque_limit[0]);
