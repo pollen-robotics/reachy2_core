@@ -223,6 +223,7 @@ def launch_setup(context, *args, **kwargs):
         namespace="",
         package="pollen_kdl_kinematics",
         executable="pollen_kdl_kinematics",
+        output="both",
     )
 
     dynamic_state_router_node = Node(
