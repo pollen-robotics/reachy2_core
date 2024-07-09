@@ -23,7 +23,6 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -422,7 +421,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "foxglove",
-                default_value="true",
+                default_value="false",
                 description="Start FoxGlove bridge with this launch file.",
                 choices=["true", "false"],
             ),
