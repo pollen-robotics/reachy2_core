@@ -23,11 +23,22 @@ from rclpy.logging import get_logging_directory
 report_lock = threading.Lock()
 failed_nodes = []
 success_nodes = []
+CORE_UP_SOUND = "MA_BANT_GAME_PACK_2.wav"
+CORE_DOWN_SOUND = "MA_BANT_Bubbles_Pops_2.wav"
 
 
 # Helper function to get configuration file path
 def get_fake(package: str, filename: str, context: LaunchContext) -> str:
     return PathJoinSubstitution([FindPackageShare(package), "config", filename]).perform(context)
+
+
+def make_blup(sound: str):
+    return ExecuteProcess(
+        cmd=["aplay", f"/home/reachy/dev/reachy2_sounds/{sound}"],
+        output="both",
+        log_cmd=True,
+        shell=True,
+    )
 
 
 def get_rviz_conf_choices() -> list[str]:
@@ -121,6 +132,7 @@ def watcher_report(nb_node: int, delay: float = 8.0) -> TimerAction:
         period=delay,
         actions=[
             OpaqueFunction(function=lambda context: print_report(context)),
+            make_blup(CORE_UP_SOUND),
         ],
     )
 
