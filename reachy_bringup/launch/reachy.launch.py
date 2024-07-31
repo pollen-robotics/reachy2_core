@@ -224,6 +224,7 @@ def launch_setup(context, *args, **kwargs):
         package="pollen_kdl_kinematics",
         executable="pollen_kdl_kinematics",
         output="both",
+        emulate_tty=True,
     )
 
     dynamic_state_router_node = Node(
@@ -272,6 +273,7 @@ def launch_setup(context, *args, **kwargs):
                 package="reachy_sdk_server",
                 executable="reachy_grpc_joint_sdk_server",
                 output="both",
+                emulate_tty=True,
                 arguments=[reachy_config.config_file],
                 condition=IfCondition(start_sdk_server_rl),
             )
