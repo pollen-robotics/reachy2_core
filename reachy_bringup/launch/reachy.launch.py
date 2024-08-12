@@ -133,15 +133,15 @@ def launch_setup(context, *args, **kwargs):
 
     # start ethercat server
     ethercat_master_server = ExecuteProcess(
-        cmd=['/bin/bash', '-c', '$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh'],
-        output='both',
+        cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
+        output="both",
         emulate_tty=True,
         condition=IfCondition(ethercat_rl),
         # Ensure the process is killed when the launch file is stopped
-        sigterm_timeout='2',  # Grace period before sending SIGKILL (optional)
-        sigkill_timeout='2',   # Time to wait after SIGTERM before sending SIGKILL (optional)
+        sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
     )
-    
+
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -392,7 +392,6 @@ def launch_setup(context, *args, **kwargs):
         foxglove_bridge_node,
         rosbag,
     ]
-
 
     start_control_after_ehtercat = TimerAction(
         period=3.0,
