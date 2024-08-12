@@ -132,11 +132,14 @@ def launch_setup(context, *args, **kwargs):
     title_print("Launching nodes...").execute(context=context)
 
     # start ethercat server
-    ethercat_master_server = Node(
-        package="reachy_bringup",
-        executable="start_ethercat_server.sh",
-        output="both",
+    ethercat_master_server = ExecuteProcess(
+        cmd=['/bin/bash', '-c', '$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh'],
+        output='both',
+        emulate_tty=True,
         condition=IfCondition(ethercat_rl),
+        # Ensure the process is killed when the launch file is stopped
+        sigterm_timeout='2',  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout='2',   # Time to wait after SIGTERM before sending SIGKILL (optional)
     )
     
     control_node = Node(
