@@ -60,7 +60,7 @@ def launch_setup(context, *args, **kwargs):
     controllers_py = controllers_rl.perform(context)
     foxglove_rl = LaunchConfiguration("foxglove")
     foxglove_py = foxglove_rl.perform(context) == "true"
-    ethercat_rl = LaunchConfiguration("ethercat")
+    ethercat_rl = LaunchConfiguration("ethercat_master")
     ethercat_py = ethercat_rl.perform(context) == "true"
 
     ####################
@@ -132,12 +132,12 @@ def launch_setup(context, *args, **kwargs):
     title_print("Launching nodes...").execute(context=context)
 
     # start ethercat server
-    ethercat_bridge_node = Node(
-            package="reachy_bringup",
-            executable="start_ethercat_server.sh",
-            output="both",
-            condition=IfCondition(ethercat_rl),
-        )
+    ethercat_master_server = Node(
+        package="reachy_bringup",
+        executable="start_ethercat_server.sh",
+        output="both",
+        condition=IfCondition(ethercat_rl),
+    )
     
     control_node = Node(
         package="controller_manager",
@@ -370,7 +370,7 @@ def launch_setup(context, *args, **kwargs):
     nodes = [
         # *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
-        # ethercat_bridge_node,
+        # ethercat_master_server,
         mobile_base_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
@@ -406,7 +406,7 @@ def launch_setup(context, *args, **kwargs):
 
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node]),
-        ethercat_bridge_node,
+        ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
     ]
@@ -454,7 +454,7 @@ def generate_launch_description():
                 choices=["default", "trajectory"],
             ),
             DeclareLaunchArgument(
-                "ethercat",
+                "ethercat_server",
                 default_value="true",
                 description="Start EtherCAT server.",
                 choices=["true", "false"],
