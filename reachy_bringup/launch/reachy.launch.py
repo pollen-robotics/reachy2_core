@@ -236,6 +236,8 @@ def launch_setup(context, *args, **kwargs):
         namespace="",
         package="pollen_kdl_kinematics",
         executable="pollen_kdl_kinematics",
+        output="both",
+        emulate_tty=True,
     )
 
     dynamic_state_router_node = Node(
@@ -284,6 +286,7 @@ def launch_setup(context, *args, **kwargs):
                 package="reachy_sdk_server",
                 executable="reachy_grpc_joint_sdk_server",
                 output="both",
+                emulate_tty=True,
                 arguments=[reachy_config.config_file],
                 condition=IfCondition(start_sdk_server_rl),
             )
@@ -362,8 +365,8 @@ def launch_setup(context, *args, **kwargs):
             "record",
             "-o",
             f"{get_current_run_log_dir()}/reachy.bag",
-            "/r_arm/target_pose",
-            "/l_arm/target_pose",
+            "/r_arm/ik_target_pose",
+            "/l_arm/ik_target_pose",
             "/head/target_pose",
             "/joint_commands",
         ],
@@ -446,7 +449,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "foxglove",
-                default_value="true",
+                default_value="false",
                 description="Start FoxGlove bridge with this launch file.",
                 choices=["true", "false"],
             ),
