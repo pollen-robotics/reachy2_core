@@ -410,7 +410,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node]),
+        *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
@@ -459,7 +459,7 @@ def generate_launch_description():
                 choices=["default", "trajectory"],
             ),
             DeclareLaunchArgument(
-                "ethercat_server",
+                "ethercat_master",
                 default_value="true",
                 description="Start EtherCAT server.",
                 choices=["true", "false"],
