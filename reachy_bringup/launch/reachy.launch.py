@@ -23,7 +23,6 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -60,8 +59,6 @@ def launch_setup(context, *args, **kwargs):
     controllers_py = controllers_rl.perform(context)
     foxglove_rl = LaunchConfiguration("foxglove")
     foxglove_py = foxglove_rl.perform(context) == "true"
-    ethercat_rl = LaunchConfiguration("ethercat_master")
-    ethercat_py = ethercat_rl.perform(context) == "true"
 
     ####################
     ### Robot config ###
@@ -70,7 +67,6 @@ def launch_setup(context, *args, **kwargs):
     title_print("Configuration").execute(context=context)
     reachy_config = ReachyConfig()
     LogInfo(msg="Reachy config {} : \n{}".format(reachy_config.config_file, reachy_config)).execute(context=context)
-
     reachy_urdf_config = (
         f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
         f" use_gazebo:=true" if gazebo_py else " ",
@@ -136,7 +132,7 @@ def launch_setup(context, *args, **kwargs):
         cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
         output="both",
         emulate_tty=True,
-        condition=IfCondition(ethercat_rl),
+        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat}")),
         # Ensure the process is killed when the launch file is stopped
         sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
         sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
@@ -457,12 +453,6 @@ def generate_launch_description():
                 default_value="default",
                 description="Controller Mode",
                 choices=["default", "trajectory"],
-            ),
-            DeclareLaunchArgument(
-                "ethercat_master",
-                default_value="true",
-                description="Start EtherCAT server.",
-                choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
