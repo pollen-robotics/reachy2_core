@@ -59,7 +59,9 @@ def launch_setup(context, *args, **kwargs):
     controllers_rl = LaunchConfiguration("controllers")
     controllers_py = controllers_rl.perform(context)
     foxglove_rl = LaunchConfiguration("foxglove")
-    foxglove_py = foxglove_rl.perform(context)
+    foxglove_py = foxglove_rl.perform(context) == "true"
+    ethercat_rl = LaunchConfiguration("ethercat_master")
+    ethercat_py = ethercat_rl.perform(context) == "true"
 
     ####################
     ### Robot config ###
@@ -128,6 +130,17 @@ def launch_setup(context, *args, **kwargs):
     ### Nodes ###
     #############
     title_print("Launching nodes...").execute(context=context)
+
+    # start ethercat server
+    ethercat_master_server = ExecuteProcess(
+        cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
+        output="both",
+        emulate_tty=True,
+        condition=IfCondition(ethercat_rl),
+        # Ensure the process is killed when the launch file is stopped
+        sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
+    )
 
     control_node = Node(
         package="controller_manager",
@@ -363,6 +376,7 @@ def launch_setup(context, *args, **kwargs):
     nodes = [
         # *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
+        # ethercat_master_server,
         mobile_base_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
@@ -378,6 +392,15 @@ def launch_setup(context, *args, **kwargs):
         foxglove_bridge_node,
         rosbag,
     ]
+
+    start_control_after_ehtercat = TimerAction(
+        period=3.0,
+        actions=[
+            control_node,
+        ],
+        cancel_on_shutdown=True,
+    )
+
     start_everything_after_control = TimerAction(
         period=1.5,
         actions=[
@@ -387,8 +410,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *build_watchers_from_node_list(get_node_list(nodes, context) + [control_node]),
-        control_node,
+        *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
+        ethercat_master_server,
+        start_control_after_ehtercat,
         start_everything_after_control,
     ]
 
@@ -433,6 +457,12 @@ def generate_launch_description():
                 default_value="default",
                 description="Controller Mode",
                 choices=["default", "trajectory"],
+            ),
+            DeclareLaunchArgument(
+                "ethercat_master",
+                default_value="true",
+                description="Start EtherCAT server.",
+                choices=["true", "false"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
