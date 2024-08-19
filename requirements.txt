@@ -8,4 +8,3 @@ zoom_kurokesu
 pypot
 setuptools==58.2.0
 pillow
-prometheus_client
