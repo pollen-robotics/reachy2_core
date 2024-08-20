@@ -296,6 +296,11 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
+    orbbec_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/gemini_330_series.launch.py"]),
+        condition=IfCondition(start_mobile_base),
+    )
+
     goto_server_node = Node(
         package="pollen_goto",
         executable="goto_server",
@@ -383,6 +388,7 @@ def launch_setup(context, *args, **kwargs):
         # sdk_server_audio_node,
         # audio_node,
         sdk_server_video_node,
+        #orbbec_node,
         goto_server_node,
         dynamic_state_router_node,
         foxglove_bridge_node,
