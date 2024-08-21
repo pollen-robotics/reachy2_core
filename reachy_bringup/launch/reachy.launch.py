@@ -243,31 +243,32 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
-    # trajectory_controllers = []
-    # for traj_controller in [
-    #     "left_arm_controller",
-    #     "right_arm_controller",
-    #     "head_controller",
-    #     "left_gripper_controller",
-    #     "right_gripper_controller",
-    # ]:
-    #     trajectory_controllers.append(
-    #         Node(
-    #             package="controller_manager",
-    #             executable="spawner",
-    #             exec_name=traj_controller,
-    #             arguments=[traj_controller, "-c", "/controller_manager"],
-    #             output="screen",
-    #             parameters=[{"use_sim_time": True}],
-    #         )
-    #     )
+    trajectory_controllers = []
+    for traj_controller in [
+        "left_arm_controller",
+        "right_arm_controller",
+        "head_controller",
+        "left_gripper_controller",
+        "right_gripper_controller",
+    ]:
+        trajectory_controllers.append(
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                exec_name=traj_controller,
+                arguments=[traj_controller, "-c", "/controller_manager"],
+                output="screen",
+                parameters=[{"use_sim_time": True}],
+            )
+        )
 
     delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[
-                *position_controllers,
-                # *(trajectory_controllers if controllers_py == "trajectory" else []),
+                # *position_controllers,
+                *(position_controllers if controllers_py != "trajectory" else []),
+                *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
         ),
