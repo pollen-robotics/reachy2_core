@@ -12,6 +12,7 @@ from launch.actions import (
     OpaqueFunction,
     RegisterEventHandler,
     TimerAction,
+    GroupAction
 )
 from launch.event_handlers import OnProcessExit, OnShutdown
 from launch.events import Shutdown
@@ -77,7 +78,7 @@ def parseTacus(tacus, context):
     elif isinstance(tacus, TimerAction):
         browse_sub_tacus(tacus.actions)
 
-    elif isinstance(tacus, (DeclareLaunchArgument, LogInfo, ExecuteProcess)):
+    elif isinstance(tacus, (DeclareLaunchArgument, LogInfo, ExecuteProcess, GroupAction)):
         pass
     else:
         print("Unhandled type of tacus. Exiting.")
