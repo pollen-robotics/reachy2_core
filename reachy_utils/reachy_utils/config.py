@@ -40,7 +40,6 @@ class ReachyConfig:
 
             if ETHERCAT in config:
                 if config[ETHERCAT] in [True, False]:
-
                     self.ethercat = bool(config[ETHERCAT])
                 else:
                     raise ValueError('Bad ethercat value "{}". Expected values are {}'.format(config[ETHERCAT], [True, False]))

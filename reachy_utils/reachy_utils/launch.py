@@ -7,12 +7,12 @@ from launch.actions import (
     DeclareLaunchArgument,
     EmitEvent,
     ExecuteProcess,
+    GroupAction,
     IncludeLaunchDescription,
     LogInfo,
     OpaqueFunction,
     RegisterEventHandler,
     TimerAction,
-    GroupAction
 )
 from launch.event_handlers import OnProcessExit, OnShutdown
 from launch.events import Shutdown
