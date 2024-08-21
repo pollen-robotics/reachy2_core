@@ -17,6 +17,7 @@ parameter | default | values | description
 `start_sdk_server` | `false` | `true`, `false` | Start sdk_server along with reachy nodes with this launch file.
 `start_rviz` | `false` | `true`, `false`, `*get_rviz_conf_choices()` | Start RViz2 automatically with this launch file.
 `foxglove` | `false` | `true`, `false` | Start FoxGlove bridge with this launch file.
+`orbbec` | `true` | `true`, `false` | Start Orbbec depth camera with this launch file.
 `controllers` | `default` | `default`, `trajectory` | Controller Mode
 `ethercat_master` | `true` | `true`, `false` | Start EtherCAT server.
 

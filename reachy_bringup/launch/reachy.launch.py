@@ -59,6 +59,8 @@ def launch_setup(context, *args, **kwargs):
     controllers_py = controllers_rl.perform(context)
     foxglove_rl = LaunchConfiguration("foxglove")
     foxglove_py = foxglove_rl.perform(context) == "true"
+    orbbec_rl = LaunchConfiguration("orbbec")
+    orbbec_py = orbbec_rl.perform(context) == "true"
 
     ####################
     ### Robot config ###
@@ -297,8 +299,8 @@ def launch_setup(context, *args, **kwargs):
     )
 
     orbbec_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/gemini_330_series.launch.py"]),
-        condition=IfCondition(start_mobile_base),
+        PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/launch", "/gemini_330_series.launch.py"]),
+        condition=IfCondition(orbbec_rl),
     )
 
     goto_server_node = Node(
@@ -388,7 +390,7 @@ def launch_setup(context, *args, **kwargs):
         # sdk_server_audio_node,
         # audio_node,
         sdk_server_video_node,
-        #orbbec_node,
+        orbbec_node,
         goto_server_node,
         dynamic_state_router_node,
         foxglove_bridge_node,
@@ -452,6 +454,12 @@ def generate_launch_description():
                 "foxglove",
                 default_value="false",
                 description="Start FoxGlove bridge with this launch file.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "orbbec",
+                default_value="true",
+                description="Start Orbbec depth camera with this launch file.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
