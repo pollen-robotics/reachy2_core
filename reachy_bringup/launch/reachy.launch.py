@@ -185,12 +185,25 @@ def launch_setup(context, *args, **kwargs):
             f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
+    ]:
+        position_controllers.append(
+            Node(
+                package="controller_manager",
+                exec_name=controller,
+                executable="spawner",
+                arguments=[controller, "-c", "/controller_manager"],
+                condition=IfCondition(PythonExpression(condition)),
+            )
+        )
+
+    generic_controllers = []
+    for controller, condition in [
         ["forward_torque_controller", "True"],
         ["forward_torque_limit_controller", f"not {gazebo_py}"],
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
     ]:
-        position_controllers.append(
+        generic_controllers.append(
             Node(
                 package="controller_manager",
                 exec_name=controller,
@@ -266,7 +279,7 @@ def launch_setup(context, *args, **kwargs):
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[
-                # *position_controllers,
+                *generic_controllers,
                 *(position_controllers if controllers_py != "trajectory" else []),
                 *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
