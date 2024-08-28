@@ -6,4 +6,4 @@ sudo apt-get install -y ros-humble-ros2-control ros-humble-joint-state-publisher
 sudo apt-get install -y libclang-dev libudev-dev pkg-config
 
 # dependencies for Orbbec camera
-sudo apt-get install -y nlohmann-json3-dev ros-humble-image-transport ros-humble-image-publisher ros-humble-camera-info-manager ros-humble-diagnostic-updater ros-humble-diagnostic-msgs ros-humble-statistics-msgs
+sudo apt-get install -y usbutils nlohmann-json3-dev ros-humble-image-transport ros-humble-image-publisher ros-humble-camera-info-manager ros-humble-diagnostic-updater ros-humble-diagnostic-msgs ros-humble-statistics-msgs
