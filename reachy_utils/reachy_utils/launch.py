@@ -7,6 +7,7 @@ from launch.actions import (
     DeclareLaunchArgument,
     EmitEvent,
     ExecuteProcess,
+    GroupAction,
     IncludeLaunchDescription,
     LogInfo,
     OpaqueFunction,
@@ -77,7 +78,7 @@ def parseTacus(tacus, context):
     elif isinstance(tacus, TimerAction):
         browse_sub_tacus(tacus.actions)
 
-    elif isinstance(tacus, (DeclareLaunchArgument, LogInfo, ExecuteProcess)):
+    elif isinstance(tacus, (DeclareLaunchArgument, LogInfo, ExecuteProcess, GroupAction)):
         pass
     else:
         print("Unhandled type of tacus. Exiting.")
