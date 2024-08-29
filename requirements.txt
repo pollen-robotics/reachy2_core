@@ -1,11 +1,5 @@
 # git+https://github.com/colcon/colcon-cargo.git
 git+https://github.com/pollen-robotics/colcon-cargo.git
 git+https://github.com/colcon/colcon-ros-cargo.git
-reachy-sdk
-transforms3d
-v4l2py
-zoom_kurokesu
-pypot
-setuptools==58.2.0
-pillow
-colcon-clean
+colcon-clean==0.2.1
+sympy==12.1
