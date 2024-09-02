@@ -4,3 +4,4 @@ git+https://github.com/colcon/colcon-ros-cargo.git
 colcon-clean==0.2.1
 sympy==1.12
 setuptools==58.2.0
+transforms3d==0.4.2
