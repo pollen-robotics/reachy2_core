@@ -1,3 +1,5 @@
+import os
+
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -23,7 +25,6 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -433,6 +434,11 @@ def launch_setup(context, *args, **kwargs):
         ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
+        # SetEnvironmentVariable(
+        #     name="PYTHONPATH",
+        #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",
+        # ),
+        # cf notion page about python site packages
     ]
 
 
