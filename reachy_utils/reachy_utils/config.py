@@ -27,8 +27,11 @@ REACHY_CONFIG_NECK = "neck_config"
 REACHY_CONFIG_LEFT_ARM = "left_arm_config"
 REACHY_CONFIG_RIGHT_ARM = "right_arm_config"
 
+REACHY_CONFIG_SERIAL_NUMBER = "serial_number"
 REACHY_CONFIG_MOBILE_BASE = "mobile_base"
 ETHERCAT = "ethercat"
+BETA = "beta"
+DVT = "dvt"
 
 
 class ReachyConfig:
@@ -45,6 +48,20 @@ class ReachyConfig:
                     raise ValueError('Bad ethercat value "{}". Expected values are {}'.format(config[ETHERCAT], [True, False]))
             else:
                 self.ethercat = False
+
+            if REACHY_CONFIG_SERIAL_NUMBER in config:
+                if DVT in config[REACHY_CONFIG_SERIAL_NUMBER]:
+                    self.dvt = True
+                    self.beta = False
+                elif BETA in config[REACHY_CONFIG_SERIAL_NUMBER]:
+                    self.beta = True
+                    self.dvt = False
+                else:
+                    raise ValueError(
+                        'Bad serial number "{}". Expected values are {}'.format(
+                            config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA]
+                        )
+                    )
 
             # Robot model (Only full kit for now, TODO)
             if config[REACHY_CONFIG_MODEL] in [
