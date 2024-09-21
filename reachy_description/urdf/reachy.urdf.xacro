@@ -139,17 +139,8 @@
       <inertia ixx="0.40791094" ixy="-0.00167148" ixz="-0.00178789"
 	       iyx="-0.00167148" iyy="0.4236827" iyz="0.00026596"
 	       izx="-0.00178789" izy="0.00026596" izz="0.70990763"/>
-
-
-    </inertial>
-
+  </inertial>
 </link>
-
-<!-- <joint name="base_link_joint" type="fixed"> -->
-<!-- 	<origin xyz="1 0 0" rpy="0 0 0"/> -->
-<!-- 	<parent link="world"/> -->
-<!-- 	<child link="base_link"/> -->
-<!-- </joint> -->
 
 
 <link name="back_bar">
