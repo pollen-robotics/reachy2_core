@@ -1,3 +1,5 @@
+import os
+
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -23,7 +25,6 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -59,7 +60,9 @@ def launch_setup(context, *args, **kwargs):
     controllers_rl = LaunchConfiguration("controllers")
     controllers_py = controllers_rl.perform(context)
     foxglove_rl = LaunchConfiguration("foxglove")
-    foxglove_py = foxglove_rl.perform(context)
+    foxglove_py = foxglove_rl.perform(context) == "true"
+    orbbec_rl = LaunchConfiguration("orbbec")
+    orbbec_py = orbbec_rl.perform(context) == "true"
 
     ####################
     ### Robot config ###
@@ -68,7 +71,6 @@ def launch_setup(context, *args, **kwargs):
     title_print("Configuration").execute(context=context)
     reachy_config = ReachyConfig()
     LogInfo(msg="Reachy config {} : \n{}".format(reachy_config.config_file, reachy_config)).execute(context=context)
-
     reachy_urdf_config = (
         f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
         f" use_gazebo:=true" if gazebo_py else " ",
@@ -133,6 +135,17 @@ def launch_setup(context, *args, **kwargs):
     #############
     title_print("Launching nodes...").execute(context=context)
 
+    # start ethercat server
+    ethercat_master_server = ExecuteProcess(
+        cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
+        output="both",
+        emulate_tty=True,
+        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat}")),
+        # Ensure the process is killed when the launch file is stopped
+        sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
+    )
+
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -180,12 +193,25 @@ def launch_setup(context, *args, **kwargs):
             f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
-        ["forward_torque_controller", "True"],
+    ]:
+        position_controllers.append(
+            Node(
+                package="controller_manager",
+                exec_name=controller,
+                executable="spawner",
+                arguments=[controller, "-c", "/controller_manager"],
+                condition=IfCondition(PythonExpression(condition)),
+            )
+        )
+
+    generic_controllers = []
+    for controller, condition in [
+        ["forward_torque_controller", f"not {gazebo_py}"],
         ["forward_torque_limit_controller", f"not {gazebo_py}"],
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
     ]:
-        position_controllers.append(
+        generic_controllers.append(
             Node(
                 package="controller_manager",
                 exec_name=controller,
@@ -227,6 +253,8 @@ def launch_setup(context, *args, **kwargs):
         namespace="",
         package="pollen_kdl_kinematics",
         executable="pollen_kdl_kinematics",
+        output="both",
+        emulate_tty=True,
     )
 
     dynamic_state_router_node = Node(
@@ -236,31 +264,32 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
-    # trajectory_controllers = []
-    # for traj_controller in [
-    #     "left_arm_controller",
-    #     "right_arm_controller",
-    #     "head_controller",
-    #     "left_gripper_controller",
-    #     "right_gripper_controller",
-    # ]:
-    #     trajectory_controllers.append(
-    #         Node(
-    #             package="controller_manager",
-    #             executable="spawner",
-    #             exec_name=traj_controller,
-    #             arguments=[traj_controller, "-c", "/controller_manager"],
-    #             output="screen",
-    #             parameters=[{"use_sim_time": True}],
-    #         )
-    #     )
+    trajectory_controllers = []
+    for traj_controller in [
+        "left_arm_controller",
+        "right_arm_controller",
+        "head_controller",
+        "left_gripper_controller",
+        "right_gripper_controller",
+    ]:
+        trajectory_controllers.append(
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                exec_name=traj_controller,
+                arguments=[traj_controller, "-c", "/controller_manager"],
+                output="screen",
+                parameters=[{"use_sim_time": True}],
+            )
+        )
 
     delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
             on_exit=[
-                *position_controllers,
-                # *(trajectory_controllers if controllers_py == "trajectory" else []),
+                *generic_controllers,
+                *(position_controllers if controllers_py != "trajectory" else []),
+                *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
         ),
@@ -275,17 +304,30 @@ def launch_setup(context, *args, **kwargs):
                 package="reachy_sdk_server",
                 executable="reachy_grpc_joint_sdk_server",
                 output="both",
+                emulate_tty=True,
                 arguments=[reachy_config.config_file],
                 condition=IfCondition(start_sdk_server_rl),
             )
         ],
     )
 
+    # sdk_server_video_node = Node(
+    #     package="reachy_sdk_server",
+    #     executable="reachy_grpc_video_sdk_server" if not gazebo_py else "reachy_grpc_video_sdk_server_gz",
+    #     output="both",
+    #     condition=IfCondition(start_sdk_server_rl),
+    # )
+    
     sdk_server_video_node = Node(
         package="reachy_sdk_server",
-        executable="reachy_grpc_video_sdk_server" if not gazebo_py else "reachy_grpc_video_sdk_server_gz",
+        executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
+    )
+
+    orbbec_node = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/launch", "/gemini_330_series.launch.py"]),
+        condition=IfCondition(orbbec_rl),
     )
 
     goto_server_node = Node(
@@ -353,17 +395,19 @@ def launch_setup(context, *args, **kwargs):
             "record",
             "-o",
             f"{get_current_run_log_dir()}/reachy.bag",
-            "/r_arm/target_pose",
-            "/l_arm/target_pose",
+            "/r_arm/ik_target_pose",
+            "/l_arm/ik_target_pose",
             "/head/target_pose",
             "/joint_commands",
         ],
         output="screen",
     )
+    
 
     nodes = [
-        *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
+        # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
+        # ethercat_master_server,
         mobile_base_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
@@ -374,11 +418,30 @@ def launch_setup(context, *args, **kwargs):
         # sdk_server_audio_node,
         # audio_node,
         sdk_server_video_node,
+        orbbec_node,
         goto_server_node,
         dynamic_state_router_node,
         foxglove_bridge_node,
         rosbag,
     ]
+
+    if  gazebo_py:
+        start_control_after_ehtercat = TimerAction(
+            period=0.5,
+            actions=[
+                gazebo_node,
+            ],
+            cancel_on_shutdown=True,
+        )
+    else:
+        start_control_after_ehtercat = TimerAction(
+            period=3.0,
+            actions=[
+                control_node,
+            ],
+            cancel_on_shutdown=True,
+        )
+
     start_everything_after_control = TimerAction(
         period=1.5,
         actions=[
@@ -388,8 +451,15 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        *build_watchers_from_node_list(get_node_list(nodes, context)),
+        *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
+        ethercat_master_server,
+        start_control_after_ehtercat,
         start_everything_after_control,
+        # SetEnvironmentVariable(
+        #     name="PYTHONPATH",
+        #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",
+        # ),
+        # cf notion page about python site packages
     ]
 
 
@@ -424,8 +494,14 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "foxglove",
-                default_value="true",
+                default_value="false",
                 description="Start FoxGlove bridge with this launch file.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "orbbec",
+                default_value="true",
+                description="Start Orbbec depth camera with this launch file.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(

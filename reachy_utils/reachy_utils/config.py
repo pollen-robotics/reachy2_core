@@ -28,6 +28,7 @@ REACHY_CONFIG_LEFT_ARM = "left_arm_config"
 REACHY_CONFIG_RIGHT_ARM = "right_arm_config"
 
 REACHY_CONFIG_MOBILE_BASE = "mobile_base"
+ETHERCAT = "ethercat"
 
 
 class ReachyConfig:
@@ -36,6 +37,14 @@ class ReachyConfig:
 
         with open(self.config_file) as f:
             config = yaml.load(f, Loader=yaml.FullLoader)
+
+            if ETHERCAT in config:
+                if config[ETHERCAT] in [True, False]:
+                    self.ethercat = bool(config[ETHERCAT])
+                else:
+                    raise ValueError('Bad ethercat value "{}". Expected values are {}'.format(config[ETHERCAT], [True, False]))
+            else:
+                self.ethercat = False
 
             # Robot model (Only full kit for now, TODO)
             if config[REACHY_CONFIG_MODEL] in [
@@ -96,6 +105,8 @@ class ReachyConfig:
             + "{}\n".format(self.right_arm_config)
             + "left_arm_config".ljust(25, " ")
             + "{}\n".format(self.left_arm_config)
+            + "ethercat".ljust(25, " ")
+            + "{}\n".format(self.ethercat)
         )
 
 

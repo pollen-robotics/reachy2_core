@@ -13,6 +13,41 @@
   <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro" />
 
+  <!-- Zuuu mobile base -->
+
+  <xacro:arg name="zuuu_prefix" default=""/>
+
+  <xacro:arg name="model" default="zuuu" />
+
+  <xacro:arg name="use_fake_components" default="true"/>
+  <xacro:arg name="use_fixed_wheels" default="true"/>
+  <xacro:arg name="use_ros_control" default="true"/>
+  
+  
+  <!-- Import zuuu macro -->
+  <xacro:include filename="$(find zuuu_description)/urdf/zuuu_description.urdf.xacro"/>
+
+  <!-- Import Gazebo macro -->
+  <xacro:include filename="$(find zuuu_description)/urdf/zuuu.gazebo.xacro"/>
+
+  <!-- Import Zuuu ros2_control description -->
+  <xacro:include filename="$(find zuuu_description)/urdf/zuuu.ros2_control.xacro"/>
+
+  <xacro:zuuu
+      model="$(arg model)" prefix="$(arg zuuu_prefix)">
+  </xacro:zuuu>
+
+  <xacro:if value="$(arg use_gazebo)">
+    <xacro:zuuu_gazebo model="$(arg model)" prefix="$(arg zuuu_prefix)" />
+  </xacro:if>
+
+  <xacro:if value="$(arg use_ros_control)">
+    <xacro:zuuu_ros2_control model="$(arg model)" prefix="$(arg zuuu_prefix)"/>
+  </xacro:if>
+
+  <!-- End of Zuuu mobile base -->
+  
+
 
   <!-- config  -->
   <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake.yaml" />
@@ -61,17 +96,26 @@
   <!--   <child link="torso" /> -->
   <!-- </joint> -->
 
-  <link name="world" />
+  <!-- <link name="world" />
   <joint name="world_joint" type="fixed">
     <origin xyz="0 0 0.0" rpy="0 0 0" />
     <parent link="world" />
     <child link="base_link" />
-  </joint>
+  </joint> -->
+
+<!-- Robot Footprint. The robot's root link -->
+<link name="base_footprint"/>
+
+<joint name="base_footprint_joint" type="fixed">
+  <origin rpy="0 0 0" xyz="0 0 0"/>
+  <axis xyz="0 0 0"/>
+  <!-- <joint_properties damping="${global_damping}" friction="${global_friction}"/> -->
+  <parent link="base_footprint"/>
+  <child link="base_link"/>
+</joint>
 
 
-
-
-  <link name="base_link">
+<link name="base_link">
 	<visual>
 	  <origin xyz="0 0 0" rpy="0 0 0"/>
 	  <geometry>
