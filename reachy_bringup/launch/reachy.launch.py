@@ -377,16 +377,26 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(foxglove_rl),
     )
 
-    mobile_base_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-        condition=IfCondition(start_mobile_base),
-    )
+    if gazebo_py:
+        mobile_base_node = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
+            # condition=IfCondition(start_mobile_base),
+            launch_arguments={"use_sim_time": f"{True}", "fake_hardware": f"{True}"}.items(),
+        ) 
+    else:
+        mobile_base_node = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
+            condition=IfCondition(start_mobile_base),
+            launch_arguments={"use_sim_time": f"{False}", "fake_hardware": f"{False}"}.items(),
+        )
+
 
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
+    
 
     rosbag = ExecuteProcess(
         cmd=[
@@ -449,6 +459,8 @@ def launch_setup(context, *args, **kwargs):
         ],
         cancel_on_shutdown=True,
     )
+    
+    
 
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
