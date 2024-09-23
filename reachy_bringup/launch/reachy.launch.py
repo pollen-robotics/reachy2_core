@@ -63,6 +63,7 @@ def launch_setup(context, *args, **kwargs):
     foxglove_py = foxglove_rl.perform(context) == "true"
     orbbec_rl = LaunchConfiguration("orbbec")
     orbbec_py = orbbec_rl.perform(context) == "true"
+    nodes = []
 
     ####################
     ### Robot config ###
@@ -128,7 +129,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
-    LogInfo(msg=f"Launching Mobile Base: {start_mobile_base}").execute(context=context)
+    start_mobile_base_py = start_mobile_base == "true"
+    
+    LogInfo(msg=f"Launching Mobile Base: {start_mobile_base_py}").execute(context=context)
 
     #############
     ### Nodes ###
@@ -377,18 +380,12 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(foxglove_rl),
     )
 
-    if gazebo_py:
+    if start_mobile_base_py:
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            # condition=IfCondition(start_mobile_base),
-            launch_arguments={"use_sim_time": f"{True}", "fake_hardware": f"{True}"}.items(),
+            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
         ) 
-    else:
-        mobile_base_node = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            condition=IfCondition(start_mobile_base),
-            launch_arguments={"use_sim_time": f"{False}", "fake_hardware": f"{False}"}.items(),
-        )
+        nodes.append(mobile_base_node)
 
 
     gazebo_node = IncludeLaunchDescription(
@@ -414,11 +411,10 @@ def launch_setup(context, *args, **kwargs):
     )
     
 
-    nodes = [
+    nodes.extend([
         # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
         # fake_camera_node,
         # ethercat_master_server,
-        mobile_base_node,
         robot_state_publisher_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
@@ -433,7 +429,7 @@ def launch_setup(context, *args, **kwargs):
         dynamic_state_router_node,
         foxglove_bridge_node,
         rosbag,
-    ]
+    ])
 
     if  gazebo_py:
         start_control_after_ehtercat = TimerAction(
