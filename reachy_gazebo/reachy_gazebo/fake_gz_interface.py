@@ -180,7 +180,7 @@ class FakeGzInterface(Node):
 
         self._curr_l_force = 0.0
         self._curr_r_force = 0.0
-        self.logger.info(f"Fake Gazebo interface for /dynamic_joint_states and /joint_states and camera services")
+        self.logger.info(f"Fake Gazebo interface for /dynamic_joint_states and /joint_states")
 
     def force_cb(self, msg, side):
         # We simulate the gripper force sensor using the Gazebo plugin ft_sensor (force sensor plugin seems broken...)

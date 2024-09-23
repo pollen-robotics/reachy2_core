@@ -261,11 +261,11 @@
           <!-- Use camera, not camera_triggered -->
           <plugin name="left_camera_controller" filename="libgazebo_ros_camera.so">
               <ros>
-                <namespace>/</namespace>
+                <namespace>/teleop_camera</namespace>
                 <remapping>image_raw:=image_raw</remapping>
                 <remapping>camera_info:=camera_info</remapping>
               </ros>
-              <camera_name>teleop_camera/left_image</camera_name>
+              <camera_name>left_image</camera_name>
 
 
             <!-- <ros> -->
@@ -330,11 +330,11 @@
           <!-- Use camera, not camera_triggered -->
           <plugin name="right_camera_controller" filename="libgazebo_ros_camera.so">
               <ros>
-                <namespace>/</namespace>
+                <namespace>/teleop_camera</namespace>
                 <remapping>image_raw:=image_raw</remapping>
                 <remapping>camera_info:=camera_info</remapping>
               </ros>
-              <camera_name>teleop_camera/right_image</camera_name>
+              <camera_name>right_image</camera_name>
 
             <!-- <ros> -->
             <!--   <namespace>custom_ns</namespace> -->

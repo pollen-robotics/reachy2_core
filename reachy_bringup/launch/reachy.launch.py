@@ -25,6 +25,7 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -130,7 +131,7 @@ def launch_setup(context, *args, **kwargs):
 
     start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
     start_mobile_base_py = start_mobile_base == "true"
-    
+
     LogInfo(msg=f"Launching Mobile Base: {start_mobile_base_py}").execute(context=context)
 
     #############
@@ -320,12 +321,13 @@ def launch_setup(context, *args, **kwargs):
     #     output="both",
     #     condition=IfCondition(start_sdk_server_rl),
     # )
-    
+
     sdk_server_video_node = Node(
         package="reachy_sdk_server",
         executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
+        arguments=[("--gazebo" if gazebo_py else "")],
     )
 
     orbbec_node = IncludeLaunchDescription(
@@ -384,16 +386,14 @@ def launch_setup(context, *args, **kwargs):
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
             launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
-        ) 
+        )
         nodes.append(mobile_base_node)
-
 
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
         launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
-    
 
     rosbag = ExecuteProcess(
         cmd=[
@@ -409,29 +409,30 @@ def launch_setup(context, *args, **kwargs):
         ],
         output="screen",
     )
-    
 
-    nodes.extend([
-        # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
-        # fake_camera_node,
-        # ethercat_master_server,
-        robot_state_publisher_node,
-        joint_state_broadcaster_spawner,
-        delay_rviz_after_joint_state_broadcaster_spawner,
-        delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-        gripper_safe_controller_node,
-        sdk_server_node,
-        # sdk_server_audio_node,
-        # audio_node,
-        sdk_server_video_node,
-        orbbec_node,
-        goto_server_node,
-        dynamic_state_router_node,
-        foxglove_bridge_node,
-        rosbag,
-    ])
+    nodes.extend(
+        [
+            # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
+            # fake_camera_node,
+            # ethercat_master_server,
+            robot_state_publisher_node,
+            joint_state_broadcaster_spawner,
+            delay_rviz_after_joint_state_broadcaster_spawner,
+            delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
+            gripper_safe_controller_node,
+            sdk_server_node,
+            # sdk_server_audio_node,
+            # audio_node,
+            sdk_server_video_node,
+            orbbec_node,
+            goto_server_node,
+            dynamic_state_router_node,
+            foxglove_bridge_node,
+            rosbag,
+        ]
+    )
 
-    if  gazebo_py:
+    if gazebo_py:
         start_control_after_ehtercat = TimerAction(
             period=0.5,
             actions=[
@@ -455,8 +456,6 @@ def launch_setup(context, *args, **kwargs):
         ],
         cancel_on_shutdown=True,
     )
-    
-    
 
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
