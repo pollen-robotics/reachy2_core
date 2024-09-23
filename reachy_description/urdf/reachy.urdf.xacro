@@ -22,8 +22,8 @@
   <xacro:arg name="use_fake_components" default="true"/>
   <xacro:arg name="use_fixed_wheels" default="true"/>
   <xacro:arg name="use_ros_control" default="true"/>
-  
-  
+
+
   <!-- Import zuuu macro -->
   <xacro:include filename="$(find zuuu_description)/urdf/zuuu_description.urdf.xacro"/>
 
@@ -46,7 +46,7 @@
   </xacro:if>
 
   <!-- End of Zuuu mobile base -->
-  
+
 
 
   <!-- config  -->
@@ -517,12 +517,12 @@
             <!-- <plugin name="intel_realsense_d430_depth_driver" filename="libgazebo_ros_camera.so"> -->
             <plugin name="depth_driver" filename="libgazebo_ros_camera.so">
               <ros>
-                <namespace>depth_camera</namespace>
-                <remapping>depth_camera/image_raw:=color/image_raw</remapping>
-                <remapping>depth_camera/depth/image_raw:=depth/image_rect_raw</remapping>
-                <remapping>depth_camera/camera_info:=camera_info</remapping>
-                <remapping>depth_camera/depth/camera_info:=depth/camera_info</remapping>
-                <remapping>depth_camera/points:=depth/points</remapping>
+                <namespace>camera</namespace>
+                <remapping>camera/image_raw:=color/image_raw</remapping>
+                <remapping>camera/depth/image_raw:=depth/image_rect_raw</remapping>
+                <remapping>camera/camera_info:=camera_info</remapping>
+                <remapping>camera/depth/camera_info:=depth/camera_info</remapping>
+                <remapping>camera/points:=depth/points</remapping>
               </ros>
               <camera_name>depth_camera</camera_name>
               <frame_name>sr_cam_l_optical</frame_name>
