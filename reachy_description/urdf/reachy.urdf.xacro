@@ -103,46 +103,6 @@
     <child link="base_link" />
   </joint> -->
 
-<!-- Robot Footprint. The robot's root link -->
-<link name="base_footprint"/>
-
-<joint name="base_footprint_joint" type="fixed">
-  <origin rpy="0 0 0" xyz="0 0 0"/>
-  <axis xyz="0 0 0"/>
-  <!-- <joint_properties damping="${global_damping}" friction="${global_friction}"/> -->
-  <parent link="base_footprint"/>
-  <child link="base_link"/>
-</joint>
-
-
-<link name="base_link">
-	<visual>
-	  <origin xyz="0 0 0" rpy="0 0 0"/>
-	  <geometry>
-
-	    <mesh filename="file://$(find reachy_description)/meshes/mobile_base_visual.dae" />
-	  </geometry>
-	  <xacro:reachy_grey/>
-	</visual>
-
-	<collision>
-	  <origin xyz="0 0 0.13045" rpy="0 0 0"/>
-	  <geometry>
-	    <cylinder radius="0.245" length="0.2609"/>
-	  </geometry>
-
-	</collision>
-
-	<inertial>
-      <origin xyz="0.008 -0.00048 0.112" rpy="0 0 0"/>
-      <mass value="24.0"/>
-      <inertia ixx="0.40791094" ixy="-0.00167148" ixz="-0.00178789"
-	       iyx="-0.00167148" iyy="0.4236827" iyz="0.00026596"
-	       izx="-0.00178789" izy="0.00026596" izz="0.70990763"/>
-  </inertial>
-</link>
-
-
 <link name="back_bar">
 	<visual>
 	  <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0"/>
