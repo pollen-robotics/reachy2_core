@@ -1,5 +1,6 @@
 use dynamixel::{GripperDynamixel, GripperDynamixelConfig};
 use motor_toolbox_rs::{FakeMotorsController, MotorsController, Result};
+
 use serde::{Deserialize, Serialize};
 
 mod dynamixel;
@@ -61,10 +62,22 @@ impl Gripper {
         self.inner.set_torque([false])
     }
 
-    /// Get the current position (in rads)
-    pub fn get_current_orientation(&mut self) -> Result<f64> {
+    /// Get the present position (in rads)
+    pub fn get_present_orientation(&mut self) -> Result<f64> {
         let pos = self.inner.get_current_position()?;
         Ok(pos[0])
+    }
+
+    /// Get the present velocity (in rads)
+    pub fn get_present_velocity(&mut self) -> Result<f64> {
+        let vel = self.inner.get_current_velocity()?;
+        Ok(vel[0] * 0.10472)
+    }
+
+    /// Get the present current (in A)
+    pub fn get_present_current(&mut self) -> Result<f64> {
+        let cur = self.inner.get_current_torque()?;
+        Ok(cur[0] * 0.001)
     }
 
     /// Get the target position (in rads)
