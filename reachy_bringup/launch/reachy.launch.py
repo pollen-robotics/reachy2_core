@@ -25,7 +25,6 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     FULL_KIT,
     HEADLESS,
@@ -38,6 +37,7 @@ from reachy_utils.config import (
 )
 from reachy_utils.launch import (
     build_watchers_from_node_list,
+    clear_bags_and_logs,
     get_current_run_log_dir,
     get_fake,
     get_node_list,
@@ -65,6 +65,8 @@ def launch_setup(context, *args, **kwargs):
     orbbec_rl = LaunchConfiguration("orbbec")
     orbbec_py = orbbec_rl.perform(context) == "true"
     nodes = []
+
+    clear_bags_and_logs(nb_runs_to_keep=10)
 
     ####################
     ### Robot config ###
@@ -169,6 +171,8 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         exec_name="joint_state_broadcaster",
+        name="joint_state_broadcaster",
+        namespace="toto",
         arguments=[
             *(
                 ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
@@ -202,6 +206,7 @@ def launch_setup(context, *args, **kwargs):
             Node(
                 package="controller_manager",
                 exec_name=controller,
+                name=controller,
                 executable="spawner",
                 arguments=[controller, "-c", "/controller_manager"],
                 condition=IfCondition(PythonExpression(condition)),
@@ -219,6 +224,7 @@ def launch_setup(context, *args, **kwargs):
             Node(
                 package="controller_manager",
                 exec_name=controller,
+                name=controller,
                 executable="spawner",
                 arguments=[controller, "-c", "/controller_manager"],
                 condition=IfCondition(PythonExpression(condition)),
@@ -259,6 +265,7 @@ def launch_setup(context, *args, **kwargs):
         executable="pollen_kdl_kinematics",
         output="both",
         emulate_tty=True,
+        additional_env={"RCUTILS_CONSOLE_OUTPUT_FILE": "/home/reachy/.ros/log/kinematics.log"},
     )
 
     dynamic_state_router_node = Node(
@@ -406,6 +413,7 @@ def launch_setup(context, *args, **kwargs):
             "/l_arm/ik_target_pose",
             "/head/target_pose",
             "/joint_commands",
+            "/joint_states",
         ],
         output="screen",
     )
@@ -414,7 +422,6 @@ def launch_setup(context, *args, **kwargs):
         [
             # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
             # fake_camera_node,
-            # ethercat_master_server,
             robot_state_publisher_node,
             joint_state_broadcaster_spawner,
             delay_rviz_after_joint_state_broadcaster_spawner,
