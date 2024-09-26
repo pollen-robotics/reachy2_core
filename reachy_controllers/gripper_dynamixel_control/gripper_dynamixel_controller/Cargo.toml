@@ -20,5 +20,5 @@ motor_toolbox_rs = "0.2.1"
 [build-dependencies]
 cbindgen = "0.24.3"
 
-[lib]
-crate-type = ["staticlib", "cdylib"]
+# [lib]
+# crate-type = ["staticlib", "cdylib"]
