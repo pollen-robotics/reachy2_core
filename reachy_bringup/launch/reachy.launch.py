@@ -25,8 +25,9 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
+    BETA,
+    DVT,
     FULL_KIT,
     HEADLESS,
     MINI,
@@ -84,6 +85,7 @@ def launch_setup(context, *args, **kwargs):
         f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
         f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
         f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
+        f' robot_model:="{BETA if reachy_config.beta else DVT if reachy_config.dvt else None}"',
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
 
