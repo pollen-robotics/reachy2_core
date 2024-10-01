@@ -10,7 +10,7 @@ edition = "2021"
 cache_cache = "0.1.1"
 libc = "0.2.146"
 once_cell = "1.19.0"
-rustypot = { git = "https://github.com/pollen-robotics/rustypot", branch = "support-poulpe" }
+rustypot = { git = "https://github.com/pollen-robotics/rustypot" }
 serialport = "4.2.1"
 serde = { version = "1.0.183", features = ["derive"] }
 serde_yaml = "0.9.25"
