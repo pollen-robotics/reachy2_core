@@ -25,8 +25,9 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
+    BETA,
+    DVT,
     FULL_KIT,
     HEADLESS,
     MINI,
@@ -38,6 +39,7 @@ from reachy_utils.config import (
 )
 from reachy_utils.launch import (
     build_watchers_from_node_list,
+    clear_bags_and_logs,
     get_current_run_log_dir,
     get_fake,
     get_node_list,
@@ -64,6 +66,9 @@ def launch_setup(context, *args, **kwargs):
     foxglove_py = foxglove_rl.perform(context) == "true"
     orbbec_rl = LaunchConfiguration("orbbec")
     orbbec_py = orbbec_rl.perform(context) == "true"
+    nodes = []
+
+    clear_bags_and_logs(nb_runs_to_keep=10)
 
     ####################
     ### Robot config ###
@@ -80,8 +85,13 @@ def launch_setup(context, *args, **kwargs):
         f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
         f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
         f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
+        f' robot_model:="{BETA if reachy_config.beta else DVT if reachy_config.dvt else None}"',
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
+
+    if gazebo_py:
+        LogInfo(msg="Starting Gazebo simulation, setting UseSimTime").execute(context=context)
+        SetUseSimTime(True)
 
     robot_description_content = Command(
         [
@@ -125,7 +135,9 @@ def launch_setup(context, *args, **kwargs):
     )
 
     start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
-    LogInfo(msg=f"Launching Mobile Base: {start_mobile_base}").execute(context=context)
+    start_mobile_base_py = start_mobile_base == "true"
+
+    LogInfo(msg=f"Launching Mobile Base: {start_mobile_base_py}").execute(context=context)
 
     #############
     ### Nodes ###
@@ -162,6 +174,8 @@ def launch_setup(context, *args, **kwargs):
         package="controller_manager",
         executable="spawner",
         exec_name="joint_state_broadcaster",
+        name="joint_state_broadcaster",
+        namespace="toto",
         arguments=[
             *(
                 ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
@@ -195,6 +209,7 @@ def launch_setup(context, *args, **kwargs):
             Node(
                 package="controller_manager",
                 exec_name=controller,
+                name=controller,
                 executable="spawner",
                 arguments=[controller, "-c", "/controller_manager"],
                 condition=IfCondition(PythonExpression(condition)),
@@ -203,7 +218,7 @@ def launch_setup(context, *args, **kwargs):
 
     generic_controllers = []
     for controller, condition in [
-        ["forward_torque_controller", "True"],
+        ["forward_torque_controller", f"not {gazebo_py}"],
         ["forward_torque_limit_controller", f"not {gazebo_py}"],
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
@@ -212,6 +227,7 @@ def launch_setup(context, *args, **kwargs):
             Node(
                 package="controller_manager",
                 exec_name=controller,
+                name=controller,
                 executable="spawner",
                 arguments=[controller, "-c", "/controller_manager"],
                 condition=IfCondition(PythonExpression(condition)),
@@ -252,6 +268,7 @@ def launch_setup(context, *args, **kwargs):
         executable="pollen_kdl_kinematics",
         output="both",
         emulate_tty=True,
+        additional_env={"RCUTILS_CONSOLE_OUTPUT_FILE": "/home/reachy/.ros/log/kinematics.log"},
     )
 
     dynamic_state_router_node = Node(
@@ -308,11 +325,19 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
+    # sdk_server_video_node = Node(
+    #     package="reachy_sdk_server",
+    #     executable="reachy_grpc_video_sdk_server" if not gazebo_py else "reachy_grpc_video_sdk_server_gz",
+    #     output="both",
+    #     condition=IfCondition(start_sdk_server_rl),
+    # )
+
     sdk_server_video_node = Node(
         package="reachy_sdk_server",
         executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
+        arguments=["--gazebo"] if gazebo_py else [],
     )
 
     orbbec_node = IncludeLaunchDescription(
@@ -367,10 +392,12 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(foxglove_rl),
     )
 
-    mobile_base_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-        condition=IfCondition(start_mobile_base),
-    )
+    if start_mobile_base_py:
+        mobile_base_node = IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
+            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
+        )
+        nodes.append(mobile_base_node)
 
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
@@ -389,38 +416,48 @@ def launch_setup(context, *args, **kwargs):
             "/l_arm/ik_target_pose",
             "/head/target_pose",
             "/joint_commands",
+            "/joint_states",
         ],
         output="screen",
     )
 
-    nodes = [
-        # *((control_node,) if not gazebo_py else (SetUseSimTime(True), gazebo_node)),  # SetUseSimTime does not seem to work...
-        # fake_camera_node,
-        # ethercat_master_server,
-        mobile_base_node,
-        robot_state_publisher_node,
-        joint_state_broadcaster_spawner,
-        delay_rviz_after_joint_state_broadcaster_spawner,
-        delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-        gripper_safe_controller_node,
-        sdk_server_node,
-        # sdk_server_audio_node,
-        # audio_node,
-        sdk_server_video_node,
-        orbbec_node,
-        goto_server_node,
-        dynamic_state_router_node,
-        foxglove_bridge_node,
-        rosbag,
-    ]
-
-    start_control_after_ehtercat = TimerAction(
-        period=3.0,
-        actions=[
-            control_node,
-        ],
-        cancel_on_shutdown=True,
+    nodes.extend(
+        [
+            # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
+            # fake_camera_node,
+            robot_state_publisher_node,
+            joint_state_broadcaster_spawner,
+            delay_rviz_after_joint_state_broadcaster_spawner,
+            delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
+            gripper_safe_controller_node,
+            sdk_server_node,
+            # sdk_server_audio_node,
+            # audio_node,
+            sdk_server_video_node,
+            orbbec_node,
+            goto_server_node,
+            dynamic_state_router_node,
+            foxglove_bridge_node,
+            rosbag,
+        ]
     )
+
+    if gazebo_py:
+        start_control_after_ehtercat = TimerAction(
+            period=0.5,
+            actions=[
+                gazebo_node,
+            ],
+            cancel_on_shutdown=True,
+        )
+    else:
+        start_control_after_ehtercat = TimerAction(
+            period=3.0,
+            actions=[
+                control_node,
+            ],
+            cancel_on_shutdown=True,
+        )
 
     start_everything_after_control = TimerAction(
         period=1.5,

@@ -52,33 +52,33 @@ DUMMY_JOINT_INTERFACE_NAMES_meta_joint = []
 
 DUMMY_SPECIAL_INTERFACES = {
     "full_kit": {
-        "neck": ["torque"],
+        "neck": ["torque", "errors"],
         "neck_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "neck_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "neck_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_shoulder": ["torque"],
+        "r_shoulder": ["torque", "errors"],
         "r_shoulder_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "r_shoulder_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_elbow": ["torque"],
+        "r_elbow": ["torque", "errors"],
         "r_elbow_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "r_elbow_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_wrist": ["torque"],
+        "r_wrist": ["torque", "errors"],
         "r_wrist_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "r_wrist_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "r_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "r_hand": ["torque"],
+        "r_hand": ["torque", "errors"],
         "r_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_shoulder": ["torque"],
+        "l_shoulder": ["torque", "errors"],
         "l_shoulder_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_shoulder_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_elbow": ["torque"],
+        "l_elbow": ["torque", "errors"],
         "l_elbow_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_elbow_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_wrist": ["torque"],
+        "l_wrist": ["torque", "errors"],
         "l_wrist_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_wrist_raw_motor_2": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
-        "l_hand": ["torque"],
+        "l_hand": ["torque", "errors"],
         "l_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
     },
     # "full_kit": {
@@ -180,7 +180,7 @@ class FakeGzInterface(Node):
 
         self._curr_l_force = 0.0
         self._curr_r_force = 0.0
-        self.logger.info(f"Fake Gazebo interface for /dynamic_joint_states and /joint_states and camera services")
+        self.logger.info(f"Fake Gazebo interface for /dynamic_joint_states and /joint_states")
 
     def force_cb(self, msg, side):
         # We simulate the gripper force sensor using the Gazebo plugin ft_sensor (force sensor plugin seems broken...)
@@ -230,10 +230,11 @@ class FakeGzInterface(Node):
                     elif k == "l_force_gripper":
                         inter.values.append(self._curr_l_force)
                     else:
-                        if v == "torque":
+                        if it == "torque":
                             inter.values.append(1.0)
                         else:
                             inter.values.append(0.0)
+
                 fake.interface_values.append(inter)
             # print(f'DEBUG DUMMY fake: {fake}')
             should_publish = True

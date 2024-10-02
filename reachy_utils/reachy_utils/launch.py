@@ -1,6 +1,8 @@
 import os
+import shutil
 import signal
 import threading
+from datetime import datetime, timedelta
 
 from launch import LaunchContext, LaunchDescription
 from launch.actions import (
@@ -120,7 +122,7 @@ def check_node_status(context):
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
-def watcher_report(nb_node: int, delay: float = 8.0) -> TimerAction:
+def watcher_report(nb_node: int, delay: float = 10.0) -> TimerAction:
     """Sets up a timer to log a report on node statuses after a delay."""
 
     def print_report(context):
@@ -180,3 +182,63 @@ def get_current_run_log_dir() -> str:
     dirs = [path for path in paths if os.path.isdir(path)]
     # Sort directories by modification time, newest first
     return max(dirs, key=os.path.getmtime)
+
+
+def clear_bags_and_logs(nb_runs_to_keep: int = 10):
+    # list dir inside the log directory
+    log_dir = get_logging_directory()
+
+    # List all items in the log directory
+    paths = [os.path.join(log_dir, name) for name in os.listdir(log_dir)]
+
+    # Filter out files, keep only directories
+    dirs = [path for path in paths if os.path.isdir(path)]
+
+    if len(dirs) <= nb_runs_to_keep:
+        print("No logs&bags to clear")
+        return
+
+    # Sort directories in name descending order
+    dirs.sort(reverse=True)
+
+    # The directory name after the nb_runs_to_keep-th item is our date limit
+    date_limit_dir = dirs[nb_runs_to_keep]
+    date_limit_dir = os.path.basename(date_limit_dir)
+    date_limit_str = "-".join(date_limit_dir.split("-")[:7])
+
+    # Convert to a datetime object for comparison
+    date_limit = datetime.strptime(date_limit_str, "%Y-%m-%d-%H-%M-%S-%f")
+    # minus one minute, to be sure not to miss any early file
+    date_limit = date_limit - timedelta(minutes=1)
+
+    print(f"Date limit: {date_limit}")
+
+    for dir in dirs[nb_runs_to_keep:]:
+        print(f"Removing directory {dir}")
+        shutil.rmtree(dir)
+
+    removed_files = []
+    kept_files = []
+    for file in os.listdir(log_dir):
+        if file.endswith(".log"):
+            timestamp_str = file.split("_")[-1].split(".")[0]
+
+            try:
+                timestamp = datetime.fromtimestamp(int(timestamp_str) / 1000)  # Assuming it's in milliseconds
+            except ValueError:
+                # If the timestamp format is unexpected, skip the file
+                print(f"Skipping invalid log file: {file}")
+                continue
+
+            # Compare the log file's timestamp to the date limit
+            if timestamp < date_limit:
+                print(f"Removing log file {file} (older than date limit) {timestamp}")
+                os.remove(os.path.join(log_dir, file))
+                removed_files.append(file)
+            else:
+                print(f"Keeping log file {file} (newer than date limit) {timestamp}")
+                kept_files.append(file)
+    print(f"Removed logfiles: {len(removed_files)}")
+    # print(removed_files)
+    print(f"Kept logfiles: {len(kept_files)}")
+    # print(kept_files)

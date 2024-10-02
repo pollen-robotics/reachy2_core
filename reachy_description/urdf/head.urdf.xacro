@@ -235,18 +235,24 @@
           <update_rate>30</update_rate>
 
           <camera name="left_camera">
-            <horizontal_fov>1.3962634</horizontal_fov>
+            <horizontal_fov>1.5864830716633846</horizontal_fov>
             <image>
-              <width>800</width>
-              <height>800</height>
+              <width>720</width>
+              <height>960</height>
               <format>R8G8B8</format>
             </image>
             <distortion>
-              <k1>0.0</k1>
+              <!-- <k1>-0.0057410988956689835</k1> -->
+              <!-- <k2>0.01649821549654007</k2> -->
+              <!-- <k3>0.0</k3> -->
+              <!-- <p1>-0.021608084440231323</p1> -->
+              <!-- <p2>0.006187329534441233</p2> -->
+	      <k1>0.0</k1>
               <k2>0.0</k2>
               <k3>0.0</k3>
               <p1>0.0</p1>
               <p2>0.0</p2>
+
               <center>0.5 0.5</center>
             </distortion>
 
@@ -261,7 +267,7 @@
           <!-- Use camera, not camera_triggered -->
           <plugin name="left_camera_controller" filename="libgazebo_ros_camera.so">
               <ros>
-                <namespace>/</namespace>
+                <namespace>/teleop_camera</namespace>
                 <remapping>image_raw:=image_raw</remapping>
                 <remapping>camera_info:=camera_info</remapping>
               </ros>
@@ -304,14 +310,19 @@
           <update_rate>30</update_rate>
 
           <camera name="right_camera">
-            <horizontal_fov>1.3962634</horizontal_fov>
+            <horizontal_fov>1.5864830716633846</horizontal_fov>
             <image>
-              <width>800</width>
-              <height>800</height>
+              <width>720</width>
+              <height>960</height>
               <format>R8G8B8</format>
             </image>
             <distortion>
-              <k1>0.0</k1>
+              <!-- <k1>-0.0057410988956689835</k1> -->
+              <!-- <k2>0.01649821549654007</k2> -->
+              <!-- <k3>0.0</k3> -->
+              <!-- <p1>-0.021608084440231323</p1> -->
+              <!-- <p2>0.006187329534441233</p2> -->
+	      <k1>0.0</k1>
               <k2>0.0</k2>
               <k3>0.0</k3>
               <p1>0.0</p1>
@@ -330,7 +341,7 @@
           <!-- Use camera, not camera_triggered -->
           <plugin name="right_camera_controller" filename="libgazebo_ros_camera.so">
               <ros>
-                <namespace>/</namespace>
+                <namespace>/teleop_camera</namespace>
                 <remapping>image_raw:=image_raw</remapping>
                 <remapping>camera_info:=camera_info</remapping>
               </ros>
