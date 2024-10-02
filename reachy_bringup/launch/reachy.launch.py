@@ -25,6 +25,7 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+
 from reachy_utils.config import (
     BETA,
     DVT,
@@ -222,6 +223,7 @@ def launch_setup(context, *args, **kwargs):
         ["forward_torque_limit_controller", f"not {gazebo_py}"],
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["gripper_current_controller", f" not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(

@@ -199,7 +199,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
                     self.id,
                 )? as i16) as f64)
             })
-            .map(|x| [x])
+            .map(|x| [(x / 1000.0)])
     }
     fn set_torque_limit(&mut self, torque_limit: [f64; 1]) -> Result<()> {
         let current_torque_limit = RawMotorsIO::get_torque_limit(self)?;
@@ -209,7 +209,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
                 &self.io,
                 self.serial_port.as_mut(),
                 self.id,
-                xm::conv::ma_to_dxl_current(torque_limit[0] as f32) as u16,
+                xm::conv::ma_to_dxl_current((torque_limit[0] * 1000.0) as f32) as u16,
             )?;
 
             self.torque_limit.insert(self.id, torque_limit[0]);
