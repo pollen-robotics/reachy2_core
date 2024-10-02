@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use cache_cache::Cache;
 use log::info;
-use motor_toolbox_rs::{MissingResisterErrror, MotorsController, RawMotorsIO, PID};
+use motor_toolbox_rs::{MissingRegisterErrror, MotorsController, RawMotorsIO, PID};
 use rustypot::{device::xm, DynamixelSerialIO};
 use serde::{Deserialize, Serialize};
 use serialport::TTYPort;
@@ -46,48 +46,18 @@ impl GripperDynamixel {
 
         controller.serial_port.set_exclusive(false)?;
 
-        info!("GripperDynamixel {} {} initialized", serial_port_name, id);
+        motor_toolbox_rs::MotorsController::set_control_mode(&mut controller, [5])?;
+        let mode = motor_toolbox_rs::MotorsController::get_control_mode(&mut controller)?;
+        info!(
+            "GripperDynamixel {} {} initialized, operating mode: {}",
+            serial_port_name, id, mode[0]
+        );
 
         Ok(controller)
     }
 
     pub fn with_config(config: GripperDynamixelConfig) -> Result<Self> {
         GripperDynamixel::new(config.serial_port_name.as_str(), config.id)
-    }
-
-    /// Set the target current (A)
-    pub fn set_target_current(&mut self, target: f64) -> Result<()> {
-        xm::write_goal_current(
-            &self.io,
-            self.serial_port.as_mut(),
-            self.id,
-            xm::conv::ma_to_dxl_current((target * 1000.0) as f32) as i16,
-        )?;
-        Ok(())
-    }
-    /// Get the target current (A)
-    pub fn get_target_current(&mut self) -> Result<f64> {
-        let cur = xm::conv::dxl_current_to_ma(xm::read_goal_current(
-            &self.io,
-            self.serial_port.as_mut(),
-            self.id,
-        )?) / 1000.0;
-        Ok(cur as f64)
-    }
-
-    /// Get the current control mode
-    pub fn get_operating_mode(&mut self) -> Result<u8> {
-        Ok(xm::read_operating_mode(
-            &self.io,
-            self.serial_port.as_mut(),
-            self.id,
-        )?)
-    }
-
-    /// Set the current control mode
-    pub fn set_operating_mode(&mut self, mode: u8) -> Result<()> {
-        xm::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode)?;
-        Ok(())
     }
 }
 
@@ -247,11 +217,81 @@ impl RawMotorsIO<1> for GripperDynamixel {
 
         Ok(())
     }
+
+    /// Set the target current (A)
+    fn set_target_torque(&mut self, target: [f64; 1]) -> Result<()> {
+        xm::write_goal_current(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+            xm::conv::ma_to_dxl_current((target[0] * 1000.0) as f32) as i16,
+        )?;
+        Ok(())
+    }
+    /// Get the target current (A)
+    fn get_target_torque(&mut self) -> Result<[f64; 1]> {
+        let cur = xm::conv::dxl_current_to_ma(xm::read_goal_current(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+        )?) / 1000.0;
+        Ok([cur as f64])
+    }
+
+    /// Set the target velocity (rad/s)
+    fn set_target_velocity(&mut self, target: [f64; 1]) -> Result<()> {
+        xm::write_goal_velocity(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+            xm::conv::rpm_to_dxl_vel((target[0] * 9.5492999999998) as f32) as i32,
+        )?;
+        Ok(())
+    }
+    /// Get the target velocity (rad/s)
+    fn get_target_velocity(&mut self) -> Result<[f64; 1]> {
+        let cur = xm::conv::dxl_vel_to_rpm(xm::read_goal_velocity(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+        )?) / 9.5492999999998;
+        Ok([cur as f64])
+    }
+
+    /// Get the current control mode
+    fn get_control_mode(&mut self) -> Result<[u8; 1]> {
+        Ok([xm::read_operating_mode(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+        )?])
+    }
+
+    /// Set the current control mode
+    fn set_control_mode(&mut self, mode: [u8; 1]) -> Result<()> {
+        xm::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
+        Ok(())
+    }
+
     fn get_pid_gains(&mut self) -> Result<[PID; 1]> {
-        Err(MissingResisterErrror("pid_gains".to_string()).into())
+        Err(MissingRegisterErrror("pid_gains".to_string()).into())
     }
     fn set_pid_gains(&mut self, _pid_gains: [PID; 1]) -> Result<()> {
-        Err(MissingResisterErrror("pid_gains".to_string()).into())
+        Err(MissingRegisterErrror("pid_gains".to_string()).into())
+    }
+
+    fn set_target_position_fb(&mut self, _: [f64; 1]) -> Result<[f64; 1]> {
+        Err(MissingRegisterErrror("target_position_fb".to_string()).into())
+    }
+    fn get_axis_sensors(&mut self) -> Result<[f64; 1]> {
+        Err(MissingRegisterErrror("axis_sensor".to_string()).into())
+    }
+
+    fn get_board_state(&mut self) -> Result<u8> {
+        Err(MissingRegisterErrror("board_state".to_string()).into())
+    }
+    fn set_board_state(&mut self, _: u8) -> Result<()> {
+        Err(MissingRegisterErrror("board_state".to_string()).into())
     }
 }
 
