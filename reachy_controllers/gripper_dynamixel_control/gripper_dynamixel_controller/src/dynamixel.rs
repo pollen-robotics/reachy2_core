@@ -53,6 +53,20 @@ impl GripperDynamixel {
             serial_port_name, id, mode[0]
         );
 
+        motor_toolbox_rs::MotorsController::set_torque_limit(&mut controller, [0.4])?;
+        let tlimit = motor_toolbox_rs::MotorsController::get_torque_limit(&mut controller)?;
+        info!(
+            "GripperDynamixel {} {} initialized, torque_limit: {}",
+            serial_port_name, id, tlimit[0]
+        );
+
+        motor_toolbox_rs::MotorsController::set_target_torque(&mut controller, [0.4])?;
+        let ttorque = motor_toolbox_rs::MotorsController::get_target_torque(&mut controller)?;
+        info!(
+            "GripperDynamixel {} {} initialized, target_torque: {}",
+            serial_port_name, id, ttorque[0]
+        );
+
         Ok(controller)
     }
 
@@ -189,6 +203,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
 
         Ok(())
     }
+
     fn get_torque_limit(&mut self) -> Result<[f64; 1]> {
         self.torque_limit
             .entry(self.id)
@@ -201,6 +216,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
             })
             .map(|x| [(x / 1000.0)])
     }
+
     fn set_torque_limit(&mut self, torque_limit: [f64; 1]) -> Result<()> {
         let current_torque_limit = RawMotorsIO::get_torque_limit(self)?;
 
