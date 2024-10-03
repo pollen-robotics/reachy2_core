@@ -150,7 +150,7 @@ def launch_setup(context, *args, **kwargs):
         cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
         output="both",
         emulate_tty=True,
-        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat}")),
+        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat} and not {fake_py}")),
         # Ensure the process is killed when the launch file is stopped
         sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
         sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
