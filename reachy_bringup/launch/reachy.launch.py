@@ -25,6 +25,7 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+
 from reachy_utils.config import (
     BETA,
     DVT,
