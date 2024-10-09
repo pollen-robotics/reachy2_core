@@ -212,7 +212,7 @@ impl RawMotorsIO<1> for GripperDynamixel {
                     &self.io,
                     self.serial_port.as_mut(),
                     self.id,
-                )? as i16)
+                )? as i16) as f64
                     / 1000.0 as f64)
             })
             .map(|x| [x])
