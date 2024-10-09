@@ -208,12 +208,12 @@ impl RawMotorsIO<1> for GripperDynamixel {
         self.torque_limit
             .entry(self.id)
             .or_try_insert_with(|_| {
-                Ok(xm::conv::dxl_current_to_ma(xm::read_torque_limit(
+                Ok((xm::conv::dxl_current_to_ma(xm::read_torque_limit(
                     &self.io,
                     self.serial_port.as_mut(),
                     self.id,
-                )? as i16) as f64
-                    / 1000.0 as f64)
+                )? as i16) as f32
+                    / 1000.0) as f64)
             })
             .map(|x| [x])
     }
