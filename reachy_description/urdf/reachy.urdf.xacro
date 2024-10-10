@@ -49,9 +49,9 @@
 
 
   <!-- config  -->
-  <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake.yaml" />
-  <xacro:arg name="right_arm_config" default="$(find arm_description)/config/fake_arm.yaml" />
-  <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_arm.yaml" />
+  <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake_neck.yaml" />
+  <xacro:arg name="right_arm_config" default="$(find arm_description)/config/fake_r_arm.yaml" />
+  <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_l_arm.yaml" />
   <xacro:arg name="robot_model" default="none" />
   <!-- config  -->
 

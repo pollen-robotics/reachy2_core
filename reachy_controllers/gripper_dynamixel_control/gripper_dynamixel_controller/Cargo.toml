@@ -10,12 +10,15 @@ edition = "2021"
 cache_cache = "0.1.1"
 libc = "0.2.146"
 once_cell = "1.19.0"
-rustypot = { git = "https://github.com/pollen-robotics/rustypot" }
+
+rustypot = { git = "https://github.com/pollen-robotics/rustypot", branch = "develop" }
+
 serialport = "4.2.1"
 serde = { version = "1.0.183", features = ["derive"] }
 serde_yaml = "0.9.25"
 log = "0.4.20"
-motor_toolbox_rs = "0.2.1"
+# motor_toolbox_rs = "0.2.1"
+motor_toolbox_rs = { git = "https://github.com/pollen-robotics/motor_toolbox_rs", branch = "29-add-target_torque" }
 
 [build-dependencies]
 cbindgen = "0.24.3"

@@ -17,6 +17,9 @@ controller_manager:
     gripper_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
+    gripper_current_controller:
+      type: forward_command_controller/ForwardCommandController
+
     forward_torque_controller:
       type: forward_command_controller/ForwardCommandController
 
@@ -52,7 +55,6 @@ r_arm_forward_position_controller:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
-      # - r_hand_finger
     interface_name: position
     use_sim_time: false
 
@@ -67,7 +69,6 @@ l_arm_forward_position_controller:
       - l_wrist_roll
       - l_wrist_pitch
       - l_wrist_yaw
-      # - l_hand_finger
     interface_name: position
     use_sim_time: false
 
@@ -79,6 +80,15 @@ gripper_forward_position_controller:
       - l_hand_finger
     interface_name: position
     use_sim_time: false
+
+gripper_current_controller:
+  ros__parameters:
+    joints:
+      - r_hand_raw_motor_1
+      - l_hand_raw_motor_1
+    interface_name: current
+    use_sim_time: false
+
 
 forward_torque_controller:
   ros__parameters:

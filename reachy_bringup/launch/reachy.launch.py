@@ -83,9 +83,9 @@ def launch_setup(context, *args, **kwargs):
         f" use_gazebo:=true" if gazebo_py else " ",
         f" depth_camera:=true" if gazebo_py else " ",
         f" robot_config:={reachy_config.model}",
-        f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-        f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
-        f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_arm.yaml", context)}"',
+        f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
+        f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
+        f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
         f' robot_model:="{BETA if reachy_config.beta else DVT if reachy_config.dvt else None}"',
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
@@ -150,7 +150,7 @@ def launch_setup(context, *args, **kwargs):
         cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
         output="both",
         emulate_tty=True,
-        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat}")),
+        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat} and not {fake_py}")),
         # Ensure the process is killed when the launch file is stopped
         sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
         sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
@@ -223,6 +223,7 @@ def launch_setup(context, *args, **kwargs):
         ["forward_torque_limit_controller", f"not {gazebo_py}"],
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
