@@ -344,6 +344,7 @@ def launch_setup(context, *args, **kwargs):
 
     orbbec_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/launch", "/gemini_330_series.launch.py"]),
+        launch_arguments={"depth_width": "1280", "enable_colored_point_cloud": "true"}.items(),
         condition=IfCondition(orbbec_rl),
     )
 
