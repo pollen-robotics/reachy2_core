@@ -1,5 +1,6 @@
 use dynamixel::{GripperDynamixel, GripperDynamixelConfig};
 use motor_toolbox_rs::{FakeMotorsController, MotorsController, Result};
+
 use serde::{Deserialize, Serialize};
 
 mod dynamixel;
@@ -61,10 +62,55 @@ impl Gripper {
         self.inner.set_torque([false])
     }
 
-    /// Get the current position (in rads)
+    /// Get the present position (in rads)
     pub fn get_current_orientation(&mut self) -> Result<f64> {
         let pos = self.inner.get_current_position()?;
         Ok(pos[0])
+    }
+
+    /// Get the present velocity (in rads)
+    pub fn get_current_velocity(&mut self) -> Result<f64> {
+        let vel = self.inner.get_current_velocity()?;
+        Ok(vel[0] * 0.10472)
+    }
+
+    /// Get the present current (in A)
+    pub fn get_current_torque(&mut self) -> Result<f64> {
+        let cur = self.inner.get_current_torque()?;
+        Ok(cur[0] * 0.001)
+    }
+
+    /// Set the target torque (in A)
+    pub fn set_target_torque(&mut self, current: f64) -> Result<()> {
+        self.inner.set_target_torque([current])
+    }
+
+    /// Get the target torque (in A)
+    pub fn get_target_torque(&mut self) -> Result<f64> {
+        let torque = self.inner.get_target_torque()?;
+        Ok(torque[0])
+    }
+
+    /// Set the target velocity (in rad/s)
+    pub fn set_target_velocity(&mut self, velocity: f64) -> Result<()> {
+        self.inner.set_target_velocity([velocity])
+    }
+
+    /// Get the target velocity (in rad/s)
+    pub fn get_target_velocity(&mut self) -> Result<f64> {
+        let vel = self.inner.get_target_velocity()?;
+        Ok(vel[0])
+    }
+
+    /// Set the control mode
+    pub fn set_control_mode(&mut self, mode: u8) -> Result<()> {
+        self.inner.set_control_mode([mode])
+    }
+
+    /// Get the control mode
+    pub fn get_control_mode(&mut self) -> Result<u8> {
+        let mode = self.inner.get_control_mode()?;
+        Ok(mode[0])
     }
 
     /// Get the target position (in rads)
@@ -98,6 +144,23 @@ impl Gripper {
     /// caution: this is the raw value used by the motors used inside the actuator, not a limit in orbita2d orientation!
     pub fn set_raw_motors_torque_limit(&mut self, torque_limit: f64) -> Result<()> {
         self.inner.set_torque_limit([torque_limit])
+    }
+
+    fn set_target_position_fb(&mut self, pos: f64) -> Result<f64> {
+        let pos = self.inner.set_target_position_fb([pos])?;
+        Ok(pos[0])
+    }
+    fn get_axis_sensors(&mut self) -> Result<f64> {
+        let axis = self.inner.get_axis_sensors()?;
+        Ok(axis[0])
+    }
+
+    fn get_board_state(&mut self) -> Result<u8> {
+        let state = self.inner.get_board_state()?;
+        Ok(state)
+    }
+    fn set_board_state(&mut self, state: u8) -> Result<()> {
+        self.inner.set_board_state(state)
     }
 }
 

@@ -237,8 +237,8 @@
           <camera name="left_camera">
             <horizontal_fov>1.5864830716633846</horizontal_fov>
             <image>
-              <width>720</width>
-              <height>960</height>
+              <width>960</width>
+              <height>720</height>
               <format>R8G8B8</format>
             </image>
             <distortion>
@@ -312,8 +312,8 @@
           <camera name="right_camera">
             <horizontal_fov>1.5864830716633846</horizontal_fov>
             <image>
-              <width>720</width>
-              <height>960</height>
+              <width>960</width>
+              <height>720</height>
               <format>R8G8B8</format>
             </image>
             <distortion>
