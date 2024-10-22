@@ -273,6 +273,15 @@ def launch_setup(context, *args, **kwargs):
         additional_env={"RCUTILS_CONSOLE_OUTPUT_FILE": "/home/reachy/.ros/log/kinematics.log"},
     )
 
+    control_node2 = LifecycleNode(
+        name="pollen_control",
+        namespace="",
+        package="pollen_kdl_kinematics",
+        executable="pollen_control",
+        output="both",
+        emulate_tty=True,
+    )
+
     dynamic_state_router_node = Node(
         package="dynamic_state_router",
         executable="dynamic_state_router",
@@ -441,6 +450,7 @@ def launch_setup(context, *args, **kwargs):
             dynamic_state_router_node,
             foxglove_bridge_node,
             rosbag,
+            control_node2,
         ]
     )
 
