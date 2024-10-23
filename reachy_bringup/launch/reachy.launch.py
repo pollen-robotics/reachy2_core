@@ -25,7 +25,6 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-
 from reachy_utils.config import (
     BETA,
     DVT,
@@ -479,11 +478,39 @@ def launch_setup(context, *args, **kwargs):
         cancel_on_shutdown=True,
     )
 
+    # TEMPORARY SPEED LIMIT FORCE
+    safety_speed_limit = 0.5
+    speedlimit_set_announce = TimerAction(
+        period=8.0,
+        actions=[
+            LogInfo(msg=f"Safety speed limitation to {safety_speed_limit}"),
+        ],
+    )
+    speedlimit_set = TimerAction(
+        period=9.0,
+        actions=[
+            ExecuteProcess(
+                cmd=[
+                    "ros2",
+                    "topic",
+                    "pub",
+                    "/forward_speed_limit_controller/commands",
+                    "std_msgs/msg/Float64MultiArray",
+                    f"{{ data : {[safety_speed_limit] * 19} }}",
+                    "--once",
+                ],
+                output="screen",
+            )
+        ],
+    )
+
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
+        speedlimit_set_announce,
+        speedlimit_set,
         # SetEnvironmentVariable(
         #     name="PYTHONPATH",
         #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",
