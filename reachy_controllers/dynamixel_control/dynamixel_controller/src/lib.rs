@@ -1,46 +1,142 @@
-use dynamixel::{GripperDynamixel, GripperDynamixelConfig};
 use motor_toolbox_rs::{FakeMotorsController, MotorsController, Result};
 use serde::{Deserialize, Serialize};
-use serialport::TTYPort;
-
-mod dynamixel;
+mod background_controller;
+mod controller;
+use background_controller::BackgroundDynamixelController;
+use controller::ForegroundDynamixelController;
+mod xl330;
+mod xm;
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct GripperConfig {
-    pub io: GripperIOConfig,
+pub enum DxlModel {
+    XL330,
+    XM,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub enum GripperIOConfig {
-    DynamixelSerialIO(GripperDynamixelConfig),
-    FakeIO(GripperFakeConfig),
+pub struct DynamixelConfigInfo {
+    pub serial_port_name: String,
+    pub id: u8,
+    pub model: DxlModel,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct GripperFakeConfig {}
+pub struct DxlConfig {
+    pub io: DxlIOConfig,
+}
 
-pub struct Gripper {
+#[derive(Debug, Deserialize, Serialize)]
+pub enum DxlIOConfig {
+    DynamixelSerialIO(DynamixelConfigInfo),
+    FakeIO(FakeConfig),
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FakeConfig {}
+
+pub struct DynamixelJoint {
     inner: Box<dyn MotorsController<1> + Send>,
 }
 
-impl Gripper {
-    pub fn with_config(config: GripperConfig) -> Result<Self> {
-        let inner: Box<dyn MotorsController<1> + Send> = match config.io {
-            GripperIOConfig::DynamixelSerialIO(config) => {
-                Box::new(GripperDynamixel::with_config(config)?)
-            }
-            GripperIOConfig::FakeIO(_) => Box::new(FakeMotorsController::new()),
-        };
-        Ok(Gripper { inner })
+pub enum Dynamixel2Joints {
+    Fg(ForegroundDynamixelController),
+    Bg(BackgroundDynamixelController),
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct JointsConfig {
+    pub left_config: DxlConfig,
+    pub right_config: DxlConfig,
+    pub background: String,
+}
+
+impl Dynamixel2Joints {
+    pub fn with_config(config: JointsConfig) -> Result<Dynamixel2Joints> {
+        if config.background == "true" {
+            Ok(Dynamixel2Joints::Bg(
+                BackgroundDynamixelController::with_config(
+                    config.left_config,
+                    config.right_config,
+                )?,
+            ))
+        } else {
+            Ok(Dynamixel2Joints::Fg(
+                ForegroundDynamixelController::with_config(
+                    config.left_config,
+                    config.right_config,
+                )?,
+            ))
+        }
     }
-    pub fn with_config_file(config_file: &str) -> Result<Self> {
+    pub fn with_config_file(config_file: &str) -> Result<Dynamixel2Joints> {
         let f = std::fs::File::open(config_file)?;
-        let config: GripperConfig = serde_yaml::from_reader(f)?;
-        Gripper::with_config(config)
+        let config: JointsConfig = serde_yaml::from_reader(f)?;
+        Dynamixel2Joints::with_config(config)
+    }
+
+    /// turn on/off the torque. The second bool in the tuple is the "reset target position argument"
+    pub fn set_torque(&mut self, torques: [(bool, bool); 2]) -> Result<()> {
+        match self {
+            Dynamixel2Joints::Bg(c) => c.set_torque(torques),
+            Dynamixel2Joints::Fg(c) => c.set_torque(torques),
+        }
+    }
+
+    pub fn is_torque_on(&mut self) -> Result<[Option<bool>; 2]> {
+        match self {
+            Dynamixel2Joints::Bg(c) => c.is_torque_on(),
+            Dynamixel2Joints::Fg(c) => c.is_torque_on(),
+        }
+    }
+
+    pub fn get_current_position(&mut self) -> Result<[Option<f64>; 2]> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.get_current_position(),
+            Dynamixel2Joints::Bg(c) => c.get_current_position(),
+        }
+    }
+
+    pub fn set_target_position(&mut self, target: [f64; 2]) -> Result<()> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.set_target_position(target),
+            Dynamixel2Joints::Bg(c) => c.set_target_position(target),
+        }
+    }
+
+    pub fn get_current_velocity(&mut self) -> Result<[Option<f64>; 2]> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.get_current_velocity(),
+            Dynamixel2Joints::Bg(c) => c.get_current_velocity(),
+        }
+    }
+
+    pub fn get_current_torque(&mut self) -> Result<[Option<f64>; 2]> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.get_current_torque(),
+            Dynamixel2Joints::Bg(c) => c.get_current_torque(),
+        }
     }
 }
 
-impl Gripper {
+impl DynamixelJoint {
+    pub fn with_config(config: DxlConfig) -> Result<Self> {
+        let inner: Box<dyn MotorsController<1> + Send> = match config.io {
+            DxlIOConfig::DynamixelSerialIO(config) => match config.model {
+                DxlModel::XL330 => Box::new(xl330::XL330Dynamixel::with_config(config)?),
+                DxlModel::XM => Box::new(xm::XMDynamixel::with_config(config)?),
+            },
+            DxlIOConfig::FakeIO(_) => Box::new(FakeMotorsController::new()),
+        };
+        Ok(DynamixelJoint { inner: inner })
+    }
+    pub fn with_config_file(config_file: &str) -> Result<Self> {
+        let f = std::fs::File::open(config_file)?;
+        let config: DxlConfig = serde_yaml::from_reader(f)?;
+        DynamixelJoint::with_config(config)
+    }
+}
+
+impl DynamixelJoint {
     /// Check if the torque is ON or OFF
     pub fn is_torque_on(&mut self) -> Result<bool> {
         let torques = self.inner.is_torque_on()?;
@@ -170,12 +266,12 @@ mod tests {
     fn parse_fake_config_file() {
         let f = std::fs::File::open("./config/fake.yaml").unwrap();
 
-        let config: Result<crate::GripperConfig, _> = serde_yaml::from_reader(f);
+        let config: Result<crate::AntennaConfig, _> = serde_yaml::from_reader(f);
         assert!(config.is_ok());
 
         let config = config.unwrap();
 
-        if let crate::GripperIOConfig::FakeIO(_) = config.io {
+        if let crate::AntennaIOConfig::FakeIO(_) = config.io {
         } else {
             panic!("Wrong config type");
         }
