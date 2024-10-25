@@ -68,7 +68,7 @@ def launch_setup(context, *args, **kwargs):
     orbbec_py = orbbec_rl.perform(context) == "true"
     nodes = []
 
-    clear_bags_and_logs(nb_runs_to_keep=10)
+    clear_bags_and_logs(nb_runs_to_keep=5)
 
     ####################
     ### Robot config ###
