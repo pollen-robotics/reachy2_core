@@ -66,6 +66,7 @@ def launch_setup(context, *args, **kwargs):
     foxglove_py = foxglove_rl.perform(context) == "true"
     orbbec_rl = LaunchConfiguration("orbbec")
     orbbec_py = orbbec_rl.perform(context) == "true"
+    verbose_logger_log_level_rl = LaunchConfiguration("log")
     nodes = []
 
     clear_bags_and_logs(nb_runs_to_keep=5)
@@ -161,6 +162,7 @@ def launch_setup(context, *args, **kwargs):
         parameters=[robot_description, robot_controllers],
         output="screen",
         emulate_tty=True,
+        arguments=["--ros-args", "--log-level", verbose_logger_log_level_rl],
     )
 
     robot_state_publisher_node = Node(
@@ -168,6 +170,7 @@ def launch_setup(context, *args, **kwargs):
         executable="robot_state_publisher",
         output="both",
         parameters=[robot_description],
+        arguments=["--ros-args", "--log-level", verbose_logger_log_level_rl],
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -556,6 +559,12 @@ def generate_launch_description():
                 default_value="default",
                 description="Controller Mode",
                 choices=["default", "trajectory"],
+            ),
+            DeclareLaunchArgument(
+                "log",
+                default_value="WARN",
+                description="Log level for needlessly verbose nodes",
+                choices=["DEBUG", "INFO", "WARN", "ERROR"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
