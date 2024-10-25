@@ -214,7 +214,7 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
     print(f"Date limit: {date_limit}")
 
     for dir in dirs[nb_runs_to_keep:]:
-        print(f"Removing directory {dir}")
+        # print(f"Removing directory {dir}")
         shutil.rmtree(dir)
 
     removed_files = []
@@ -232,11 +232,11 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
 
             # Compare the log file's timestamp to the date limit
             if timestamp < date_limit:
-                print(f"Removing log file {file} (older than date limit) {timestamp}")
+                # print(f"Removing log file {file} (older than date limit) {timestamp}")
                 os.remove(os.path.join(log_dir, file))
                 removed_files.append(file)
             else:
-                print(f"Keeping log file {file} (newer than date limit) {timestamp}")
+                # print(f"Keeping log file {file} (newer than date limit) {timestamp}")
                 kept_files.append(file)
     print(f"Removed logfiles: {len(removed_files)}")
     # print(removed_files)
