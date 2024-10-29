@@ -25,6 +25,7 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
 from reachy_utils.config import (
     BETA,
     DVT,
@@ -314,7 +315,6 @@ def launch_setup(context, *args, **kwargs):
     )
 
     ### SDK ###
-
     sdk_server_node = TimerAction(
         period=2.0,
         actions=[
@@ -323,18 +323,14 @@ def launch_setup(context, *args, **kwargs):
                 executable="reachy_grpc_joint_sdk_server",
                 output="both",
                 emulate_tty=True,
-                arguments=[reachy_config.config_file],
+                arguments=[
+                    reachy_config.config_file,
+                    str(ReachyCoreMode.GAZEBO if gazebo_py else ReachyCoreMode.FAKE if fake_py else ReachyCoreMode.REAL),
+                ],
                 condition=IfCondition(start_sdk_server_rl),
             )
         ],
     )
-
-    # sdk_server_video_node = Node(
-    #     package="reachy_sdk_server",
-    #     executable="reachy_grpc_video_sdk_server" if not gazebo_py else "reachy_grpc_video_sdk_server_gz",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
 
     sdk_server_video_node = Node(
         package="reachy_sdk_server",
