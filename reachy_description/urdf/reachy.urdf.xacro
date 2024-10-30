@@ -185,7 +185,7 @@
       <origin xyz="0 0 0 " rpy="0 0 0" />
       <geometry>
         <!-- <mesh filename="package://reachy_description/meshes/torso_visual_high.dae" /> -->
-        <mesh filename="file://$(find reachy_description)/meshes/torso_visual_high.dae" />
+        <mesh filename="file://$(find reachy_description)/meshes/torso_visual.dae" />
         <!-- <mesh filename="file://$(find reachy_description)/meshes/torso_visual_high2.dae" /> -->
       </geometry>
 
@@ -207,7 +207,7 @@
       <origin xyz="0 0 0 " rpy="0 0 0" />
       <geometry>
         <!-- <mesh filename="package://reachy_description/meshes/torso_collider_no_cone.dae" /> -->
-        <mesh filename="file://$(find reachy_description)/meshes/torso_collider_no_cone.dae" />
+        <mesh filename="file://$(find reachy_description)/meshes/torso_collider.dae" />
       </geometry>
 
     </collision>
