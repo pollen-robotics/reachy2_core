@@ -6,7 +6,7 @@
 
 extern "C" {
 
-int32_t dynamixel_2joints_from_config(const char *configfile, uint32_t *uid);
+int32_t dynamixel_2joints_from_config(uint32_t *uid, const char *configfile);
 
 int32_t dynamixel_2joints_is_torque_on(uint32_t uid, bool (*is_on)[2]);
 
@@ -16,7 +16,11 @@ int32_t dynamixel_2joints_disable_torque(uint32_t uid);
 
 int32_t dynamixel_2joints_get_current_position(uint32_t uid, double (*position)[2]);
 
+int32_t dynamixel_2joints_set_torque(uint32_t uid, const bool (*torque)[2]);
+
 int32_t dynamixel_2joints_set_target_position(uint32_t uid, const double (*position)[2]);
+
+int32_t dynamixel_2joints_get_target_position(uint32_t uid, double (*target)[2]);
 
 int32_t dynamixel_2joints_get_current_velocity(uint32_t uid, double (*velocity)[2]);
 

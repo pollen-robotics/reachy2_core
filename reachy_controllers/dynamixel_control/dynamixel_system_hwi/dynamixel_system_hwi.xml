@@ -1,0 +1,12 @@
+<library path="dynamixel_system_hwi">
+
+  <class
+    name="dynamixel_system_hwi/DynamixelSystem"
+    type="dynamixel_system_hwi::DynamixelSystem"
+    base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Dynamixel hardware interface plugin.
+    </description>
+  </class>
+
+</library>

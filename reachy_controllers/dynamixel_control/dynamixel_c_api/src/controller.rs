@@ -28,8 +28,8 @@ static CONTROLLER2: Lazy<SyncMap<u32, Dynamixel2Joints>> = Lazy::new(SyncMap::ne
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dynamixel_2joints_from_config(
-    configfile: *const libc::c_char,
     uid: &mut u32,
+    configfile: *const libc::c_char,
 ) -> i32 {
     let configfile = unsafe { CStr::from_ptr(configfile) }.to_str().unwrap();
 
@@ -116,6 +116,21 @@ pub extern "C" fn dynamixel_2joints_get_current_position(uid: u32, position: &mu
 }
 
 #[no_mangle]
+pub extern "C" fn dynamixel_2joints_set_torque(uid: u32, torque: &[bool; 2]) -> i32 {
+    match CONTROLLER2
+        .get_mut(&uid)
+        .unwrap()
+        .set_torque([(torque[0], true), (torque[1], true)])
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn dynamixel_2joints_set_target_position(uid: u32, position: &[f64; 2]) -> i32 {
     match CONTROLLER2
         .get_mut(&uid)
@@ -123,6 +138,24 @@ pub extern "C" fn dynamixel_2joints_set_target_position(uid: u32, position: &[f6
         .set_target_position(*position)
     {
         Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+#[no_mangle]
+pub extern "C" fn dynamixel_2joints_get_target_position(uid: u32, target: &mut [f64; 2]) -> i32 {
+    match CONTROLLER2.get_mut(&uid).unwrap().get_target_position() {
+        Ok(tgt) => match convert(tgt) {
+            Some(t) => {
+                *target = t;
+                return 0;
+            }
+            None => {
+                return 1;
+            }
+        },
         Err(e) => {
             print_error(e);
             1

@@ -244,6 +244,13 @@ impl Dynamixel2Joints {
         }
     }
 
+    pub fn get_target_position(&mut self) -> Result<[Option<f64>; 2]> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.get_target_position(),
+            Dynamixel2Joints::Bg(c) => c.get_target_position(),
+        }
+    }
+
     pub fn get_current_velocity(&mut self) -> Result<[Option<f64>; 2]> {
         match self {
             Dynamixel2Joints::Fg(c) => c.get_current_velocity(),
