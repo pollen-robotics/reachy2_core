@@ -3,7 +3,7 @@
     href="http://download.ros.org/schema/package_format3.xsd"
     schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-    <name>dynamixel_controller</name>
+    <name>dynamixel_c_api</name>
     <version>0.1.0</version>
     <description>Package containing communication layer with hardware</description>
     <maintainer email="contact@pollen-robotics.com">Pollen Robotics</maintainer>

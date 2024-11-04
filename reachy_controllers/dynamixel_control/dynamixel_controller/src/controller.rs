@@ -44,7 +44,7 @@ impl ForegroundDynamixelController {
         }
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_torque (left) {:?}", res),
+            Err(res) => error!("Error: set_torque (left dxl) {:?}", res),
         }
 
         let (torque, reset_target) = torques[1];
@@ -56,7 +56,7 @@ impl ForegroundDynamixelController {
 
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_torque(right_antenna) {:?}", res),
+            Err(res) => error!("Error: set_torque(right dxl) {:?}", res),
         }
 
         Ok(())
@@ -68,7 +68,7 @@ impl ForegroundDynamixelController {
         let left_pos = match left_pos {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_current_position (left_antenna) {:?}", e);
+                error!("Error: get_current_position (left dxl) {:?}", e);
                 None
             }
         };
@@ -78,7 +78,7 @@ impl ForegroundDynamixelController {
         let right_pos = match right_pos {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_current_position (right_antenna) {:?}", e);
+                error!("Error: get_current_position (right dxl) {:?}", e);
                 None
             }
         };
@@ -91,7 +91,7 @@ impl ForegroundDynamixelController {
         let left_pos = match left_pos {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_target_position (left_antenna) {:?}", e);
+                error!("Error: get_target_position (left dxl) {:?}", e);
                 None
             }
         };
@@ -100,7 +100,7 @@ impl ForegroundDynamixelController {
         let right_pos = match right_pos {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_target_position (right_antenna) {:?}", e);
+                error!("Error: get_target_position (right dxl) {:?}", e);
                 None
             }
         };
@@ -112,12 +112,12 @@ impl ForegroundDynamixelController {
         let res = self.left.set_target_orientation(target[0]);
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_target_position (left_antenna) {:?}", res),
+            Err(res) => error!("Error: set_target_position (left dxl) {:?}", res),
         }
         let res = self.right.set_target_orientation(target[1]);
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_target_position (right_antenna) {:?}", res),
+            Err(res) => error!("Error: set_target_position (right dxl) {:?}", res),
         }
 
         Ok(())
@@ -128,7 +128,7 @@ impl ForegroundDynamixelController {
         let left = match left {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_current_torque (left_antenna) {:?}", e);
+                error!("Error: get_current_torque (left dxl) {:?}", e);
                 None
             }
         };
@@ -136,7 +136,7 @@ impl ForegroundDynamixelController {
         let right = match right {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_current_torque (right_antenna) {:?}", e);
+                error!("Error: get_current_torque (right dxl) {:?}", e);
                 None
             }
         };
@@ -148,12 +148,12 @@ impl ForegroundDynamixelController {
         let res = self.left.set_target_torque(target[0]);
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_target_torque (left_antenna) {:?}", res),
+            Err(res) => error!("Error: set_target_torque (left dxl) {:?}", res),
         }
         let res = self.right.set_target_torque(target[1]);
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_target_torque (right_antenna) {:?}", res),
+            Err(res) => error!("Error: set_target_torque (right dxl) {:?}", res),
         }
 
         Ok(())
@@ -165,7 +165,7 @@ impl ForegroundDynamixelController {
         let left = match left {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_target_torque (left_antenna) {:?}", e);
+                error!("Error: get_target_torque (left dxl) {:?}", e);
                 None
             }
         };
@@ -175,7 +175,7 @@ impl ForegroundDynamixelController {
         let right = match right {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_target_torque (right_antenna) {:?}", e);
+                error!("Error: get_target_torque (right dxl) {:?}", e);
                 None
             }
         };
@@ -189,7 +189,7 @@ impl ForegroundDynamixelController {
         let left = match left {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_current_velocity (left_antenna) {:?}", e);
+                error!("Error: get_current_velocity (left dxl) {:?}", e);
                 None
             }
         };
@@ -199,7 +199,7 @@ impl ForegroundDynamixelController {
         let right = match right {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_current_velocity (right_antenna) {:?}", e);
+                error!("Error: get_current_velocity (right dxl) {:?}", e);
                 None
             }
         };
@@ -215,12 +215,12 @@ impl ForegroundDynamixelController {
         let res = self.left.set_control_mode(mode[0]);
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_control_mode (left_antenna) {:?}", res),
+            Err(res) => error!("Error: set_control_mode (left dxl) {:?}", res),
         }
         let res = self.right.set_control_mode(mode[1]);
         match res {
             Ok(_) => {}
-            Err(res) => error!("Error: set_control_mode (right_antenna) {:?}", res),
+            Err(res) => error!("Error: set_control_mode (right dxl) {:?}", res),
         }
 
         Ok(())
@@ -232,7 +232,7 @@ impl ForegroundDynamixelController {
         let left = match left {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_control_mode (left_antenna) {:?}", e);
+                error!("Error: get_control_mode (left dxl) {:?}", e);
                 None
             }
         };
@@ -241,7 +241,7 @@ impl ForegroundDynamixelController {
         let right = match right {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_control_mode (right_antenna) {:?}", e);
+                error!("Error: get_control_mode (right dxl) {:?}", e);
                 None
             }
         };
@@ -257,10 +257,7 @@ impl ForegroundDynamixelController {
         let left_velocity = match left_velocity {
             Ok(v) => Some(v),
             Err(e) => {
-                error!(
-                    "Error: get_raw_motors_velocity_limit (left_antenna) {:?}",
-                    e
-                );
+                error!("Error: get_raw_motors_velocity_limit (left dxl) {:?}", e);
                 None
             }
         };
@@ -269,10 +266,7 @@ impl ForegroundDynamixelController {
         let right_velocity = match right_velocity {
             Ok(v) => Some(v),
             Err(e) => {
-                error!(
-                    "Error: get_raw_motors_velocity_limit (right_antenna) {:?}",
-                    e
-                );
+                error!("Error: get_raw_motors_velocity_limit (right dxl) {:?}", e);
                 None
             }
         };
@@ -286,18 +280,12 @@ impl ForegroundDynamixelController {
         let res = self.left.set_raw_motors_velocity_limit(velocity_limit[0]);
         match res {
             Ok(_) => {}
-            Err(res) => error!(
-                "Error: set_raw_motors_velocity_limit (left_antenna) {:?}",
-                res
-            ),
+            Err(res) => error!("Error: set_raw_motors_velocity_limit (left dxl) {:?}", res),
         }
         let res = self.right.set_raw_motors_velocity_limit(velocity_limit[1]);
         match res {
             Ok(_) => {}
-            Err(res) => error!(
-                "Error: set_raw_motors_velocity_limit (right_antenna) {:?}",
-                res
-            ),
+            Err(res) => error!("Error: set_raw_motors_velocity_limit (right dxl) {:?}", res),
         }
 
         Ok(())
@@ -311,7 +299,7 @@ impl ForegroundDynamixelController {
         let left_torque = match left_torque {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_raw_motors_torque_limit (left_antenna) {:?}", e);
+                error!("Error: get_raw_motors_torque_limit (left dxl) {:?}", e);
                 None
             }
         };
@@ -320,7 +308,7 @@ impl ForegroundDynamixelController {
         let right_torque = match right_torque {
             Ok(v) => Some(v),
             Err(e) => {
-                error!("Error: get_raw_motors_torque_limit (right_antenna) {:?}", e);
+                error!("Error: get_raw_motors_torque_limit (right dxl) {:?}", e);
                 None
             }
         };
@@ -334,19 +322,13 @@ impl ForegroundDynamixelController {
         let res = self.left.set_raw_motors_torque_limit(torque_limit[0]);
         match res {
             Ok(_) => {}
-            Err(res) => error!(
-                "Error: set_raw_motors_torque_limit (left_antenna) {:?}",
-                res
-            ),
+            Err(res) => error!("Error: set_raw_motors_torque_limit (left dxl) {:?}", res),
         }
 
         let res = self.right.set_raw_motors_torque_limit(torque_limit[1]);
         match res {
             Ok(_) => {}
-            Err(res) => error!(
-                "Error: set_raw_motors_torque_limit (right_antenna) {:?}",
-                res
-            ),
+            Err(res) => error!("Error: set_raw_motors_torque_limit (right dxl) {:?}", res),
         }
 
         Ok(())
