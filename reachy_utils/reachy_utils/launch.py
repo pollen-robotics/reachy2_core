@@ -29,6 +29,57 @@ failed_nodes = []
 success_nodes = []
 CORE_UP_SOUND = "MA_BANT_GAME_PACK_2.wav"
 CORE_DOWN_SOUND = "MA_BANT_Bubbles_Pops_2.wav"
+SHUTDOWN_GRACE_PERIOD = 120
+ROSBAG_TOPICS = [
+    "/clicked_point",
+    "/dynamic_joint_commands",
+    "/dynamic_joint_states",
+    "/events/write_split",
+    "/forward_pid_controller/commands",
+    "/forward_speed_limit_controller/commands",
+    "/forward_speed_limit_controller/transition_event",
+    "/forward_torque_controller/commands",
+    "/forward_torque_controller/transition_event",
+    "/forward_torque_limit_controller/commands",
+    "/forward_torque_limit_controller/transition_event",
+    "/goal_pose",
+    "/gripper_current_controller/commands",
+    "/gripper_forward_position_controller/commands",
+    "/gripper_forward_position_controller/transition_event",
+    "/grippers/commands",
+    "/head/averaged_target_pose",
+    "/head/cart_target_pose",
+    "/head/ik_target_pose",
+    "/head/target_pose",
+    "/initialpose",
+    "/joint_commands",
+    "/joint_state_broadcaster/transition_event",
+    "/joint_states",
+    "/kinematics/transition_event",
+    "/l_arm/averaged_target_pose",
+    "/l_arm/cart_target_pose",
+    "/l_arm/ik_target_pose",
+    "/l_arm/target_pose",
+    "/l_arm_forward_position_controller/commands",
+    "/l_arm_forward_position_controller/transition_event",
+    "/l_arm_reachability_states",
+    "/markers_grasp_triplet",
+    "/mobile_base_state",
+    "/neck_forward_position_controller/commands",
+    "/neck_forward_position_controller/transition_event",
+    "/parameter_events",
+    "/r_arm/averaged_target_pose",
+    "/r_arm/cart_target_pose",
+    "/r_arm/ik_target_pose",
+    "/r_arm/target_pose",
+    "/r_arm_forward_position_controller/commands",
+    "/r_arm_forward_position_controller/transition_event",
+    "/r_arm_reachability_states",
+    "/robot_description",
+    "/rosout",
+    "/tf",
+    "/tf_static",
+]
 
 
 # Helper function to get configuration file path
@@ -120,8 +171,18 @@ def check_node_status(context):
             failed_nodes.append(name)
             if name not in non_critical_nodes:
                 LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
+                LogInfo(
+                    msg=f"Grace period of {SHUTDOWN_GRACE_PERIOD} seconds before shutdown, you may use it to dump current rosbag with reachy2_dump_rosbag or via reachy2 dashboard"
+                ).execute(context)
                 # instead of exit , just send a ctrl+c signal to the launch file, exit left zombies
-                EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
+                # EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
+                # send the emit event after a timer
+                TimerAction(
+                    period=float(SHUTDOWN_GRACE_PERIOD),  # sadly TimerAction does not accept int
+                    actions=[
+                        EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")),
+                    ],
+                ).execute(context)
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
