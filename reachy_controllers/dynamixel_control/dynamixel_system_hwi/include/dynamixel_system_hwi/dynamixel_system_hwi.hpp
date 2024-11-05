@@ -40,6 +40,7 @@ private:
   double hw_states_p_gain_[2];
   double hw_states_i_gain_[2];
   double hw_states_d_gain_[2];
+  double hw_states_mode_[2];
 
   double hw_commands_position_[2];
   double hw_commands_speed_limit_[2];
@@ -48,6 +49,7 @@ private:
   double hw_commands_p_gain_[2];
   double hw_commands_i_gain_[2];
   double hw_commands_d_gain_[2];
+  double hw_commands_mode_[2];
 
   // Store time between update loops
   rclcpp::Clock clock_;

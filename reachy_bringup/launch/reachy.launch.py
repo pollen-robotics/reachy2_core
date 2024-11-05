@@ -25,6 +25,7 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+
 from reachy_utils.config import (
     BETA,
     DVT,
@@ -196,6 +197,10 @@ def launch_setup(context, *args, **kwargs):
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
         [
+            "antenna_forward_position_controller",
+            f"'{reachy_config.model}' != '{HEADLESS}'",
+        ],
+        [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
@@ -223,6 +228,7 @@ def launch_setup(context, *args, **kwargs):
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
         ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -499,8 +505,8 @@ def launch_setup(context, *args, **kwargs):
         ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
-        speedlimit_set_announce,
-        speedlimit_set,
+        # speedlimit_set_announce,
+        # speedlimit_set,
         # SetEnvironmentVariable(
         #     name="PYTHONPATH",
         #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",

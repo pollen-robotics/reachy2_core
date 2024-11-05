@@ -32,6 +32,8 @@ pub struct BackgroundDynamixelController {
 
     last_read_raw_motors_torque_limit: Arc<RwLock<[Option<f64>; 2]>>,
     last_write_raw_motors_torque_limit: Arc<RwLock<Option<[f64; 2]>>>,
+
+    last_read_motors_temperature: Arc<RwLock<[Option<f64>; 2]>>,
 }
 
 impl BackgroundDynamixelController {
@@ -65,6 +67,8 @@ impl BackgroundDynamixelController {
             Arc::new(RwLock::new(inner.get_raw_motors_torque_limit()?));
         let last_write_raw_motors_torque_limit = Arc::new(RwLock::new(None));
 
+        let last_read_motors_temperature = Arc::new(RwLock::new(inner.get_motors_temperature()?));
+
         thread::spawn({
             let last_read_torque = last_read_torque.clone();
             let last_write_torque = last_write_torque.clone();
@@ -86,6 +90,8 @@ impl BackgroundDynamixelController {
             let last_write_raw_motors_velocity_limit = last_write_raw_motors_velocity_limit.clone();
             let last_read_raw_motors_torque_limit = last_read_raw_motors_torque_limit.clone();
             let last_write_raw_motors_torque_limit = last_write_raw_motors_torque_limit.clone();
+
+            let last_read_motors_temperature = last_read_motors_temperature.clone();
 
             move || loop {
                 let tic = std::time::Instant::now();
@@ -239,6 +245,15 @@ impl BackgroundDynamixelController {
                     }
                 }
 
+                match inner.get_motors_temperature() {
+                    Ok(t) => {
+                        *last_read_motors_temperature.write().unwrap() = t;
+                    }
+                    Err(e) => {
+                        error!("Error when reading motors temperature: {}", e);
+                    }
+                }
+
                 let toc = tic.elapsed();
                 debug!("BackgroundDynamixelController loop duration: {:?}", toc);
             }
@@ -265,6 +280,7 @@ impl BackgroundDynamixelController {
             last_write_raw_motors_velocity_limit,
             last_read_raw_motors_torque_limit,
             last_write_raw_motors_torque_limit,
+            last_read_motors_temperature,
         })
     }
 
@@ -340,6 +356,13 @@ impl BackgroundDynamixelController {
     ) -> Result<[Option<f64>; 2], Box<dyn std::error::Error>> {
         Ok(*self.last_read_raw_motors_torque_limit.read().unwrap())
     }
+
+    pub fn get_motors_temperature(
+        &mut self,
+    ) -> Result<[Option<f64>; 2], Box<dyn std::error::Error>> {
+        Ok(*self.last_read_motors_temperature.read().unwrap())
+    }
+
     pub fn set_raw_motors_torque_limit(
         &mut self,
         torque_limit: [f64; 2],

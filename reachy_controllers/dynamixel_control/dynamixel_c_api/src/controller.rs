@@ -247,3 +247,77 @@ pub extern "C" fn dynamixel_2joints_set_control_mode(uid: u32, mode: &[u8; 2]) -
         }
     }
 }
+
+#[no_mangle]
+pub extern "C" fn dynamixel_2joints_get_motors_temperature(
+    uid: u32,
+    temperature: &mut [f64; 2],
+) -> i32 {
+    match CONTROLLER2.get_mut(&uid).unwrap().get_motors_temperature() {
+        Ok(temp) => match convert(temp) {
+            Some(t) => {
+                *temperature = t;
+                return 0;
+            }
+            None => {
+                return 1;
+            }
+        },
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_2joints_get_raw_motors_torque_limit(
+    uid: u32,
+    limit: &mut [f64; 2],
+) -> i32 {
+    match CONTROLLER2
+        .get_mut(&uid)
+        .unwrap()
+        .get_raw_motors_torque_limit()
+    {
+        Ok(tl) => match convert(tl) {
+            Some(t) => {
+                *limit = t;
+                return 0;
+            }
+            None => {
+                return 1;
+            }
+        },
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_2joints_get_raw_motors_velocity_limit(
+    uid: u32,
+    limit: &mut [f64; 2],
+) -> i32 {
+    match CONTROLLER2
+        .get_mut(&uid)
+        .unwrap()
+        .get_raw_motors_velocity_limit()
+    {
+        Ok(tl) => match convert(tl) {
+            Some(t) => {
+                *limit = t;
+                return 0;
+            }
+            None => {
+                return 1;
+            }
+        },
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}

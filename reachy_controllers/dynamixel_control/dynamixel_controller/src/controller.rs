@@ -315,6 +315,32 @@ impl ForegroundDynamixelController {
 
         Ok([left_torque, right_torque])
     }
+
+    pub fn get_motors_temperature(
+        &mut self,
+    ) -> Result<[Option<f64>; 2], Box<dyn std::error::Error>> {
+        let left_temp = self.left.get_motors_temperature();
+
+        let left_temp = match left_temp {
+            Ok(t) => Some(t),
+            Err(e) => {
+                error!("Error: get_motor_temperature (left dxl) {:?}", e);
+                None
+            }
+        };
+        let right_temp = self.right.get_motors_temperature();
+
+        let right_temp = match right_temp {
+            Ok(t) => Some(t),
+            Err(e) => {
+                error!("Error: get_motors_temperature (right dxl) {:?}", e);
+                None
+            }
+        };
+
+        Ok([left_temp, right_temp])
+    }
+
     pub fn set_raw_motors_torque_limit(
         &mut self,
         torque_limit: [f64; 2],

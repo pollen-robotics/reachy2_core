@@ -32,4 +32,10 @@ int32_t dynamixel_2joints_get_control_mode(uint32_t uid, uint8_t (*mode)[2]);
 
 int32_t dynamixel_2joints_set_control_mode(uint32_t uid, const uint8_t (*mode)[2]);
 
+int32_t dynamixel_2joints_get_motors_temperature(uint32_t uid, double (*temperature)[2]);
+
+int32_t dynamixel_2joints_get_raw_motors_torque_limit(uint32_t uid, double (*limit)[2]);
+
+int32_t dynamixel_2joints_get_raw_motors_velocity_limit(uint32_t uid, double (*limit)[2]);
+
 } // extern "C"

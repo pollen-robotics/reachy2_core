@@ -182,6 +182,11 @@ impl DynamixelJoint {
         Ok(axis[0])
     }
 
+    fn get_motors_temperature(&mut self) -> Result<f64> {
+        let temp = self.inner.get_motors_temperature()?;
+        Ok(temp[0])
+    }
+
     fn get_board_state(&mut self) -> Result<u8> {
         let state = self.inner.get_board_state()?;
         Ok(state)
@@ -310,6 +315,13 @@ impl Dynamixel2Joints {
         match self {
             Dynamixel2Joints::Fg(c) => c.set_raw_motors_velocity_limit(limit),
             Dynamixel2Joints::Bg(c) => c.set_raw_motors_velocity_limit(limit),
+        }
+    }
+
+    pub fn get_motors_temperature(&mut self) -> Result<[Option<f64>; 2]> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.get_motors_temperature(),
+            Dynamixel2Joints::Bg(c) => c.get_motors_temperature(),
         }
     }
 }

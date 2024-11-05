@@ -49,6 +49,7 @@
 
 
   <!-- config  -->
+  <xacro:arg name="antenna_config" default="$(find dynamixel_description)/config/two_fake.yaml"/>
   <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake_neck.yaml" />
   <xacro:arg name="right_arm_config" default="$(find arm_description)/config/fake_r_arm.yaml" />
   <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_l_arm.yaml" />
@@ -244,7 +245,7 @@
   <xacro:head
     parent="torso"
     damping="${damping}" friction="${friction}"
-    neck_config="$(arg neck_config)"
+    neck_config="$(arg neck_config)" antenna_config="$(arg antenna_config)"
   />
 
   <!-- RIGHT ARM -->

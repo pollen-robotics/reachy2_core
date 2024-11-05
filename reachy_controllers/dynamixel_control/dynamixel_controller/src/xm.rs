@@ -280,6 +280,16 @@ impl RawMotorsIO<1> for XMDynamixel {
         )?])
     }
 
+    /// Get the temperature (°C)
+    fn get_motors_temperature(&mut self) -> Result<[f64; 1]> {
+        let temp = xm::conv::dxl_to_temperature(xm::read_present_temperature(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+        )?);
+        Ok([temp as f64])
+    }
+
     /// Set the current control mode
     fn set_control_mode(&mut self, mode: [u8; 1]) -> Result<()> {
         xm::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;

@@ -281,6 +281,16 @@ impl RawMotorsIO<1> for XL330Dynamixel {
         )?])
     }
 
+    /// Get the temperature (°C)
+    fn get_motors_temperature(&mut self) -> Result<[f64; 1]> {
+        let temp = xl330::conv::dxl_to_temperature(xl330::read_present_temperature(
+            &self.io,
+            self.serial_port.as_mut(),
+            self.id,
+        )?);
+        Ok([temp as f64])
+    }
+
     /// Set the current control mode
     fn set_control_mode(&mut self, mode: [u8; 1]) -> Result<()> {
         xl330::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
