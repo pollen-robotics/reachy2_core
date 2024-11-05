@@ -25,6 +25,10 @@
           <!-- Use fake components. -->
           <xacro:unless value="$(arg use_gazebo)">
             <plugin>fake_components/GenericSystem</plugin>
+	    <!-- test -->
+          <!-- <plugin>dynamixel_system_hwi/DynamixelSystem</plugin> -->
+          <param name="config_file">${config_file}</param>
+
           </xacro:unless>
         </xacro:if>
       </hardware>
