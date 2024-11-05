@@ -4,6 +4,7 @@ import signal
 import threading
 from datetime import datetime, timedelta
 
+import yaml
 from launch import LaunchContext, LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -29,7 +30,7 @@ failed_nodes = []
 success_nodes = []
 CORE_UP_SOUND = "MA_BANT_GAME_PACK_2.wav"
 CORE_DOWN_SOUND = "MA_BANT_Bubbles_Pops_2.wav"
-SHUTDOWN_GRACE_PERIOD = 120
+SHUTDOWN_GRACE_PERIOD = 2
 ROSBAG_TOPICS = [
     "/clicked_point",
     "/dynamic_joint_commands",
@@ -171,18 +172,29 @@ def check_node_status(context):
             failed_nodes.append(name)
             if name not in non_critical_nodes:
                 LogInfo(msg=f"Critical node failed : [{name}]").execute(context)
-                LogInfo(
-                    msg=f"Grace period of {SHUTDOWN_GRACE_PERIOD} seconds before shutdown, you may use it to dump current rosbag with reachy2_dump_rosbag or via reachy2 dashboard"
-                ).execute(context)
+                # LogInfo(msg=f"Grace period of {SHUTDOWN_GRACE_PERIOD} seconds before shutdown, to write rosbag").execute(
+                #     context
+                # )
                 # instead of exit , just send a ctrl+c signal to the launch file, exit left zombies
-                # EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
-                # send the emit event after a timer
-                TimerAction(
-                    period=float(SHUTDOWN_GRACE_PERIOD),  # sadly TimerAction does not accept int
-                    actions=[
-                        EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")),
+                ExecuteProcess(
+                    name="rosbag_snapshot_dump",
+                    cmd=[
+                        "ros2",
+                        "service",
+                        "call",
+                        "/rosbag2_recorder/snapshot",
+                        "rosbag2_interfaces/Snapshot",
                     ],
+                    output="screen",
                 ).execute(context)
+                EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
+                # send the emit event after a timer
+                # TimerAction(
+                #     period=float(SHUTDOWN_GRACE_PERIOD),  # sadly TimerAction does not accept int
+                #     actions=[
+                #         EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")),
+                #     ],
+                # ).execute(context)
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
@@ -257,6 +269,35 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
 
     # Filter out files, keep only directories
     dirs = [path for path in paths if os.path.isdir(path)]
+    # filter dir list, keep only dir that are not nameds Log, Orbbec log dir irrelvant to consider
+    dirs = [dir for dir in dirs if os.path.basename(dir) != "Log"]
+
+    current_log_dir = get_current_run_log_dir()
+    # Pre-filter, keeping only dir with non-empty rosbag
+    for dir in dirs:
+
+        # dont remove current log dir, ofc its quite empty
+        if dir == current_log_dir:
+            continue
+
+        if os.path.exists(os.path.join(dir, "reachy.bag", "metadata.yaml")):
+            try:
+                with open(os.path.join(dir, "reachy.bag", "metadata.yaml"), "r") as file:
+                    metadata = yaml.load(file, Loader=yaml.FullLoader)
+                    if metadata["rosbag2_bagfile_information"]["message_count"] > 0:
+                        # keeping dir
+                        continue
+
+            except Exception as e:
+                shutil.rmtree(dir)
+                dirs.remove(dir)
+
+        shutil.rmtree(dir)
+        dirs.remove(dir)
+
+    for file in os.listdir(log_dir):
+        if file.endswith(".log"):
+            os.remove(os.path.join(log_dir, file))
 
     if len(dirs) <= nb_runs_to_keep:
         print("No logs&bags to clear")
@@ -265,44 +306,5 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
     # Sort directories in name descending order
     dirs.sort(reverse=True)
 
-    # The directory name after the nb_runs_to_keep-th item is our date limit
-    date_limit_dir = dirs[nb_runs_to_keep]
-    date_limit_dir = os.path.basename(date_limit_dir)
-    date_limit_str = "-".join(date_limit_dir.split("-")[:7])
-
-    # Convert to a datetime object for comparison
-    date_limit = datetime.strptime(date_limit_str, "%Y-%m-%d-%H-%M-%S-%f")
-    # minus one minute, to be sure not to miss any early file
-    date_limit = date_limit - timedelta(minutes=1)
-
-    print(f"Date limit: {date_limit}")
-
     for dir in dirs[nb_runs_to_keep:]:
-        # print(f"Removing directory {dir}")
         shutil.rmtree(dir)
-
-    removed_files = []
-    kept_files = []
-    for file in os.listdir(log_dir):
-        if file.endswith(".log"):
-            timestamp_str = file.split("_")[-1].split(".")[0]
-
-            try:
-                timestamp = datetime.fromtimestamp(int(timestamp_str) / 1000)  # Assuming it's in milliseconds
-            except ValueError:
-                # If the timestamp format is unexpected, skip the file
-                print(f"Skipping invalid log file: {file}")
-                continue
-
-            # Compare the log file's timestamp to the date limit
-            if timestamp < date_limit:
-                # print(f"Removing log file {file} (older than date limit) {timestamp}")
-                os.remove(os.path.join(log_dir, file))
-                removed_files.append(file)
-            else:
-                # print(f"Keeping log file {file} (newer than date limit) {timestamp}")
-                kept_files.append(file)
-    print(f"Removed logfiles: {len(removed_files)}")
-    # print(removed_files)
-    print(f"Kept logfiles: {len(kept_files)}")
-    # print(kept_files)
