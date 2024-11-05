@@ -26,6 +26,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
+
 from reachy_utils.config import (
     BETA,
     DVT,
@@ -240,12 +241,6 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
-    gripper_safe_controller_node = Node(
-        package="gripper_safe_controller",
-        executable="gripper_safe_controller",
-        arguments=["--controllers-file", robot_controllers],
-    )
-
     # antenna_forward_position_controller_spawner = Node(
     #     package='controller_manager',
     #     executable='spawner',
@@ -432,7 +427,6 @@ def launch_setup(context, *args, **kwargs):
             joint_state_broadcaster_spawner,
             delay_rviz_after_joint_state_broadcaster_spawner,
             delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-            gripper_safe_controller_node,
             sdk_server_node,
             # sdk_server_audio_node,
             # audio_node,
