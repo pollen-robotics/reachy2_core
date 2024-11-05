@@ -149,6 +149,7 @@ def launch_setup(context, *args, **kwargs):
 
     # start ethercat server
     ethercat_master_server = ExecuteProcess(
+        name="ethercat_master_server",
         cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
         output="both",
         emulate_tty=True,
@@ -402,6 +403,7 @@ def launch_setup(context, *args, **kwargs):
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
     rosbag = ExecuteProcess(
+        name="rosbag",
         cmd=[
             "ros2",
             "bag",
@@ -474,6 +476,7 @@ def launch_setup(context, *args, **kwargs):
         period=9.0,
         actions=[
             ExecuteProcess(
+                name="speedlimit_set",
                 cmd=[
                     "ros2",
                     "topic",
