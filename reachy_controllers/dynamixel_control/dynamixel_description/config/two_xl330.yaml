@@ -11,4 +11,4 @@ right_config:
     id: 62
     model: !XL330
 
-background: true
+background: false

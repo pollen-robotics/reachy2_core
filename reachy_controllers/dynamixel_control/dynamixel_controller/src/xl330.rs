@@ -31,7 +31,7 @@ impl XL330Dynamixel {
                     .timeout(Duration::from_millis(10))
                     .open_native()?,
             ),
-            io: DynamixelSerialIO::v2().with_post_delay(Duration::from_millis(1)),
+            io: DynamixelSerialIO::v2().with_post_delay(Duration::from_millis(2)),
             id,
             target_position: Cache::keep_last(),
             torque_on: Cache::keep_last(),

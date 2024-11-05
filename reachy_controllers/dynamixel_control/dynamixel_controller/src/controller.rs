@@ -73,7 +73,7 @@ impl ForegroundDynamixelController {
             }
         };
 
-        let right_pos = self.left.get_current_orientation();
+        let right_pos = self.right.get_current_orientation();
 
         let right_pos = match right_pos {
             Ok(v) => Some(v),
@@ -324,7 +324,7 @@ impl ForegroundDynamixelController {
         let left_temp = match left_temp {
             Ok(t) => Some(t),
             Err(e) => {
-                error!("Error: get_motor_temperature (left dxl) {:?}", e);
+                error!("Error: get_motors_temperature (left dxl) {:?}", e);
                 None
             }
         };

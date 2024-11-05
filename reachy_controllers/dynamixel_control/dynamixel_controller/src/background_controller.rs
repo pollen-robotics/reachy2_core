@@ -92,7 +92,7 @@ impl BackgroundDynamixelController {
             let last_write_raw_motors_torque_limit = last_write_raw_motors_torque_limit.clone();
 
             let last_read_motors_temperature = last_read_motors_temperature.clone();
-
+            let mut loop_counter: u32 = 0;
             move || loop {
                 let tic = std::time::Instant::now();
 
@@ -153,44 +153,27 @@ impl BackgroundDynamixelController {
                     }
                 }
 
-                match inner.get_target_torque() {
-                    Ok(p) => {
-                        *last_read_target_torque.write().unwrap() = p;
-                    }
-                    Err(e) => {
-                        error!("Error when reading target torque: {}", e);
-                    }
-                }
+                /*
+                       match inner.get_target_torque() {
+                           Ok(p) => {
+                               *last_read_target_torque.write().unwrap() = p;
+                           }
+                           Err(e) => {
+                               error!("Error when reading target torque: {}", e);
+                           }
+                       }
 
-                let target_t = { *last_write_target_torque.read().unwrap() };
+                       let target_t = { *last_write_target_torque.read().unwrap() };
 
-                if let Some(target) = target_t {
-                    match inner.set_target_torque(target) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            error!("Error when writing target torque: {}", e);
-                        }
-                    }
-                }
-
-                let velocity_limit = { *last_write_raw_motors_velocity_limit.read().unwrap() };
-                if let Some(velocity_limit) = velocity_limit {
-                    match inner.set_raw_motors_velocity_limit(velocity_limit) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            error!("Error when writing velocity limit: {}", e);
-                        }
-                    }
-                }
-                match inner.get_raw_motors_velocity_limit() {
-                    Ok(v) => {
-                        *last_read_raw_motors_velocity_limit.write().unwrap() = v;
-                    }
-                    Err(e) => {
-                        error!("Error when reading velocity limit: {}", e);
-                    }
-                }
-
+                       if let Some(target) = target_t {
+                           match inner.set_target_torque(target) {
+                               Ok(_) => {}
+                               Err(e) => {
+                                   error!("Error when writing target torque: {}", e);
+                               }
+                           }
+                       }
+                */
                 match inner.get_current_velocity() {
                     Ok(v) => {
                         *last_read_current_velocity.write().unwrap() = v;
@@ -209,49 +192,73 @@ impl BackgroundDynamixelController {
                     }
                 }
 
-                let torque_limit = { *last_write_raw_motors_torque_limit.read().unwrap() };
-                if let Some(torque_limit) = torque_limit {
-                    match inner.set_raw_motors_torque_limit(torque_limit) {
-                        Ok(_) => {}
-                        Err(e) => {
-                            error!("Error when writing torque limit: {}", e);
+                //Kind of slow register
+                if loop_counter == 100 {
+                    let velocity_limit = { *last_write_raw_motors_velocity_limit.read().unwrap() };
+                    if let Some(velocity_limit) = velocity_limit {
+                        match inner.set_raw_motors_velocity_limit(velocity_limit) {
+                            Ok(_) => {}
+                            Err(e) => {
+                                error!("Error when writing velocity limit: {}", e);
+                            }
                         }
                     }
-                }
-                match inner.get_raw_motors_torque_limit() {
-                    Ok(t) => {
-                        *last_read_raw_motors_torque_limit.write().unwrap() = t;
-                    }
-                    Err(e) => {
-                        error!("Error when reading torque limit: {}", e);
-                    }
-                }
-
-                let mode = { *last_write_control_mode.read().unwrap() };
-                if let Some(m) = mode {
-                    match inner.set_control_mode(m) {
-                        Ok(_) => {}
+                    match inner.get_raw_motors_velocity_limit() {
+                        Ok(v) => {
+                            *last_read_raw_motors_velocity_limit.write().unwrap() = v;
+                        }
                         Err(e) => {
-                            error!("Error when writing control mode: {}", e);
+                            error!("Error when reading velocity limit: {}", e);
                         }
                     }
-                }
-                match inner.get_control_mode() {
-                    Ok(s) => {
-                        *last_read_control_mode.write().unwrap() = s;
-                    }
-                    Err(e) => {
-                        error!("Error when reading control mode: {}", e);
-                    }
-                }
 
-                match inner.get_motors_temperature() {
-                    Ok(t) => {
-                        *last_read_motors_temperature.write().unwrap() = t;
+                    let torque_limit = { *last_write_raw_motors_torque_limit.read().unwrap() };
+                    if let Some(torque_limit) = torque_limit {
+                        match inner.set_raw_motors_torque_limit(torque_limit) {
+                            Ok(_) => {}
+                            Err(e) => {
+                                error!("Error when writing torque limit: {}", e);
+                            }
+                        }
                     }
-                    Err(e) => {
-                        error!("Error when reading motors temperature: {}", e);
+                    match inner.get_raw_motors_torque_limit() {
+                        Ok(t) => {
+                            *last_read_raw_motors_torque_limit.write().unwrap() = t;
+                        }
+                        Err(e) => {
+                            error!("Error when reading torque limit: {}", e);
+                        }
                     }
+
+                    let mode = { *last_write_control_mode.read().unwrap() };
+                    if let Some(m) = mode {
+                        match inner.set_control_mode(m) {
+                            Ok(_) => {}
+                            Err(e) => {
+                                error!("Error when writing control mode: {}", e);
+                            }
+                        }
+                    }
+                    match inner.get_control_mode() {
+                        Ok(s) => {
+                            *last_read_control_mode.write().unwrap() = s;
+                        }
+                        Err(e) => {
+                            error!("Error when reading control mode: {}", e);
+                        }
+                    }
+
+                    match inner.get_motors_temperature() {
+                        Ok(t) => {
+                            *last_read_motors_temperature.write().unwrap() = t;
+                        }
+                        Err(e) => {
+                            error!("Error when reading motors temperature: {}", e);
+                        }
+                    }
+                    loop_counter = 0;
+                } else {
+                    loop_counter += 1;
                 }
 
                 let toc = tic.elapsed();
