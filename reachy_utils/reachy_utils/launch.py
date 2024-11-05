@@ -275,7 +275,6 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
     current_log_dir = get_current_run_log_dir()
     # Pre-filter, keeping only dir with non-empty rosbag
     for dir in dirs:
-
         # dont remove current log dir, ofc its quite empty
         if dir == current_log_dir:
             continue
