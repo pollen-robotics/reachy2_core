@@ -138,7 +138,7 @@
 
     <!-- test antennas -->
 
-    <link name="antenna_left" >
+    <link name="antenna_left_link" >
       <inertial>
 	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
 	<mass value="0.001"/>
@@ -156,16 +156,16 @@
     </link>
 
     <!-- revolute joint -->
-    <joint name="antenna_left_joint" type="revolute">
+    <joint name="antenna_left" type="revolute">
       <origin xyz="0.0 0.1 0.1" rpy="0 0.0 0"/>
       <parent link="head" />
-      <child link="antenna_left" />
+      <child link="antenna_left_link" />
       <axis xyz="0 1 0"/>
       <limit effort="0.0" velocity="0.0" lower="-0.5" upper="0.5"/>
     </joint>
 
 
-    <link name="antenna_right" >
+    <link name="antenna_right_link" >
       <inertial>
 	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
 	<mass value="0.001"/>
@@ -183,16 +183,16 @@
     </link>
 
     <!-- revolute joint -->
-    <joint name="antenna_right_joint" type="revolute">
+    <joint name="antenna_right" type="revolute">
       <origin xyz="0.0 -0.1 0.1" rpy="0 0.0 0"/>
       <parent link="head" />
-      <child link="antenna_right" />
+      <child link="antenna_right_link" />
       <axis xyz="0 1 0"/>
       <limit effort="0.0" velocity="0.0" lower="-0.5" upper="0.5"/>
     </joint>
 
   <xacro:dynamixel_control
-    name="antenna"
+    name="antenna" joint1="left" joint2="right"
     config_file="${antenna_config}"
     />
 

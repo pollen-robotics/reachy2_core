@@ -1,9 +1,12 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="dynamixel_control" params="name config_file">
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_actuator_control.ros2_control.xacro"/>
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_axis_control.ros2_control.xacro"/>
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_raw_motor_control.ros2_control.xacro"/>
 
-  <xacro:include filename="$(find pollen_generic_description)/ros2_control/joint.ros2_control.xacro"/>
+
+  <xacro:macro name="dynamixel_control" params="name joint1 joint2 config_file ">
 
     <ros2_control name="${name}" type="system">
       <hardware>
@@ -26,8 +29,16 @@
         </xacro:if>
       </hardware>
 
-      <xacro:position_joint_control name="${name}_left_joint"/>
-      <xacro:position_joint_control name="${name}_right_joint"/>
+      <xacro:dynamixel_actuator_control name="${name}_${joint1}"/>
+      <xacro:dynamixel_actuator_control name="${name}_${joint2}"/>
+
+      <xacro:dynamixel_axis_control name="${name}_${joint1}"/>
+      <xacro:dynamixel_axis_control name="${name}_${joint2}"/>
+
+      <xacro:dynamixel_raw_motor_control name="${name}_raw_motor_${joint1}"/>
+      <xacro:dynamixel_raw_motor_control name="${name}_raw_motor_${joint2}"/>
+
     </ros2_control>
+
   </xacro:macro>
 </robot>
