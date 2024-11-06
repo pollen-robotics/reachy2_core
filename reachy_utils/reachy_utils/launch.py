@@ -187,14 +187,14 @@ def check_node_status(context):
                     ],
                     output="screen",
                 ).execute(context)
-                EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
+                # EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
                 # send the emit event after a timer
-                # TimerAction(
-                #     period=float(SHUTDOWN_GRACE_PERIOD),  # sadly TimerAction does not accept int
-                #     actions=[
-                #         EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")),
-                #     ],
-                # ).execute(context)
+                TimerAction(
+                    period=float(SHUTDOWN_GRACE_PERIOD),  # sadly TimerAction does not accept int
+                    actions=[
+                        EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")),
+                    ],
+                ).execute(context)
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
