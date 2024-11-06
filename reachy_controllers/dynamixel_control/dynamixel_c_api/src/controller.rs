@@ -321,3 +321,40 @@ pub extern "C" fn dynamixel_2joints_get_raw_motors_velocity_limit(
         }
     }
 }
+
+//
+#[no_mangle]
+pub extern "C" fn dynamixel_2joints_set_raw_motors_torque_limit(
+    uid: u32,
+    limit: &mut [f64; 2],
+) -> i32 {
+    match CONTROLLER2
+        .get_mut(&uid)
+        .unwrap()
+        .set_raw_motors_torque_limit(*limit)
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_2joints_set_raw_motors_velocity_limit(
+    uid: u32,
+    limit: &mut [f64; 2],
+) -> i32 {
+    match CONTROLLER2
+        .get_mut(&uid)
+        .unwrap()
+        .set_raw_motors_velocity_limit(*limit)
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}

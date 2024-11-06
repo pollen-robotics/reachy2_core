@@ -110,6 +110,116 @@ DynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
 
   // TODO: make sure there is no error here!
   // dynamixel_2joints_get_target_position(this->uid, &hw_commands_position_);
+  // Initialize states and commands
+
+
+
+
+  if (dynamixel_2joints_get_current_position(this->uid, &hw_states_position_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ POSITION ERROR!", info_.name.c_str()
+    );
+  }
+
+  if (dynamixel_2joints_get_current_velocity(this->uid, &hw_states_velocity_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ VELOCITY ERROR!", info_.name.c_str()
+    );
+  }
+
+  if (dynamixel_2joints_get_current_torque(this->uid, &hw_states_effort_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ TORQUE ERROR!", info_.name.c_str()
+    );
+  }
+
+  if (dynamixel_2joints_get_raw_motors_torque_limit(this->uid, &hw_states_torque_limit_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ TORQUE LIMIT ERROR!", info_.name.c_str()
+    );
+  }
+
+  if (dynamixel_2joints_get_raw_motors_velocity_limit(this->uid, &hw_states_speed_limit_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ SPEED LIMIT ERROR!", info_.name.c_str()
+    );
+  }
+
+
+  if (dynamixel_2joints_get_motors_temperature(this->uid, &hw_states_temperature_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ TEMPERATURE ERROR!", info_.name.c_str()
+    );
+  }
+
+  uint8_t mode[2] = {255,255};
+
+  if (dynamixel_2joints_get_control_mode(this->uid, &mode) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ CONTROL MODE ERROR!", info_.name.c_str()
+    );
+  }
+  hw_states_mode_[0] = static_cast<double>(mode[0]);
+  hw_states_mode_[1] = static_cast<double>(mode[1]);
+
+
+  bool torque_on[2] = {false,false};
+
+  if (dynamixel_2joints_is_torque_on(this->uid, &torque_on) != 0) {
+      RCLCPP_INFO_THROTTLE(
+        rclcpp::get_logger("DynamixelSystem"),
+        clock_,
+        LOG_THROTTLE_DURATION,
+        "(%s) READ TORQUE (ON/OFF) ERROR!", info_.name.c_str()
+      );
+  }
+  else{
+    for (int i=0; i < 2; i++) {
+      hw_states_torque_[i] = torque_on[i] ? 1.0 : 0.0;
+    }
+  }
+
+
+
+  hw_commands_position_[0]=hw_states_position_[0];
+  hw_commands_position_[1]=hw_states_position_[1];
+
+  hw_commands_speed_limit_[0]=hw_states_speed_limit_[0];
+  hw_commands_speed_limit_[1]=hw_states_speed_limit_[1];
+
+  hw_commands_torque_limit_[0]=hw_states_torque_limit_[0];
+  hw_commands_torque_limit_[1]=hw_states_torque_limit_[1];
+
+  hw_commands_torque_[0]=hw_states_torque_[0];
+  hw_commands_torque_[1]=hw_states_torque_[1];
+
+  // hw_commands_p_gain_[2];
+  // hw_commands_i_gain_[2];
+  // hw_commands_d_gain_[2];
+  hw_commands_mode_[0]=hw_states_mode_[0];
+  hw_commands_mode_[1]=hw_states_mode_[1];
+
 
 
 
@@ -380,6 +490,20 @@ DynamixelSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
     );
   }
 
+  uint8_t mode[2] = {255,255};
+
+  if (dynamixel_2joints_get_control_mode(this->uid, &mode) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ CONTROL MODE ERROR!", info_.name.c_str()
+    );
+  }
+  hw_states_mode_[0] = static_cast<double>(mode[0]);
+  hw_states_mode_[1] = static_cast<double>(mode[1]);
+
+
   bool torque_on[2] = {false,false};
 
   if (dynamixel_2joints_is_torque_on(this->uid, &torque_on) != 0) {
@@ -426,9 +550,49 @@ DynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
       rclcpp::get_logger("DynamixelSystem"),
       clock_,
       LOG_THROTTLE_DURATION,
-      "(%s) WRITE POSITION LIMIT ERROR!", info_.name.c_str()
+      "(%s) WRITE TARGET POSITION ERROR!", info_.name.c_str()
     );
   }
+
+
+  uint8_t mode[2] = {static_cast<uint8_t>(hw_commands_mode_[0]), static_cast<uint8_t>(hw_commands_mode_[1])};
+
+  if (dynamixel_2joints_set_control_mode(
+    this->uid,
+    &mode
+  ) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) WRITE CONTROL MODE ERROR!", info_.name.c_str()
+    );
+  }
+
+    if (dynamixel_2joints_set_raw_motors_velocity_limit(
+    this->uid,
+    &hw_commands_speed_limit_
+  ) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) WRITE VELOCITY LIMIT ERROR!", info_.name.c_str()
+    );
+    }
+
+    if (dynamixel_2joints_set_raw_motors_torque_limit(
+    this->uid,
+    &hw_commands_torque_limit_
+  ) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) WRITE TORQUE LIMIT ERROR!", info_.name.c_str()
+    );
+  }
+
 
   return hardware_interface::return_type::OK;
 }

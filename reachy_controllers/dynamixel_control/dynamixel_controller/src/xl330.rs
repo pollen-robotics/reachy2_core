@@ -1,4 +1,5 @@
 use cache_cache::Cache;
+use log::error;
 use log::info;
 use motor_toolbox_rs::{MissingRegisterErrror, MotorsController, RawMotorsIO, PID};
 use rustypot::{device::xl330, DynamixelSerialIO};
@@ -126,20 +127,24 @@ impl RawMotorsIO<1> for XL330Dynamixel {
         ])
     }
 
+    // it is in fact the current in A
     fn get_current_torque(&mut self) -> Result<[f64; 1]> {
         Ok([xl330::conv::dxl_current_to_ma(xl330::read_present_current(
             &self.io,
             self.serial_port.as_mut(),
             self.id,
-        )?) as f64])
+        )? as i16) as f64
+            / 1000.0])
     }
 
+    // rad/s
     fn get_current_velocity(&mut self) -> Result<[f64; 1]> {
         Ok([xl330::conv::dxl_vel_to_rpm(xl330::read_present_velocity(
             &self.io,
             self.serial_port.as_mut(),
             self.id,
-        )?) as f64])
+        )?) as f64
+            * 0.10472])
     }
 
     fn get_target_position(&mut self) -> Result<[f64; 1]> {
@@ -172,6 +177,7 @@ impl RawMotorsIO<1> for XL330Dynamixel {
         Ok(())
     }
 
+    //rad/s
     fn get_velocity_limit(&mut self) -> Result<[f64; 1]> {
         self.velocity_limit
             .entry(self.id)
@@ -180,10 +186,12 @@ impl RawMotorsIO<1> for XL330Dynamixel {
                     &self.io,
                     self.serial_port.as_mut(),
                     self.id,
-                )? as i32) as f64)
+                )? as i32) as f64
+                    * 0.10472)
             })
             .map(|x| [x])
     }
+
     fn set_velocity_limit(&mut self, velocity_limit: [f64; 1]) -> Result<()> {
         let current_velocity_limit = RawMotorsIO::get_velocity_limit(self)?;
 
@@ -192,7 +200,7 @@ impl RawMotorsIO<1> for XL330Dynamixel {
                 &self.io,
                 self.serial_port.as_mut(),
                 self.id,
-                xl330::conv::rpm_to_dxl_vel(velocity_limit[0] as f32) as u32,
+                (xl330::conv::rpm_to_dxl_vel(velocity_limit[0] as f32) as f32 / 0.10472) as u32,
             )?;
 
             self.velocity_limit.insert(self.id, velocity_limit[0]);
@@ -201,6 +209,7 @@ impl RawMotorsIO<1> for XL330Dynamixel {
         Ok(())
     }
 
+    //in A (ok it is not really in Nm)
     fn get_torque_limit(&mut self) -> Result<[f64; 1]> {
         self.torque_limit
             .entry(self.id)
@@ -215,6 +224,7 @@ impl RawMotorsIO<1> for XL330Dynamixel {
             .map(|x| [x])
     }
 
+    //in A (ok it is not really in Nm)
     fn set_torque_limit(&mut self, torque_limit: [f64; 1]) -> Result<()> {
         let current_torque_limit = RawMotorsIO::get_torque_limit(self)?;
 
@@ -248,7 +258,8 @@ impl RawMotorsIO<1> for XL330Dynamixel {
             &self.io,
             self.serial_port.as_mut(),
             self.id,
-        )?) / 1000.0;
+        )? as i16)
+            / 1000.0;
         Ok([cur as f64])
     }
 
