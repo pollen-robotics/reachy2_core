@@ -40,6 +40,7 @@ from reachy_utils.config import (
     log_config,
 )
 from reachy_utils.launch import (
+    ROSBAG_TOPICS,
     build_watchers_from_node_list,
     clear_bags_and_logs,
     get_current_run_log_dir,
@@ -71,7 +72,7 @@ def launch_setup(context, *args, **kwargs):
     verbose_logger_log_level_rl = LaunchConfiguration("log")
     nodes = []
 
-    clear_bags_and_logs(nb_runs_to_keep=5)
+    clear_bags_and_logs(nb_runs_to_keep=10)
 
     ####################
     ### Robot config ###
@@ -408,13 +409,17 @@ def launch_setup(context, *args, **kwargs):
             "ros2",
             "bag",
             "record",
+            "--snapshot-mode",
+            "--max-cache-size",
+            "400000000",
             "-o",
             f"{get_current_run_log_dir()}/reachy.bag",
-            "/r_arm/ik_target_pose",
-            "/l_arm/ik_target_pose",
-            "/head/target_pose",
-            "/joint_commands",
-            "/joint_states",
+            *ROSBAG_TOPICS,
+            # "/r_arm/ik_target_pose",
+            # "/l_arm/ik_target_pose",
+            # "/head/target_pose",
+            # "/joint_commands",
+            # "/joint_states",
         ],
         output="screen",
     )
@@ -439,25 +444,16 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    if gazebo_py:
-        start_control_after_ehtercat = TimerAction(
-            period=0.5,
-            actions=[
-                gazebo_node,
-            ],
-            cancel_on_shutdown=True,
-        )
-    else:
-        start_control_after_ehtercat = TimerAction(
-            period=3.0,
-            actions=[
-                control_node,
-            ],
-            cancel_on_shutdown=True,
-        )
+    start_control_after_ehtercat = TimerAction(
+        period=3.0 if not gazebo_py else 0.5,
+        actions=[
+            control_node if not gazebo_py else gazebo_node,
+        ],
+        cancel_on_shutdown=True,
+    )
 
     start_everything_after_control = TimerAction(
-        period=1.5,
+        period=4.0 if not gazebo_py else 1.5,
         actions=[
             *nodes,
         ],
@@ -473,7 +469,7 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
     speedlimit_set = TimerAction(
-        period=9.0,
+        period=10.0,
         actions=[
             ExecuteProcess(
                 name="speedlimit_set",
