@@ -39,8 +39,8 @@
       <xacro:dynamixel_axis_control name="${name}_${joint1}"/>
       <xacro:dynamixel_axis_control name="${name}_${joint2}"/>
 
-      <xacro:dynamixel_raw_motor_control name="${name}_raw_motor_${joint1}"/>
-      <xacro:dynamixel_raw_motor_control name="${name}_raw_motor_${joint2}"/>
+      <xacro:dynamixel_raw_motor_control name="${name}_${joint1}_raw_motor"/>
+      <xacro:dynamixel_raw_motor_control name="${name}_${joint2}_raw_motor"/>
 
     </ros2_control>
 

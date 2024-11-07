@@ -153,27 +153,26 @@ impl BackgroundDynamixelController {
                     }
                 }
 
-                /*
-                       match inner.get_target_torque() {
-                           Ok(p) => {
-                               *last_read_target_torque.write().unwrap() = p;
-                           }
-                           Err(e) => {
-                               error!("Error when reading target torque: {}", e);
-                           }
-                       }
+                match inner.get_target_torque() {
+                    Ok(p) => {
+                        *last_read_target_torque.write().unwrap() = p;
+                    }
+                    Err(e) => {
+                        error!("Error when reading target torque: {}", e);
+                    }
+                }
 
-                       let target_t = { *last_write_target_torque.read().unwrap() };
+                let target_t = { *last_write_target_torque.read().unwrap() };
 
-                       if let Some(target) = target_t {
-                           match inner.set_target_torque(target) {
-                               Ok(_) => {}
-                               Err(e) => {
-                                   error!("Error when writing target torque: {}", e);
-                               }
-                           }
-                       }
-                */
+                if let Some(target) = target_t {
+                    match inner.set_target_torque(target) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            error!("Error when writing target torque: {}", e);
+                        }
+                    }
+                }
+
                 match inner.get_current_velocity() {
                     Ok(v) => {
                         *last_read_current_velocity.write().unwrap() = v;

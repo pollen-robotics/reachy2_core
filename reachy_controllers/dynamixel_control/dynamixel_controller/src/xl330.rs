@@ -1,6 +1,8 @@
 use cache_cache::Cache;
 use log::error;
 use log::info;
+use log::warn;
+
 use motor_toolbox_rs::{MissingRegisterErrror, MotorsController, RawMotorsIO, PID};
 use rustypot::{device::xl330, DynamixelSerialIO};
 use serialport::TTYPort;
@@ -22,10 +24,11 @@ pub struct XL330Dynamixel {
 
     velocity_limit: Cache<u8, f64>,
     torque_limit: Cache<u8, f64>,
+    control_mode: Cache<u8, u8>,
 }
 
 impl XL330Dynamixel {
-    pub fn new(serial_port_name: &str, id: u8) -> Result<Self> {
+    pub fn new(serial_port_name: &str, id: u8, mode: u8, current_limit: f64) -> Result<Self> {
         let mut controller = XL330Dynamixel {
             serial_port: Box::new(
                 serialport::new(serial_port_name, 2_000_000)
@@ -38,25 +41,39 @@ impl XL330Dynamixel {
             torque_on: Cache::keep_last(),
             velocity_limit: Cache::keep_last(),
             torque_limit: Cache::keep_last(),
+            control_mode: Cache::keep_last(),
         };
 
         controller.serial_port.set_exclusive(false)?; //To be able to share the serial port
 
-        // motor_toolbox_rs::MotorsController::set_control_mode(&mut controller, [3])?; //position control mode
-        let mode = motor_toolbox_rs::MotorsController::get_control_mode(&mut controller)?;
-        info!(
-            "XL330Dynamixel {} {} initialized, operating mode: {}",
-            serial_port_name, id, mode[0]
-        );
+        let torque_on = motor_toolbox_rs::MotorsController::is_torque_on(&mut controller)?;
 
-        // motor_toolbox_rs::MotorsController::set_torque_limit(&mut controller, [0.4])?;
-        let tlimit = motor_toolbox_rs::MotorsController::get_torque_limit(&mut controller)?;
-        info!(
-            "XL330Dynamixel {} {} initialized, torque_limit: {}",
-            serial_port_name, id, tlimit[0]
-        );
+        if torque_on[0] {
+            motor_toolbox_rs::MotorsController::set_control_mode(&mut controller, [mode])?; //control mode 3=standard position control 5=torque based position control. Looks like torque should be off to change it?
+            let rmode = motor_toolbox_rs::MotorsController::get_control_mode(&mut controller)?;
+            info!(
+                "XL330Dynamixel {} {} initialized, operating mode: {} (asked: {})",
+                serial_port_name, id, rmode[0], mode
+            );
 
-        // motor_toolbox_rs::MotorsController::set_target_torque(&mut controller, [0.4])?;
+            motor_toolbox_rs::MotorsController::set_torque_limit(&mut controller, [current_limit])?;
+            let tlimit = motor_toolbox_rs::MotorsController::get_torque_limit(&mut controller)?;
+            info!(
+                "XL330Dynamixel {} {} initialized, torque_limit: {} (asked: {})",
+                serial_port_name, id, tlimit[0], current_limit
+            );
+        } else {
+            warn!(
+                "XL330Dynamixel {} {} torque is off, cannot set control mode",
+                serial_port_name, id
+            );
+            warn!(
+                "XL330Dynamixel {} {} torque is off, cannot set torque_limit",
+                serial_port_name, id
+            );
+        }
+
+        motor_toolbox_rs::MotorsController::set_target_torque(&mut controller, [current_limit])?;
         let ttorque = motor_toolbox_rs::MotorsController::get_target_torque(&mut controller)?;
         info!(
             "XL330Dynamixel {} {} initialized, target_torque: {}",
@@ -67,7 +84,12 @@ impl XL330Dynamixel {
     }
 
     pub fn with_config(config: DynamixelConfigInfo) -> Result<Self> {
-        XL330Dynamixel::new(config.serial_port_name.as_str(), config.id)
+        XL330Dynamixel::new(
+            config.serial_port_name.as_str(),
+            config.id,
+            config.mode,
+            config.current_limit,
+        )
     }
 }
 
@@ -285,11 +307,18 @@ impl RawMotorsIO<1> for XL330Dynamixel {
 
     /// Get the current control mode
     fn get_control_mode(&mut self) -> Result<[u8; 1]> {
-        Ok([xl330::read_operating_mode(
-            &self.io,
-            self.serial_port.as_mut(),
-            self.id,
-        )?])
+        self.control_mode
+            .entry(self.id)
+            .or_try_insert_with(|_| {
+                Ok((xl330::read_operating_mode(&self.io, self.serial_port.as_mut(), self.id)?))
+            })
+            .map(|x| [x])
+
+        // Ok([xl330::read_operating_mode(
+        //     &self.io,
+        //     self.serial_port.as_mut(),
+        //     self.id,
+        // )?])
     }
 
     /// Get the temperature (°C)
@@ -304,7 +333,15 @@ impl RawMotorsIO<1> for XL330Dynamixel {
 
     /// Set the current control mode
     fn set_control_mode(&mut self, mode: [u8; 1]) -> Result<()> {
-        xl330::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
+        let ctrl_mode = RawMotorsIO::get_control_mode(self)?;
+
+        if ctrl_mode != mode {
+            xl330::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
+
+            self.control_mode.insert(self.id, mode[0]);
+        }
+
+        // xl330::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
         Ok(())
     }
 

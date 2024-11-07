@@ -28,6 +28,8 @@ int32_t dynamixel_2joints_get_current_torque(uint32_t uid, double (*torque)[2]);
 
 int32_t dynamixel_2joints_set_target_torque(uint32_t uid, const double (*torque)[2]);
 
+int32_t dynamixel_2joints_get_target_torque(uint32_t uid, double (*torque)[2]);
+
 int32_t dynamixel_2joints_get_control_mode(uint32_t uid, uint8_t (*mode)[2]);
 
 int32_t dynamixel_2joints_set_control_mode(uint32_t uid, const uint8_t (*mode)[2]);

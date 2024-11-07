@@ -19,6 +19,8 @@ pub struct DynamixelConfigInfo {
     pub serial_port_name: String,
     pub id: u8,
     pub model: DxlModel,
+    pub mode: u8,
+    pub current_limit: f64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -274,6 +276,13 @@ impl Dynamixel2Joints {
         match self {
             Dynamixel2Joints::Fg(c) => c.set_target_torque(target),
             Dynamixel2Joints::Bg(c) => c.set_target_torque(target),
+        }
+    }
+
+    pub fn get_target_torque(&mut self) -> Result<[Option<f64>; 2]> {
+        match self {
+            Dynamixel2Joints::Fg(c) => c.get_target_torque(),
+            Dynamixel2Joints::Bg(c) => c.get_target_torque(),
         }
     }
 

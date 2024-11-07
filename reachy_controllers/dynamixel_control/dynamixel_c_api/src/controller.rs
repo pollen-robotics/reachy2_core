@@ -218,6 +218,26 @@ pub extern "C" fn dynamixel_2joints_set_target_torque(uid: u32, torque: &[f64; 2
 }
 
 #[no_mangle]
+pub extern "C" fn dynamixel_2joints_get_target_torque(uid: u32, torque: &mut [f64; 2]) -> i32 {
+    match CONTROLLER2.get_mut(&uid).unwrap().get_target_torque() {
+        Ok(tq) => match convert(tq) {
+            Some(t) => {
+                *torque = t;
+                return 0;
+            }
+            None => {
+                return 1;
+            }
+        },
+
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn dynamixel_2joints_get_control_mode(uid: u32, mode: &mut [u8; 2]) -> i32 {
     match CONTROLLER2.get_mut(&uid).unwrap().get_control_mode() {
         Ok(m) => match convert(m) {

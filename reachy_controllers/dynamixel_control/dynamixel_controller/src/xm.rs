@@ -22,10 +22,11 @@ pub struct XMDynamixel {
 
     velocity_limit: Cache<u8, f64>,
     torque_limit: Cache<u8, f64>,
+    control_mode: Cache<u8, u8>,
 }
 
 impl XMDynamixel {
-    pub fn new(serial_port_name: &str, id: u8) -> Result<Self> {
+    pub fn new(serial_port_name: &str, id: u8, mode: u8, current_limit: f64) -> Result<Self> {
         let mut controller = XMDynamixel {
             serial_port: Box::new(
                 serialport::new(serial_port_name, 2_000_000)
@@ -38,25 +39,26 @@ impl XMDynamixel {
             torque_on: Cache::keep_last(),
             velocity_limit: Cache::keep_last(),
             torque_limit: Cache::keep_last(),
+            control_mode: Cache::keep_last(),
         };
 
         controller.serial_port.set_exclusive(false)?; //To be able to share the serial port
 
-        // motor_toolbox_rs::MotorsController::set_control_mode(&mut controller, [3])?; //position control mode
+        motor_toolbox_rs::MotorsController::set_control_mode(&mut controller, [mode])?; //control mode 3=standard position control 5=torque based position control
         let mode = motor_toolbox_rs::MotorsController::get_control_mode(&mut controller)?;
         info!(
             "XMDynamixel {} {} initialized, operating mode: {}",
             serial_port_name, id, mode[0]
         );
 
-        // motor_toolbox_rs::MotorsController::set_torque_limit(&mut controller, [0.4])?;
+        motor_toolbox_rs::MotorsController::set_torque_limit(&mut controller, [current_limit])?;
         let tlimit = motor_toolbox_rs::MotorsController::get_torque_limit(&mut controller)?;
         info!(
             "XMDynamixel {} {} initialized, torque_limit: {}",
             serial_port_name, id, tlimit[0]
         );
 
-        // motor_toolbox_rs::MotorsController::set_target_torque(&mut controller, [0.4])?;
+        motor_toolbox_rs::MotorsController::set_target_torque(&mut controller, [current_limit])?;
         let ttorque = motor_toolbox_rs::MotorsController::get_target_torque(&mut controller)?;
         info!(
             "XMDynamixel {} {} initialized, target_torque: {}",
@@ -67,7 +69,12 @@ impl XMDynamixel {
     }
 
     pub fn with_config(config: DynamixelConfigInfo) -> Result<Self> {
-        XMDynamixel::new(config.serial_port_name.as_str(), config.id)
+        XMDynamixel::new(
+            config.serial_port_name.as_str(),
+            config.id,
+            config.mode,
+            config.current_limit,
+        )
     }
 }
 
@@ -273,11 +280,18 @@ impl RawMotorsIO<1> for XMDynamixel {
 
     /// Get the current control mode
     fn get_control_mode(&mut self) -> Result<[u8; 1]> {
-        Ok([xm::read_operating_mode(
-            &self.io,
-            self.serial_port.as_mut(),
-            self.id,
-        )?])
+        self.control_mode
+            .entry(self.id)
+            .or_try_insert_with(|_| {
+                Ok((xm::read_operating_mode(&self.io, self.serial_port.as_mut(), self.id)?))
+            })
+            .map(|x| [x])
+
+        // Ok([xm::read_operating_mode(
+        //     &self.io,
+        //     self.serial_port.as_mut(),
+        //     self.id,
+        // )?])
     }
 
     /// Get the temperature (°C)
@@ -292,7 +306,15 @@ impl RawMotorsIO<1> for XMDynamixel {
 
     /// Set the current control mode
     fn set_control_mode(&mut self, mode: [u8; 1]) -> Result<()> {
-        xm::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
+        let ctrl_mode = RawMotorsIO::get_control_mode(self)?;
+
+        if ctrl_mode != mode {
+            xm::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
+
+            self.control_mode.insert(self.id, mode[0]);
+        }
+
+        // xm::write_operating_mode(&self.io, self.serial_port.as_mut(), self.id, mode[0])?;
         Ok(())
     }
 

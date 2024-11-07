@@ -228,7 +228,9 @@ def launch_setup(context, *args, **kwargs):
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
         ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
-        ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
+        # ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["antenna_current_controller", f"not {gazebo_py}"],
+        ["antenna_mode_controller", f"not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(

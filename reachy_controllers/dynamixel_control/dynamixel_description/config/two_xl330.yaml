@@ -3,12 +3,16 @@ left_config:
   io: !DynamixelSerialIO
     serial_port_name: /dev/ttyUSB0
     id: 61
+    mode: 5
+    current_limit: 0.4
     model: !XL330
 
 right_config:
   io: !DynamixelSerialIO
     serial_port_name: /dev/ttyUSB0
     id: 62
+    mode: 5
+    current_limit: 0.4
     model: !XL330
 
-background: false
+background: true

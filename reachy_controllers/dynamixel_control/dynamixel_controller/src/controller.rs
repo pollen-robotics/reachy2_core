@@ -3,7 +3,7 @@ use crate::DxlConfig;
 use crate::DynamixelJoint;
 use log::error;
 use std::error::Error;
-
+use std::{thread, time::Duration};
 pub struct ForegroundDynamixelController {
     pub left: DynamixelJoint,
     pub right: DynamixelJoint,
@@ -46,7 +46,7 @@ impl ForegroundDynamixelController {
             Ok(_) => {}
             Err(res) => error!("Error: set_torque (left dxl) {:?}", res),
         }
-
+        // thread::sleep(Duration::from_millis(2));
         let (torque, reset_target) = torques[1];
         if torque {
             res = self.right.enable_torque(reset_target);
@@ -58,7 +58,7 @@ impl ForegroundDynamixelController {
             Ok(_) => {}
             Err(res) => error!("Error: set_torque(right dxl) {:?}", res),
         }
-
+        // thread::sleep(Duration::from_millis(2));
         Ok(())
     }
 

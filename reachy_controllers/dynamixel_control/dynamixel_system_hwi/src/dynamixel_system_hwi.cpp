@@ -20,7 +20,16 @@ DynamixelSystem::on_init(const hardware_interface::HardwareInfo & info)
     return CallbackReturn::ERROR;
   }
 
-  long unsigned int nb_joints_expected = 2; //TODO Check
+  long unsigned int nb_joints_expected = 2;
+
+   for (std::size_t i = 0; i < info_.joints.size(); i++)
+   {
+     auto joint = info_.joints[i];
+    RCLCPP_INFO(
+      rclcpp::get_logger("DynamixelSystem"),
+      "Got joint: \"%s\" ", joint.name.c_str());
+   }
+
   if (info.joints.size() != nb_joints_expected)
   {
     RCLCPP_ERROR(
@@ -31,10 +40,17 @@ DynamixelSystem::on_init(const hardware_interface::HardwareInfo & info)
     return CallbackReturn::ERROR;
   }
 
-  /*
-  //TODO GPIO
-  const int nb_gpios_expected = 8; //for each motor: ctrl mode, torque_limit, velocity_limit, temperature
 
+  //GPIO
+  const int nb_gpios_expected = 4; //ie: antenna_left, antenna_right, antenna_raw_motor_left, antenna_raw_motor_right
+  for (std::size_t i = 0; i < info_.gpios.size(); i++)
+  {
+    auto gpio = info_.gpios[i];
+    RCLCPP_INFO(
+      rclcpp::get_logger("DynamixelSystem"),
+      "Got GPIO: \"%s\" ", gpio.name.c_str());
+
+  }
   if (info.gpios.size() != nb_gpios_expected)
   {
     RCLCPP_ERROR(
@@ -42,7 +58,7 @@ DynamixelSystem::on_init(const hardware_interface::HardwareInfo & info)
       "Got \"%s\" gpios", std::to_string(info.gpios.size()).c_str());
     return CallbackReturn::ERROR;
   }
-*/
+
 
   const char *config_file = "";
 
@@ -101,6 +117,8 @@ DynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
     hw_states_torque_limit_[i] = std::numeric_limits<double>::quiet_NaN();
     hw_states_speed_limit_[i] = std::numeric_limits<double>::quiet_NaN();
     hw_states_torque_[i] = std::numeric_limits<double>::quiet_NaN();
+    hw_states_current_[i] = std::numeric_limits<double>::quiet_NaN();
+
 
     //future stuffs
     hw_states_p_gain_[i] = std::numeric_limits<double>::quiet_NaN();
@@ -109,7 +127,6 @@ DynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
   }
 
   // TODO: make sure there is no error here!
-  // dynamixel_2joints_get_target_position(this->uid, &hw_commands_position_);
   // Initialize states and commands
 
 
@@ -170,6 +187,17 @@ DynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
     );
   }
 
+
+  if (dynamixel_2joints_get_target_torque(this->uid, &hw_states_current_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ TARGET CURRENT ERROR!", info_.name.c_str()
+    );
+  }
+
+
   uint8_t mode[2] = {255,255};
 
   if (dynamixel_2joints_get_control_mode(this->uid, &mode) != 0) {
@@ -220,6 +248,9 @@ DynamixelSystem::on_activate(const rclcpp_lifecycle::State & /*previous_state*/)
   hw_commands_mode_[0]=hw_states_mode_[0];
   hw_commands_mode_[1]=hw_states_mode_[1];
 
+  hw_commands_current_[0]=hw_states_current_[0];
+  hw_commands_current_[1]=hw_states_current_[1];
+
 
 
 
@@ -258,23 +289,6 @@ DynamixelSystem::export_state_interfaces()
     state_interfaces.emplace_back(hardware_interface::StateInterface(
       joint.name, hardware_interface::HW_IF_EFFORT, &hw_states_effort_[i]));
 
-
-    //TODO GPIO
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "temperature", &hw_states_temperature_[i]));
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "torque_limit", &hw_states_torque_limit_[i]));
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "speed_limit", &hw_states_speed_limit_[i]));
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "torque", &hw_states_torque_[i]));
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "p_gain", &hw_states_p_gain_[i]));
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "i_gain", &hw_states_i_gain_[i]));
-    // state_interfaces.emplace_back(hardware_interface::StateInterface(
-    //   joint.name, "d_gain", &hw_states_d_gain_[i]));
-
     RCLCPP_INFO(
       rclcpp::get_logger("DynamixelSystem"),
       "export state interface (%s) \"%s\"!", info_.name.c_str(), joint.name.c_str()
@@ -284,7 +298,13 @@ DynamixelSystem::export_state_interfaces()
 
   //GPIOS
       // motor index (not corresponding to the GPIO index)
+  // Here we have 2 motors but 4 GPIOs (left/torque, right/torque, left_raw_motor/ and right_raw_motor/)
     size_t motor_index = 0;
+    size_t raw_motor_index = 0;
+
+    RCLCPP_INFO(
+      rclcpp::get_logger("DynamixelSystem"),
+      "export state interface (GPIO) (%s)", info_.name.c_str());
 
     // be careful GPIO index != motor or actuator index
     for (std::size_t i = 0; i < info_.gpios.size(); i++)
@@ -295,34 +315,78 @@ DynamixelSystem::export_state_interfaces()
       {
         state_interfaces.emplace_back(hardware_interface::StateInterface(
             gpio.name, "torque", &hw_states_torque_[motor_index]));
+        motor_index++;
 
-        RCLCPP_INFO(
-            rclcpp::get_logger("DynamixelSystem"),
-            "export state interface (GPIO torque) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+        // RCLCPP_INFO(
+        //     rclcpp::get_logger("DynamixelSystem"),
+        //     "export state interface (GPIO torque) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+
+          RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "torque");
+
       }
       else if (gpio.name.find("raw_motor") != std::string::npos)
       {
         state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "temperature", &hw_states_temperature_[motor_index]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "torque_limit", &hw_states_torque_limit_[motor_index]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "speed_limit", &hw_states_speed_limit_[motor_index]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "p_gain", &hw_states_p_gain_[motor_index]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "i_gain", &hw_states_i_gain_[motor_index]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "d_gain", &hw_states_d_gain_[motor_index]));
-        state_interfaces.emplace_back(hardware_interface::StateInterface(
-            gpio.name, "mode", &hw_states_mode_[motor_index]));
+            gpio.name, "temperature", &hw_states_temperature_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "temperature");
 
-        // next motor
-        motor_index++;
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "torque_limit", &hw_states_torque_limit_[raw_motor_index]));
+
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "torque_limit");
+
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "speed_limit", &hw_states_speed_limit_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "speed_limit");
+
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "p_gain", &hw_states_p_gain_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "p_gain");
+
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "i_gain", &hw_states_i_gain_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "i_gain");
+
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "d_gain", &hw_states_d_gain_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "d_gain");
+
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "mode", &hw_states_mode_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "mode");
+
+
+        state_interfaces.emplace_back(hardware_interface::StateInterface(
+            gpio.name, "current", &hw_states_current_[raw_motor_index]));
+
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "current");
+
 
         RCLCPP_INFO(
             rclcpp::get_logger("DynamixelSystem"),
             "export state interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+
+        // next motor
+        raw_motor_index++;
+
       }
       else
       {
@@ -330,13 +394,18 @@ DynamixelSystem::export_state_interfaces()
             rclcpp::get_logger("DynamixelSystem"),
             "Unkwon state interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
       }
-    }
 
-    if (motor_index != 2)
+    }
+    RCLCPP_INFO(
+      rclcpp::get_logger("DynamixelSystem"),
+      "export state interface (GPIO) (%s) done", info_.name.c_str());
+
+
+    if (motor_index != 2 || raw_motor_index != 2)
     {
       RCLCPP_ERROR(
           rclcpp::get_logger("DynamixelSystem"),
-          "Orbita3d HWI: Number of motors not correct: expected 2 found %ld! Stopping operation!", motor_index);
+          "DynamixelHWI: Number of motors not correct: expected 2 found %ld! Or number of raw_motors not correct: expected 2 found %ld! Stopping operation!", motor_index, raw_motor_index);
       std::abort();
     }
 
@@ -356,18 +425,6 @@ DynamixelSystem::export_command_interfaces()
 
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
       joint.name, hardware_interface::HW_IF_POSITION, &hw_commands_position_[i]));
-    // command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    //   joint.name, "speed_limit", &hw_commands_speed_limit_[i]));
-    // command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    //   joint.name, "torque_limit", &hw_commands_torque_limit_[i]));
-    // command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    //   joint.name, "torque", &hw_commands_torque_[i]));
-    // command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    //   joint.name, "p_gain", &hw_commands_p_gain_[i]));
-    // command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    //   joint.name, "i_gain", &hw_commands_i_gain_[i]));
-    // command_interfaces.emplace_back(hardware_interface::CommandInterface(
-    //   joint.name, "d_gain", &hw_commands_d_gain_[i]));
 
     RCLCPP_INFO(
       rclcpp::get_logger("DynamixelSystem"),
@@ -376,43 +433,86 @@ DynamixelSystem::export_command_interfaces()
   }
 
     // motor index (not corresponding to the GPIO index)
+    size_t raw_motor_index = 0;
     size_t motor_index = 0;
+
+    RCLCPP_INFO(
+      rclcpp::get_logger("DynamixelSystem"),
+      "export command interface (GPIO) (%s) size: %ld", info_.name.c_str(), info_.gpios.size());
 
     // be careful GPIO index != motor or actuator index
     for (std::size_t i = 0; i < info_.gpios.size(); i++)
     {
       auto gpio = info_.gpios[i];
 
+
       // if (gpio.name == info_.name.c_str())
       if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str())
       {
         command_interfaces.emplace_back(hardware_interface::CommandInterface(
             gpio.name, "torque", &hw_commands_torque_[motor_index]));
+
         RCLCPP_INFO(
-            rclcpp::get_logger("DynamixelSystem"),
-            "export command interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "torque");
+        motor_index++;
+
+        // RCLCPP_INFO(
+        //     rclcpp::get_logger("DynamixelSystem"),
+        //     "export command interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
       }
       else if (gpio.name.find("raw_motor") != std::string::npos)
       {
         command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            gpio.name, "speed_limit", &hw_commands_speed_limit_[motor_index]));
-        command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            gpio.name, "torque_limit", &hw_commands_torque_limit_[motor_index]));
-        command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            gpio.name, "p_gain", &hw_commands_p_gain_[motor_index]));
-        command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            gpio.name, "i_gain", &hw_commands_i_gain_[motor_index]));
-        command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            gpio.name, "d_gain", &hw_commands_d_gain_[motor_index]));
-        command_interfaces.emplace_back(hardware_interface::CommandInterface(
-            gpio.name, "mode", &hw_commands_mode_[motor_index]));
+            gpio.name, "speed_limit", &hw_commands_speed_limit_[raw_motor_index]));
+        RCLCPP_INFO(
+          rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+          info_.gpios.at(i).name.c_str(), "speed_limit");
 
-        // next motor
-        motor_index++;
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+            gpio.name, "torque_limit", &hw_commands_torque_limit_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "torque_limit");
+
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+            gpio.name, "p_gain", &hw_commands_p_gain_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "p_gain");
+
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+            gpio.name, "i_gain", &hw_commands_i_gain_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "i_gain");
+
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+            gpio.name, "d_gain", &hw_commands_d_gain_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "d_gain");
+
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+            gpio.name, "mode", &hw_commands_mode_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "mode");
+
+        command_interfaces.emplace_back(hardware_interface::CommandInterface(
+            gpio.name, "current", &hw_commands_current_[raw_motor_index]));
+        RCLCPP_INFO(
+            rclcpp::get_logger("DynamixelSystem"), "Added %s/%s",
+            info_.gpios.at(i).name.c_str(), "current");
+
 
         RCLCPP_INFO(
             rclcpp::get_logger("DynamixelSystem"),
             "export command interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+
+        // next motor
+        raw_motor_index++;
+
       }
       else
       {
@@ -420,6 +520,19 @@ DynamixelSystem::export_command_interfaces()
             rclcpp::get_logger("DynamixelSystem"),
             "Unkown command interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
       }
+
+    }
+
+    RCLCPP_INFO(
+      rclcpp::get_logger("DynamixelSystem"),
+      "export command interface (GPIO) (%s) done", info_.name.c_str());
+
+    if (motor_index != 2 || raw_motor_index != 2)
+    {
+      RCLCPP_ERROR(
+          rclcpp::get_logger("DynamixelSystem"),
+          "DynamixelHWI: Number of motors not correct: expected 2 found %ld! Or number of raw_motors not correct: expected 2 found %ld! Stopping operation!", motor_index, raw_motor_index);
+      std::abort();
     }
 
 
@@ -490,6 +603,15 @@ DynamixelSystem::read(const rclcpp::Time &, const rclcpp::Duration &)
     );
   }
 
+  if (dynamixel_2joints_get_target_torque(this->uid, &hw_states_current_) != 0) {
+    RCLCPP_INFO_THROTTLE(
+      rclcpp::get_logger("DynamixelSystem"),
+      clock_,
+      LOG_THROTTLE_DURATION,
+      "(%s) READ TARGET CURRENT ERROR!", info_.name.c_str()
+    );
+  }
+
   uint8_t mode[2] = {255,255};
 
   if (dynamixel_2joints_get_control_mode(this->uid, &mode) != 0) {
@@ -529,7 +651,6 @@ hardware_interface::return_type
 DynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
 
-  //TODO the other stuff
 
   bool torque_on[2] = {hw_commands_torque_[0] != 0.0, hw_commands_torque_[1] != 0.0};
 
@@ -592,6 +713,21 @@ DynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
       "(%s) WRITE TORQUE LIMIT ERROR!", info_.name.c_str()
     );
   }
+
+
+
+    if (dynamixel_2joints_set_target_torque(
+          this->uid,
+          &hw_commands_current_
+          ) != 0) {
+      RCLCPP_INFO_THROTTLE(
+        rclcpp::get_logger("DynamixelSystem"),
+        clock_,
+        LOG_THROTTLE_DURATION,
+      "(%s) WRITE TARGET CURRENT ERROR!", info_.name.c_str()
+        );
+    }
+
 
 
   return hardware_interface::return_type::OK;

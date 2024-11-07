@@ -26,6 +26,9 @@ controller_manager:
     antenna_current_controller:
       type: forward_command_controller/ForwardCommandController
 
+    antenna_mode_controller:
+      type: forward_command_controller/ForwardCommandController
+
     forward_torque_controller:
       type: forward_command_controller/ForwardCommandController
 
@@ -108,9 +111,17 @@ gripper_current_controller:
 antenna_current_controller:
   ros__parameters:
     joints:
-      - antenna_left
-      - antenna_right
+      - antenna_left_raw_motor
+      - antenna_right_raw_motor
     interface_name: current
+    use_sim_time: false
+
+antenna_mode_controller:
+  ros__parameters:
+    joints:
+      - antenna_left_raw_motor
+      - antenna_right_raw_motor
+    interface_name: mode
     use_sim_time: false
 
 
@@ -153,8 +164,8 @@ forward_torque_limit_controller:
       - l_wrist_raw_motor_2
       - l_wrist_raw_motor_3
       - l_hand_raw_motor_1
-      - antenna_raw_motor_left
-      - antenna_raw_motor_right
+      - antenna_left_raw_motor
+      - antenna_right_raw_motor
     interface_name: torque_limit
     use_sim_time: false
 
@@ -180,8 +191,8 @@ forward_speed_limit_controller:
       - l_wrist_raw_motor_2
       - l_wrist_raw_motor_3
       - l_hand_raw_motor_1
-      - antenna_raw_motor_left
-      - antenna_raw_motor_right
+      - antenna_left_raw_motor
+      - antenna_right_raw_motor
     interface_name: speed_limit
     use_sim_time: false
 
@@ -208,6 +219,6 @@ forward_pid_controller:
       - l_wrist_raw_motor_2
       - l_wrist_raw_motor_3
       - l_hand_raw_motor_1
-      - antenna_raw_motor_left
-      - antenna_raw_motor_right
+      - antenna_left_raw_motor
+      - antenna_right_raw_motor
     use_sim_time: false

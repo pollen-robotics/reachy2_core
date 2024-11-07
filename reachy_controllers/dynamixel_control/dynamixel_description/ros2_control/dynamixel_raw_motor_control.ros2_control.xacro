@@ -19,6 +19,9 @@
         <command_interface name="i_gain"/>
         <state_interface name="d_gain"/>
         <command_interface name="d_gain"/>
+
+        <state_interface name="current"/>
+        <command_interface name="current"/>
       </gpio>
 
   </xacro:macro>
