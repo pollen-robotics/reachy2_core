@@ -26,6 +26,9 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
+from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
+
+
 from reachy_utils.config import (
     BETA,
     DVT,
@@ -39,6 +42,7 @@ from reachy_utils.config import (
     log_config,
 )
 from reachy_utils.launch import (
+    ROSBAG_TOPICS,
     build_watchers_from_node_list,
     clear_bags_and_logs,
     get_current_run_log_dir,
@@ -67,6 +71,7 @@ def launch_setup(context, *args, **kwargs):
     foxglove_py = foxglove_rl.perform(context) == "true"
     orbbec_rl = LaunchConfiguration("orbbec")
     orbbec_py = orbbec_rl.perform(context) == "true"
+    verbose_logger_log_level_rl = LaunchConfiguration("log")
     nodes = []
 
     clear_bags_and_logs(nb_runs_to_keep=10)
@@ -147,6 +152,7 @@ def launch_setup(context, *args, **kwargs):
 
     # start ethercat server
     ethercat_master_server = ExecuteProcess(
+        name="ethercat_master_server",
         cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
         output="both",
         emulate_tty=True,
@@ -162,6 +168,7 @@ def launch_setup(context, *args, **kwargs):
         parameters=[robot_description, robot_controllers],
         output="screen",
         emulate_tty=True,
+        arguments=["--ros-args", "--log-level", verbose_logger_log_level_rl],
     )
 
     robot_state_publisher_node = Node(
@@ -169,6 +176,7 @@ def launch_setup(context, *args, **kwargs):
         executable="robot_state_publisher",
         output="both",
         parameters=[robot_description],
+        arguments=["--ros-args", "--log-level", verbose_logger_log_level_rl],
     )
 
     joint_state_broadcaster_spawner = Node(
@@ -242,12 +250,6 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
-    gripper_safe_controller_node = Node(
-        package="gripper_safe_controller",
-        executable="gripper_safe_controller",
-        arguments=["--controllers-file", robot_controllers],
-    )
-
     # antenna_forward_position_controller_spawner = Node(
     #     package='controller_manager',
     #     executable='spawner',
@@ -318,7 +320,6 @@ def launch_setup(context, *args, **kwargs):
     )
 
     ### SDK ###
-
     sdk_server_node = TimerAction(
         period=2.0,
         actions=[
@@ -327,18 +328,14 @@ def launch_setup(context, *args, **kwargs):
                 executable="reachy_grpc_joint_sdk_server",
                 output="both",
                 emulate_tty=True,
-                arguments=[reachy_config.config_file],
+                arguments=[
+                    reachy_config.config_file,
+                    str(ReachyCoreMode.GAZEBO if gazebo_py else ReachyCoreMode.FAKE if fake_py else ReachyCoreMode.REAL),
+                ],
                 condition=IfCondition(start_sdk_server_rl),
             )
         ],
     )
-
-    # sdk_server_video_node = Node(
-    #     package="reachy_sdk_server",
-    #     executable="reachy_grpc_video_sdk_server" if not gazebo_py else "reachy_grpc_video_sdk_server_gz",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
 
     sdk_server_video_node = Node(
         package="reachy_sdk_server",
@@ -350,6 +347,7 @@ def launch_setup(context, *args, **kwargs):
 
     orbbec_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/launch", "/gemini_330_series.launch.py"]),
+        launch_arguments={"depth_width": "1280", "enable_colored_point_cloud": "true"}.items(),
         condition=IfCondition(orbbec_rl),
     )
 
@@ -414,17 +412,22 @@ def launch_setup(context, *args, **kwargs):
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
     rosbag = ExecuteProcess(
+        name="rosbag",
         cmd=[
             "ros2",
             "bag",
             "record",
+            "--snapshot-mode",
+            "--max-cache-size",
+            "400000000",
             "-o",
             f"{get_current_run_log_dir()}/reachy.bag",
-            "/r_arm/ik_target_pose",
-            "/l_arm/ik_target_pose",
-            "/head/target_pose",
-            "/joint_commands",
-            "/joint_states",
+            *ROSBAG_TOPICS,
+            # "/r_arm/ik_target_pose",
+            # "/l_arm/ik_target_pose",
+            # "/head/target_pose",
+            # "/joint_commands",
+            # "/joint_states",
         ],
         output="screen",
     )
@@ -437,7 +440,6 @@ def launch_setup(context, *args, **kwargs):
             joint_state_broadcaster_spawner,
             delay_rviz_after_joint_state_broadcaster_spawner,
             delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
-            gripper_safe_controller_node,
             sdk_server_node,
             # sdk_server_audio_node,
             # audio_node,
@@ -450,25 +452,16 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    if gazebo_py:
-        start_control_after_ehtercat = TimerAction(
-            period=0.5,
-            actions=[
-                gazebo_node,
-            ],
-            cancel_on_shutdown=True,
-        )
-    else:
-        start_control_after_ehtercat = TimerAction(
-            period=3.0,
-            actions=[
-                control_node,
-            ],
-            cancel_on_shutdown=True,
-        )
+    start_control_after_ehtercat = TimerAction(
+        period=3.0 if not gazebo_py else 0.5,
+        actions=[
+            control_node if not gazebo_py else gazebo_node,
+        ],
+        cancel_on_shutdown=True,
+    )
 
     start_everything_after_control = TimerAction(
-        period=1.5,
+        period=4.0 if not gazebo_py else 1.5,
         actions=[
             *nodes,
         ],
@@ -484,9 +477,10 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
     speedlimit_set = TimerAction(
-        period=9.0,
+        period=10.0,
         actions=[
             ExecuteProcess(
+                name="speedlimit_set",
                 cmd=[
                     "ros2",
                     "topic",
@@ -562,6 +556,12 @@ def generate_launch_description():
                 default_value="default",
                 description="Controller Mode",
                 choices=["default", "trajectory"],
+            ),
+            DeclareLaunchArgument(
+                "log",
+                default_value="WARN",
+                description="Log level for needlessly verbose nodes",
+                choices=["DEBUG", "INFO", "WARN", "ERROR"],
             ),
             OpaqueFunction(function=launch_setup),
         ]
