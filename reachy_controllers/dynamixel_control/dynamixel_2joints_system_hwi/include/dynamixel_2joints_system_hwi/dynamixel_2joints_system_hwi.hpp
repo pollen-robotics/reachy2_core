@@ -10,7 +10,7 @@
 
 #define LOG_THROTTLE_DURATION 30000
 
-namespace dynamixel_system_hwi
+namespace dynamixel_2joints_system_hwi
 {
   using namespace hardware_interface;
 class DynamixelSystem : public hardware_interface::SystemInterface
@@ -30,28 +30,28 @@ public:
     hardware_interface::return_type write(const rclcpp::Time &, const rclcpp::Duration &) override;
 
 private:
-  double hw_states_position_;
-  double hw_states_velocity_;
-  double hw_states_effort_;
-  double hw_states_temperature_;
-  double hw_states_torque_limit_;
-  double hw_states_speed_limit_;
-  double hw_states_torque_;
-  double hw_states_p_gain_;
-  double hw_states_i_gain_;
-  double hw_states_d_gain_;
-  double hw_states_mode_;
-  double hw_states_current_;
+  double hw_states_position_[2];
+  double hw_states_velocity_[2];
+  double hw_states_effort_[2];
+  double hw_states_temperature_[2];
+  double hw_states_torque_limit_[2];
+  double hw_states_speed_limit_[2];
+  double hw_states_torque_[2];
+  double hw_states_p_gain_[2];
+  double hw_states_i_gain_[2];
+  double hw_states_d_gain_[2];
+  double hw_states_mode_[2];
+  double hw_states_current_[2];
 
-  double hw_commands_position_;
-  double hw_commands_speed_limit_;
-  double hw_commands_torque_limit_;
-  double hw_commands_torque_;
-  double hw_commands_p_gain_;
-  double hw_commands_i_gain_;
-  double hw_commands_d_gain_;
-  double hw_commands_mode_;
-  double hw_commands_current_;
+  double hw_commands_position_[2];
+  double hw_commands_speed_limit_[2];
+  double hw_commands_torque_limit_[2];
+  double hw_commands_torque_[2];
+  double hw_commands_p_gain_[2];
+  double hw_commands_i_gain_[2];
+  double hw_commands_d_gain_[2];
+  double hw_commands_mode_[2];
+  double hw_commands_current_[2];
 
   // Store time between update loops
   rclcpp::Clock clock_;
@@ -63,4 +63,4 @@ private:
 
 }
 
-#endif // _DYNAMIXEL_SYSTEM_HWI
+#endif // _DYNAMIXEL_2JOINTS_SYSTEM_HWI

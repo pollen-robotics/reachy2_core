@@ -88,6 +88,16 @@ impl DynamixelJoint {
         }
         self.inner.set_torque([true])
     }
+
+    /// turn on/off the torque. The second bool in the tuple is the "reset target position argument"
+    pub fn set_torque(&mut self, torques: (bool, bool)) -> Result<()> {
+        if torques.0 && torques.1 {
+            let thetas = self.inner.get_current_position()?;
+            self.inner.set_target_position(thetas)?;
+        }
+        self.inner.set_torque([torques.0])
+    }
+
     /// Disable the torque
     pub fn disable_torque(&mut self) -> Result<()> {
         self.inner.set_torque([false])
@@ -184,7 +194,7 @@ impl DynamixelJoint {
         Ok(axis[0])
     }
 
-    fn get_motors_temperature(&mut self) -> Result<f64> {
+    pub fn get_motors_temperature(&mut self) -> Result<f64> {
         let temp = self.inner.get_motors_temperature()?;
         Ok(temp[0])
     }

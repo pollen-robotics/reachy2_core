@@ -8,8 +8,12 @@ use env_logger;
 use once_cell::sync::Lazy;
 use std::{ffi::CStr, sync::Mutex};
 
+fn print_error2(e: Box<dyn std::error::Error>) {
+    log::debug!("[DYNAMIXEL_2JOINTS] Error: {:?}", e);
+}
+
 fn print_error(e: Box<dyn std::error::Error>) {
-    log::debug!("[DYNAMIXEL_2JOINT] Error: {:?}", e);
+    log::debug!("[DYNAMIXEL_JOINT] Error: {:?}", e);
 }
 fn get_available_uid() -> u32 {
     let mut uid = UID.lock().unwrap();
@@ -23,8 +27,292 @@ pub fn convert<T, const N: usize>(arr: [Option<T>; N]) -> Option<[T; N]> {
 
 static UID: Lazy<Mutex<u32>> = Lazy::new(|| Mutex::new(0));
 static CONTROLLER2: Lazy<SyncMap<u32, Dynamixel2Joints>> = Lazy::new(SyncMap::new);
-// static CONTROLLER: Lazy<SyncMap<u32, DynamixelJoint>> = Lazy::new(SyncMap::new); // For the single joint case
+static CONTROLLER: Lazy<SyncMap<u32, DynamixelJoint>> = Lazy::new(SyncMap::new); // For the single joint case
 
+// Single joint
+
+#[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
+pub extern "C" fn dynamixel_joint_from_config(
+    uid: &mut u32,
+    configfile: *const libc::c_char,
+) -> i32 {
+    let configfile = unsafe { CStr::from_ptr(configfile) }.to_str().unwrap();
+
+    let _ = env_logger::try_init();
+    match DynamixelJoint::with_config_file(configfile) {
+        Ok(controller) => {
+            *uid = get_available_uid();
+            CONTROLLER.insert(*uid, controller);
+            0
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_is_torque_on(uid: u32, is_on: &mut bool) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().is_torque_on() {
+        Ok(torque) => {
+            *is_on = torque;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_enable_torque(uid: u32, reset_target: bool) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .enable_torque(reset_target)
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_disable_torque(uid: u32) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().disable_torque() {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_current_position(uid: u32, position: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_current_orientation() {
+        Ok(pos) => {
+            *position = pos;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_set_torque(uid: u32, torque: &bool) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .set_torque((*torque, true))
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_set_target_position(uid: u32, position: &f64) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .set_target_orientation(*position)
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_target_position(uid: u32, target: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_target_orientation() {
+        Ok(tgt) => {
+            *target = tgt;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_current_velocity(uid: u32, velocity: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_current_velocity() {
+        Ok(vel) => {
+            *velocity = vel;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_current_torque(uid: u32, torque: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_current_torque() {
+        Ok(t) => {
+            *torque = t;
+            return 0;
+        }
+
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_set_target_torque(uid: u32, torque: &f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().set_target_torque(*torque) {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_target_torque(uid: u32, torque: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_target_torque() {
+        Ok(tq) => {
+            *torque = tq;
+            return 0;
+        }
+
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_control_mode(uid: u32, mode: &mut u8) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_control_mode() {
+        Ok(m) => {
+            *mode = m;
+            return 0;
+        }
+
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_set_control_mode(uid: u32, mode: &u8) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().set_control_mode(*mode) {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_motors_temperature(uid: u32, temperature: &mut f64) -> i32 {
+    match CONTROLLER.get_mut(&uid).unwrap().get_motors_temperature() {
+        Ok(temp) => {
+            *temperature = temp;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_raw_motors_torque_limit(uid: u32, limit: &mut f64) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .get_raw_motors_torque_limit()
+    {
+        Ok(tl) => {
+            *limit = tl;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_get_raw_motors_velocity_limit(uid: u32, limit: &mut f64) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .get_raw_motors_velocity_limit()
+    {
+        Ok(vl) => {
+            *limit = vl;
+            return 0;
+        }
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+//
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_set_raw_motors_torque_limit(uid: u32, limit: &mut f64) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .set_raw_motors_torque_limit(*limit)
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dynamixel_joint_set_raw_motors_velocity_limit(uid: u32, limit: &mut f64) -> i32 {
+    match CONTROLLER
+        .get_mut(&uid)
+        .unwrap()
+        .set_raw_motors_velocity_limit(*limit)
+    {
+        Ok(_) => 0,
+        Err(e) => {
+            print_error(e);
+            1
+        }
+    }
+}
+
+// Two joints
 #[no_mangle]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn dynamixel_2joints_from_config(
@@ -41,7 +329,7 @@ pub extern "C" fn dynamixel_2joints_from_config(
             0
         }
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -60,7 +348,7 @@ pub extern "C" fn dynamixel_2joints_is_torque_on(uid: u32, is_on: &mut [bool; 2]
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -75,7 +363,7 @@ pub extern "C" fn dynamixel_2joints_enable_torque(uid: u32, reset_target: bool) 
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -90,7 +378,7 @@ pub extern "C" fn dynamixel_2joints_disable_torque(uid: u32) -> i32 {
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -109,7 +397,7 @@ pub extern "C" fn dynamixel_2joints_get_current_position(uid: u32, position: &mu
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -124,7 +412,7 @@ pub extern "C" fn dynamixel_2joints_set_torque(uid: u32, torque: &[bool; 2]) -> 
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -139,7 +427,7 @@ pub extern "C" fn dynamixel_2joints_set_target_position(uid: u32, position: &[f6
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -157,7 +445,7 @@ pub extern "C" fn dynamixel_2joints_get_target_position(uid: u32, target: &mut [
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -176,7 +464,7 @@ pub extern "C" fn dynamixel_2joints_get_current_velocity(uid: u32, velocity: &mu
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -196,7 +484,7 @@ pub extern "C" fn dynamixel_2joints_get_current_torque(uid: u32, torque: &mut [f
         },
 
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -211,7 +499,7 @@ pub extern "C" fn dynamixel_2joints_set_target_torque(uid: u32, torque: &[f64; 2
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -231,7 +519,7 @@ pub extern "C" fn dynamixel_2joints_get_target_torque(uid: u32, torque: &mut [f6
         },
 
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -251,7 +539,7 @@ pub extern "C" fn dynamixel_2joints_get_control_mode(uid: u32, mode: &mut [u8; 2
         },
 
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -262,7 +550,7 @@ pub extern "C" fn dynamixel_2joints_set_control_mode(uid: u32, mode: &[u8; 2]) -
     match CONTROLLER2.get_mut(&uid).unwrap().set_control_mode(*mode) {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -284,7 +572,7 @@ pub extern "C" fn dynamixel_2joints_get_motors_temperature(
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -310,7 +598,7 @@ pub extern "C" fn dynamixel_2joints_get_raw_motors_torque_limit(
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -336,7 +624,7 @@ pub extern "C" fn dynamixel_2joints_get_raw_motors_velocity_limit(
             }
         },
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -355,7 +643,7 @@ pub extern "C" fn dynamixel_2joints_set_raw_motors_torque_limit(
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
@@ -373,7 +661,7 @@ pub extern "C" fn dynamixel_2joints_set_raw_motors_velocity_limit(
     {
         Ok(_) => 0,
         Err(e) => {
-            print_error(e);
+            print_error2(e);
             1
         }
     }
