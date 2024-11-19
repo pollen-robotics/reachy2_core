@@ -332,7 +332,7 @@
         <horizontal_fov>${90.0*pi/180}</horizontal_fov>
         <image>
           <width>1280</width>
-          <height>800</height>
+          <height>720</height>
           <format>B8G8R8</format>
         </image>
         <distortion>
@@ -398,7 +398,7 @@
         <horizontal_fov>${90.0*pi/180}</horizontal_fov>
         <image>
           <width>1280</width>
-          <height>800</height>
+          <height>720</height>
           <format>B8G8R8</format>
         </image>
         <distortion>
@@ -462,7 +462,7 @@
         <horizontal_fov>${90.0*pi/180}</horizontal_fov>
         <image>
           <width>1280</width>
-          <height>800</height>
+          <height>720</height>
           <format>B8G8R8</format>
         </image>
         <distortion>
