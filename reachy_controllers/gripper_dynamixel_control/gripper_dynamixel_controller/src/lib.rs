@@ -1,7 +1,7 @@
 use dynamixel::{GripperDynamixel, GripperDynamixelConfig};
 use motor_toolbox_rs::{FakeMotorsController, MotorsController, Result};
-
 use serde::{Deserialize, Serialize};
+use serialport::TTYPort;
 
 mod dynamixel;
 

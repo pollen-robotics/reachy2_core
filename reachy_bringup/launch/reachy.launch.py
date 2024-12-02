@@ -89,6 +89,7 @@ def launch_setup(context, *args, **kwargs):
         f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
         f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
         f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
+        f' antenna_config:="{get_fake("dynamixel_description", "antennas.yaml", context) if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
         f' robot_model:="{BETA if reachy_config.beta else DVT if reachy_config.dvt else None}"',
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
@@ -203,6 +204,10 @@ def launch_setup(context, *args, **kwargs):
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
         [
+            "antenna_forward_position_controller",
+            f"'{reachy_config.model}' != '{HEADLESS}'",
+        ],
+        [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
@@ -230,6 +235,8 @@ def launch_setup(context, *args, **kwargs):
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
         ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["antenna_mode_controller", f"not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -492,8 +499,8 @@ def launch_setup(context, *args, **kwargs):
         ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
-        speedlimit_set_announce,
-        speedlimit_set,
+        # speedlimit_set_announce,
+        # speedlimit_set,
         # SetEnvironmentVariable(
         #     name="PYTHONPATH",
         #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",

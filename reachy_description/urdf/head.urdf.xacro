@@ -20,6 +20,8 @@
 
   <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro"/>
 
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel.ros2_control.xacro"/>
+
     <material name="camblack">
         <color rgba="0.2 0.2 0.2 1"/>
     </material>
@@ -28,7 +30,7 @@
     </material>
 
 
-  <xacro:macro name="head" params="parent damping friction neck_config">
+  <xacro:macro name="head" params="parent damping friction neck_config antenna_config">
 
     <!-- xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="${pi} ${neck_offset_pitch} ${neck_offset_yaw}" -->
   <xacro:orbita3d
@@ -133,19 +135,66 @@
     </joint>
 
 
-    <!-- <link name="camera_optical_left" > -->
-    <!-- </link> -->
 
-    <!-- <joint name="camera_optical_left" type="fixed"> -->
-    <!--   <!-\- between the cameras -\-> -->
-    <!--   <!-\- <origin xyz="0.030 0.022 0.085" rpy="-1.57 0.0 -1.57"/> -\-> -->
+    <!-- test antennas -->
 
-    <!--   <origin xyz="0.03531 0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
-    <!--   <!-\- Rotation center -\-> -->
-    <!--   <!-\- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -\-> -->
-    <!--   <parent link="head" /> -->
-    <!--   <child link="camera_optical_left" /> -->
-    <!-- </joint> -->
+    <link name="antenna_left_link" >
+      <inertial>
+	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+	<mass value="0.001"/>
+	<inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+      </inertial>
+      <!-- cylinder geometry -->
+      <visual>
+	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <cylinder length="0.1" radius="0.005"/>
+	</geometry>
+	<material name="neckwhite"/>
+      </visual>
+
+    </link>
+
+    <!-- revolute joint -->
+    <joint name="antenna_left" type="revolute">
+      <origin xyz="0.0 0.1 0.1" rpy="0 0.0 0"/>
+      <parent link="head" />
+      <child link="antenna_left_link" />
+      <axis xyz="0 1 0"/>
+      <limit effort="0.0" velocity="0.0" lower="-0.5" upper="0.5"/>
+    </joint>
+
+
+    <link name="antenna_right_link" >
+      <inertial>
+	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+	<mass value="0.001"/>
+	<inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+      </inertial>
+      <!-- cylinder geometry -->
+      <visual>
+	<origin xyz="0 0 0" rpy="0 0 0"/>
+	<geometry>
+	  <cylinder length="0.1" radius="0.005"/>
+	</geometry>
+	<material name="neckwhite"/>
+      </visual>
+
+    </link>
+
+    <!-- revolute joint -->
+    <joint name="antenna_right" type="revolute">
+      <origin xyz="0.0 -0.1 0.1" rpy="0 0.0 0"/>
+      <parent link="head" />
+      <child link="antenna_right_link" />
+      <axis xyz="0 1 0"/>
+      <limit effort="0.0" velocity="0.0" lower="-0.5" upper="0.5"/>
+    </joint>
+
+  <xacro:dynamixel_control
+    name="antenna" joint1="left" joint2="right"
+    config_file="${antenna_config}"
+    />
 
 
 
