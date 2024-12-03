@@ -90,7 +90,7 @@ def launch_setup(context, *args, **kwargs):
         f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
         f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
         f' antenna_config:="{get_fake("dynamixel_description", "antennas.yaml", context) if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
-        f' robot_model:="{BETA if reachy_config.beta else DVT if reachy_config.dvt else None}"',
+        f' robot_model:="{BETA if reachy_config.beta else DVT }"', # for now PVT urdf is assumed to be the same as dvt
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
 
