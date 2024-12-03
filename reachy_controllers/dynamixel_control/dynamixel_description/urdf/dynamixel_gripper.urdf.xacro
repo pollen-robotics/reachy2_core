@@ -1,0 +1,335 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:macro name="dynamixel_gripper" params="prefix parent side damping friction ">
+
+  <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro"/>
+
+  <xacro:property name="gripper_length" value="0.12"/>
+  <xacro:property name="gripper_radius" value="0.03"/>
+
+
+  <xacro:if value="${side == 'left'}">
+    <xacro:property name="reflect" value="-1"/>
+    <xacro:property name="min_grasping_finger" value="-0.51"/>
+    <xacro:property name="max_grasping_finger" value="0.554"/>
+
+  </xacro:if>
+  <xacro:if value="${side == 'right'}">
+    <xacro:property name="reflect" value="1"/>
+    <xacro:property name="min_grasping_finger" value="-0.51"/>
+    <xacro:property name="max_grasping_finger" value="0.554"/>
+
+  </xacro:if>
+
+  <xacro:property name="min_gripper_joint" value="0.0"/>
+  <xacro:property name="max_gripper_joint" value="2.27"/>
+
+
+    <!-- <material name="gripperblack"> -->
+    <!--     <color rgba="0.4 0.4 0.4 1"/> -->
+    <!-- </material> -->
+    <!-- <material name="gripperwhite"> -->
+    <!--     <color rgba="0.9 0.9 0.9 1"/> -->
+    <!-- </material> -->
+
+  <xacro:property name="p" value="${prefix}"/>
+
+  <link name="${p}_palm_link">
+
+
+      <xacro:if value="${side == 'right'}">
+    <collision>
+      <!-- <origin xyz="0 0 0.04 " rpy="0 0 0"/> -->
+      <origin xyz="0 0 0.0 " rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="${gripper_radius} ${gripper_radius*2} ${gripper_length/2}"/> -->
+        <!-- <box size="0.08 0.12 0.07"/> -->
+	  <!-- <mesh filename="package://arm_description/meshes/pincette_right_collider.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_right_collider.dae" />
+
+      </geometry>
+    </collision>
+
+
+      <visual>
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_right_visual.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_right_visual.dae" />
+      	</geometry>
+      </visual>
+
+      <inertial>
+      	<origin xyz="0.0070087 0.00974766 0.04392328" rpy="0 0 0"/>
+	<mass value="0.30798029"/>
+	<inertia ixx="0.00021928" ixy="-0.00003149" ixz="-0.00001759"
+		 iyx="-0.00003149" iyy="0.00016859" iyz="-0.00001396"
+		 izx="-0.00001759" izy="-0.00001396" izz="0.0002333"/>
+      </inertial>
+   </xacro:if>
+
+
+  <xacro:if value="${side == 'left'}">
+    <collision>
+      <!-- <origin xyz="0 0 0.04 " rpy="0 0 0"/> -->
+      <origin xyz="0 0 0.0 " rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="${gripper_radius} ${gripper_radius*2} ${gripper_length/2}"/> -->
+        <!-- <box size="0.08 0.12 0.07"/> -->
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_left_collider.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_left_collider.dae" />
+      </geometry>
+    </collision>
+
+      <visual>
+      	<origin xyz="0 0 0" rpy="0 0 0"/>
+      	<geometry>
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_left_visual.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_left_visual.dae" />
+      	</geometry>
+      </visual>
+
+
+      <inertial>
+      	<origin xyz="0.0070087 -0.00974766 0.04392328" rpy="0 0 0"/>
+	<mass value="0.30798029"/>
+	<inertia ixx="0.00021812" ixy="0.00003057" ixz="-0.00001759"
+		 iyx="0.00003057" iyy="0.00016868" iyz="0.00001416"
+		 izx="-0.00001759" izy="0.00001416" izz="0.00023207"/>
+      </inertial>
+
+  </xacro:if>
+
+
+
+  </link>
+
+  <joint name="${p}_palm" type="fixed">
+    <origin xyz="0 0 0" rpy="0.0 0 0"/>
+    <parent link="${parent}"/>
+    <child link="${p}_palm_link"/>
+  </joint>
+
+
+
+  <link name="${p}_virtual_gripper_link">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <mass value="0.01"/>
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+      </inertial>
+  </link>
+
+  <joint name="${p}_finger" type="revolute">
+    <origin xyz="0.0 0.0 0.070028" rpy="0 0 0"/>
+    <parent link="${p}_palm_link"/>
+    <child link="${p}_virtual_gripper_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="${min_gripper_joint}" upper="${max_gripper_joint}" effort="100.0" velocity="10.0"/>
+      <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+  <link name="${p}_proximal_link">
+
+      <inertial>
+      	<origin xyz="0.00004101 0.002756 0.019654" rpy="0 0 0"/>
+	<mass value="0.03926395"/>
+	 <inertia ixx="0.00001937" ixy="0.0" ixz="0.00000007"
+		  iyx="0.0" iyy="0.00002003" iyz="0.00000036"
+		  izx="0.00000007" izy="0.00000036" izz="0.00000463"/>
+      </inertial>
+
+    <collision>
+      <!-- <origin xyz="0 0.006 0.03 " rpy="0 0 0"/> -->
+      <!-- <geometry> -->
+      <!--   <box size="0.031 0.026 0.06"/> -->
+      <!-- </geometry> -->
+
+      <origin xyz="0 0.00 0.0 " rpy="0 0 0"/>
+      <geometry>
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_proximal_collider.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_proximal_collider.dae" />
+      </geometry>
+
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0 " rpy="0 0 0"/>
+      <geometry>
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_proximal_visual.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_proximal_visual.dae" />
+      </geometry>
+
+    </visual>
+
+  </link>
+
+
+
+
+  <link name="${p}_proximal_mimic_link">
+      <inertial>
+      	<origin xyz="0.00004101 0.002756 0.019654" rpy="0 0 0"/>
+	<mass value="0.03926395"/>
+	 <inertia ixx="0.00001937" ixy="0.0" ixz="0.00000007"
+		  iyx="0.0" iyy="0.00002003" iyz="0.00000036"
+		  izx="0.00000007" izy="0.00000036" izz="0.00000463"/>
+      </inertial>
+
+    <collision>
+      <!-- <origin xyz="0 0.006 0.03 " rpy="0 0 0"/> -->
+      <origin xyz="0 0.0 0.0 " rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="0.031 0.026 0.06"/> -->
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_proximal_collider.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_proximal_collider.dae" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0 " rpy="0 0 0"/>
+      <geometry>
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_proximal_visual.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_proximal_visual.dae" />
+      </geometry>
+
+    </visual>
+
+  </link>
+
+
+  <joint name="${p}_finger_proximal" type="revolute">
+    <origin xyz="-0.010196 0.03792 0.070028" rpy="0 0 0"/>
+    <parent link="${p}_palm_link"/>
+    <child link="${p}_proximal_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="${min_grasping_finger}" upper="${max_grasping_finger}" effort="100.0" velocity="10.0"/>
+    <mimic joint="${p}_finger" multiplier="-0.4689" offset="0.554" />
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+ <joint name="${p}_finger_proximal_mimic" type="revolute">
+    <origin xyz="-0.010196 -0.03792 0.070028" rpy="0 0 ${pi}"/>
+    <parent link="${p}_palm_link"/>
+    <child link="${p}_proximal_mimic_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="${min_grasping_finger}" upper="${max_grasping_finger}" effort="100.0" velocity="10.0"/>
+    <dynamics damping="${damping}" friction="${friction}"/>
+    <mimic joint="${p}_finger_proximal" multiplier="1" offset="0" />
+  </joint>
+
+
+
+  <link name="${p}_distal_link">
+
+      <inertial>
+      	<origin xyz="0.00000695 -0.00006402 0.01772685" rpy="0 0 0"/>
+	<mass value="0.02821091"/>
+	 <inertia ixx="0.00000683" ixy="0.0" ixz="0.0"
+		  iyx="0.0" iyy="0.00000696" iyz="0.00000127"
+		  izx="0.0" izy="0.00000127" izz="0.0000028"/>
+      </inertial>
+
+    <collision>
+      <!-- <origin xyz="0 0.0015 0.023 " rpy="0 0 0"/> -->
+      <origin xyz="0 0.0 0.0 " rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="0.031 0.026 0.046"/> -->
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_distal_collider.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_distal_collider.dae" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0 " rpy="0 0 0"/>
+      <geometry>
+
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_distal.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_distal.dae" />
+      </geometry>
+
+    </visual>
+
+  </link>
+
+
+  <joint name="${p}_finger_distal" type="revolute">
+    <origin xyz="0 0 0.049997" rpy="0 0 0"/>
+    <parent link="${p}_proximal_link"/>
+    <child link="${p}_distal_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="${min_grasping_finger}" upper="${max_grasping_finger}" effort="100.0" velocity="10.0"/>
+    <!-- <mimic joint="${p}_finger_proximal" multiplier="-1" offset="0" /> -->
+    <mimic joint="${p}_finger" multiplier="0.4689" offset="-0.554" />
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+
+
+
+
+  <link name="${p}_distal_mimic_link">
+
+      <inertial>
+      	<origin xyz="0.00000695 -0.00006402 0.01772685" rpy="0 0 0"/>
+	<mass value="0.02821091"/>
+	 <inertia ixx="0.00000683" ixy="0.0" ixz="0.0"
+		  iyx="0.0" iyy="0.00000696" iyz="0.00000127"
+		  izx="0.0" izy="0.00000127" izz="0.0000028"/>
+      </inertial>
+
+    <collision>
+      <!-- <origin xyz="0 0.0015 0.023 " rpy="0 0 0"/> -->
+      <origin xyz="0 0.00 0.0 " rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="0.031 0.026 0.046"/> -->
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_distal_collider.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_distal_collider.dae" />
+      </geometry>
+    </collision>
+
+    <visual>
+      <origin xyz="0 0 0 " rpy="0 0 0"/>
+      <geometry>
+
+
+	  <!-- <mesh filename="file://$(find arm_description)/meshes/pincette_distal.dae" /> -->
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_distal.dae" />
+      </geometry>
+
+    </visual>
+
+  </link>
+
+
+  <joint name="${p}_finger_distal_mimic" type="revolute">
+    <origin xyz="0 0 0.049997" rpy="0 0 0"/>
+    <parent link="${p}_proximal_mimic_link"/>
+    <child link="${p}_distal_mimic_link"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="${min_grasping_finger}" upper="${max_grasping_finger}" effort="100.0" velocity="10.0"/>
+    <!-- <mimic joint="${p}_finger_proximal" multiplier="-1" offset="0" /> -->
+    <mimic joint="${p}_finger" multiplier="0.4689" offset="-0.554" />
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+
+
+  <!-- <gazebo reference="${p}_finger_distal_link"> -->
+  <!--   <selfCollide>false</selfCollide> -->
+  <!-- </gazebo> -->
+
+
+  <!-- <gazebo reference="${p}_finger_distal_link_mimic"> -->
+  <!--   <selfCollide>false</selfCollide> -->
+  <!-- </gazebo> -->
+
+
+</xacro:macro>
+</robot>

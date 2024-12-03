@@ -8,16 +8,32 @@ controller_manager:
     neck_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
-    r_arm_forward_position_controller:
+    r_shoulder_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
-    l_arm_forward_position_controller:
+    r_elbow_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
+
+    r_wrist_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    l_shoulder_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    l_elbow_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    l_wrist_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
 
     gripper_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
     gripper_current_controller:
+      type: forward_command_controller/ForwardCommandController
+
+    gripper_mode_controller:
       type: forward_command_controller/ForwardCommandController
 
     antenna_forward_position_controller:
@@ -55,38 +71,62 @@ neck_forward_position_controller:
     use_sim_time: false
 
 
-antenna_forward_position_controller:
+r_shoulder_forward_position_controller:
   ros__parameters:
     joints:
-      - antenna_left
-      - antenna_right
+      - r_shoulder_roll
+      - r_shoulder_pitch
     interface_name: position
     use_sim_time: false
 
-r_arm_forward_position_controller:
+r_elbow_forward_position_controller:
   ros__parameters:
     joints:
-      - r_shoulder_pitch
-      - r_shoulder_roll
       - r_elbow_yaw
       - r_elbow_pitch
+    interface_name: position
+    use_sim_time: false
+
+r_wrist_forward_position_controller:
+  ros__parameters:
+    joints:
       - r_wrist_roll
       - r_wrist_pitch
       - r_wrist_yaw
     interface_name: position
     use_sim_time: false
 
-
-l_arm_forward_position_controller:
+l_shoulder_forward_position_controller:
   ros__parameters:
     joints:
-      - l_shoulder_pitch
       - l_shoulder_roll
+      - l_shoulder_pitch
+    interface_name: position
+    use_sim_time: false
+
+l_elbow_forward_position_controller:
+  ros__parameters:
+    joints:
       - l_elbow_yaw
       - l_elbow_pitch
+    interface_name: position
+    use_sim_time: false
+
+l_wrist_forward_position_controller:
+  ros__parameters:
+    joints:
       - l_wrist_roll
       - l_wrist_pitch
       - l_wrist_yaw
+    interface_name: position
+    use_sim_time: false
+
+
+antenna_forward_position_controller:
+  ros__parameters:
+    joints:
+      - antenna_left
+      - antenna_right
     interface_name: position
     use_sim_time: false
 
@@ -121,6 +161,15 @@ antenna_mode_controller:
     joints:
       - antenna_left_raw_motor
       - antenna_right_raw_motor
+    interface_name: mode
+    use_sim_time: false
+
+
+gripper_mode_controller:
+  ros__parameters:
+    joints:
+      - l_hand_raw_motor_1
+      - r_hand_raw_motor_1
     interface_name: mode
     use_sim_time: false
 
