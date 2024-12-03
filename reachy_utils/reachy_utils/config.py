@@ -32,6 +32,7 @@ REACHY_CONFIG_MOBILE_BASE = "mobile_base"
 ETHERCAT = "ethercat"
 BETA = "beta"
 DVT = "dvt"
+PVT = "pvt"
 
 
 class ReachyConfig:
@@ -53,13 +54,19 @@ class ReachyConfig:
                 if DVT in config[REACHY_CONFIG_SERIAL_NUMBER]:
                     self.dvt = True
                     self.beta = False
+                    self.pvt = False
                 elif BETA in config[REACHY_CONFIG_SERIAL_NUMBER]:
                     self.beta = True
                     self.dvt = False
+                    self.pvt = False
+                elif PVT in config[REACHY_CONFIG_SERIAL_NUMBER]:
+                    self.beta = False
+                    self.dvt = False
+                    self.pvt = True
                 else:
                     raise ValueError(
                         'Bad serial number "{}". Expected values are {}'.format(
-                            config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA]
+                            config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA, PVT]
                         )
                     )
 
