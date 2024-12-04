@@ -311,8 +311,9 @@ DynamixelSystem::export_state_interfaces()
     {
       auto gpio = info_.gpios[i];
 
-      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str())
+      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str()|| gpio.name.compare(std::string("l_hand"))==0  || gpio.name.compare(std::string("r_hand" ))==0) //for compatibility...
       {
+
         state_interfaces.emplace_back(hardware_interface::StateInterface(
             gpio.name, "torque", &hw_states_torque_[motor_index]));
         motor_index++;
@@ -392,7 +393,7 @@ DynamixelSystem::export_state_interfaces()
       {
         RCLCPP_WARN(
             rclcpp::get_logger("DynamixelSystem"),
-            "Unkwon state interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+            "Unknown state interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
       }
 
     }
@@ -447,7 +448,7 @@ DynamixelSystem::export_command_interfaces()
 
 
       // if (gpio.name == info_.name.c_str())
-      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str())
+      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str()|| gpio.name.compare(std::string("l_hand"))==0  || gpio.name.compare(std::string("r_hand" ))==0) //for compatibility...
       {
         command_interfaces.emplace_back(hardware_interface::CommandInterface(
             gpio.name, "torque", &hw_commands_torque_[motor_index]));
@@ -518,7 +519,7 @@ DynamixelSystem::export_command_interfaces()
       {
         RCLCPP_WARN(
             rclcpp::get_logger("DynamixelSystem"),
-            "Unkown command interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+            "Unknown command interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
       }
 
     }
@@ -662,7 +663,10 @@ DynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
       "(%s) WRITE TORQUE ERROR!", info_.name.c_str()
     );
   }
-
+//   RCLCPP_ERROR(
+//     rclcpp::get_logger("DynamixelSystem"),
+//     "DynamixelHWI: SET_TARGET (%s) %f %f", info_.name.c_str(), hw_commands_position_[0], hw_commands_position_[1]
+// );
   if (dynamixel_2joints_set_target_position(
     this->uid,
     &hw_commands_position_

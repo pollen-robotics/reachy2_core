@@ -308,7 +308,8 @@ DynamixelSystem::export_state_interfaces()
     {
       auto gpio = info_.gpios[i];
 
-      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str())
+
+      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str() || !gpio.name.compare(std::string("l_hand"))  || !gpio.name.compare(std::string("r_hand" ))) //for compatibility...
       {
         state_interfaces.emplace_back(hardware_interface::StateInterface(
             gpio.name, "torque", &hw_states_torque_));
@@ -389,7 +390,7 @@ DynamixelSystem::export_state_interfaces()
       {
         RCLCPP_WARN(
             rclcpp::get_logger("DynamixelSystem"),
-            "Unkwon state interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
+            "Unkonw state interface (GPIO) (%s) \"%s\"!", info_.name.c_str(), gpio.name.c_str());
       }
 
     }
@@ -444,7 +445,7 @@ DynamixelSystem::export_command_interfaces()
 
 
       // if (gpio.name == info_.name.c_str())
-      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str())
+      if (gpio.name == (info_.name+"_left").c_str() || gpio.name == (info_.name+"_right").c_str()|| !gpio.name.compare(std::string("l_hand"))  || !gpio.name.compare(std::string("r_hand" ))) //for compatibility...
       {
         command_interfaces.emplace_back(hardware_interface::CommandInterface(
             gpio.name, "torque", &hw_commands_torque_));
