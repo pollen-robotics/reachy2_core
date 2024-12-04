@@ -39,6 +39,9 @@
       <xacro:dynamixel_axis_control name="${joint1}_finger"/>
       <xacro:dynamixel_axis_control name="${joint2}_finger"/>
 
+
+
+
       <xacro:dynamixel_raw_motor_control name="${joint1}_raw_motor_1"/>
       <xacro:dynamixel_raw_motor_control name="${joint2}_raw_motor_1"/>
 

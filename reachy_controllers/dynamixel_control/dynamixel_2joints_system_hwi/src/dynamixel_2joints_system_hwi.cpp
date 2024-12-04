@@ -663,10 +663,7 @@ DynamixelSystem::write(const rclcpp::Time &, const rclcpp::Duration &)
       "(%s) WRITE TORQUE ERROR!", info_.name.c_str()
     );
   }
-//   RCLCPP_ERROR(
-//     rclcpp::get_logger("DynamixelSystem"),
-//     "DynamixelHWI: SET_TARGET (%s) %f %f", info_.name.c_str(), hw_commands_position_[0], hw_commands_position_[1]
-// );
+
   if (dynamixel_2joints_set_target_position(
     this->uid,
     &hw_commands_position_
