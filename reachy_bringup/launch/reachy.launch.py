@@ -214,28 +214,36 @@ def launch_setup(context, *args, **kwargs):
             "antenna_forward_position_controller",
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
+        # [
+        #     "r_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
         [
-            "r_shoulder_forward_position_controller",
+            "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         [
-            "r_elbow_forward_position_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        ],
-        [
-            "r_wrist_forward_position_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        ],
-        [
-            "l_shoulder_forward_position_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        ],
-        [
-            "l_elbow_forward_position_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        ],
-        [
-            "l_wrist_forward_position_controller",
+            "l_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
@@ -466,7 +474,7 @@ def launch_setup(context, *args, **kwargs):
             sdk_server_node,
             # sdk_server_audio_node,
             # audio_node,
-            # sdk_server_video_node,
+            sdk_server_video_node,
             orbbec_node,
             goto_server_node,
             dynamic_state_router_node,
