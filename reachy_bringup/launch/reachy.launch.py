@@ -84,7 +84,7 @@ def launch_setup(context, *args, **kwargs):
     reachy_urdf_config = (
         f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
         f" use_gazebo:=true" if gazebo_py else " ",
-        f" depth_camera:=true" if gazebo_py else " ",
+        f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
         f" robot_config:={reachy_config.model}",
         f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
         f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
@@ -347,7 +347,7 @@ def launch_setup(context, *args, **kwargs):
     orbbec_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/launch", "/gemini_330_series.launch.py"]),
         launch_arguments={"depth_width": "1280", "enable_colored_point_cloud": "true"}.items(),
-        condition=IfCondition(orbbec_rl),
+        condition=IfCondition(PythonExpression(f"{orbbec_py} and not {gazebo_py}")),
     )
 
     goto_server_node = Node(
