@@ -17,15 +17,21 @@ STARTER_KIT_RIGHT_NO_HEAD = "starter_kit_right_no_head"
 
 REACHY_CONFIG_MODEL = "model"
 REACHY_CONFIG_NECK = "neck_config"
-# REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
-# REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
-# REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
 
-# REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
-# REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
-# REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
-REACHY_CONFIG_LEFT_ARM = "left_arm_config"
-REACHY_CONFIG_RIGHT_ARM = "right_arm_config"
+REACHY_CONFIG_RIGHT_SHOULDER = "right_shoulder_config"
+REACHY_CONFIG_RIGHT_ELBOW = "right_elbow_config"
+REACHY_CONFIG_RIGHT_WRIST = "right_wrist_config"
+
+REACHY_CONFIG_LEFT_SHOULDER = "left_shoulder_config"
+REACHY_CONFIG_LEFT_ELBOW = "left_elbow_config"
+REACHY_CONFIG_LEFT_WRIST = "left_wrist_config"
+
+REACHY_CONFIG_GRIPPERS = "grippers_config"
+REACHY_CONFIG_ANTENNA = "antenna_config"
+
+
+# REACHY_CONFIG_LEFT_ARM = "left_arm_config"
+# REACHY_CONFIG_RIGHT_ARM = "right_arm_config"
 
 REACHY_CONFIG_SERIAL_NUMBER = "serial_number"
 REACHY_CONFIG_MOBILE_BASE = "mobile_base"
@@ -107,17 +113,53 @@ class ReachyConfig:
             except KeyError as e:
                 raise KeyError("orbita3d neck config key not found :: {}".format(e))
 
-            # Right arm
-            try:
-                self.right_arm_config = config[REACHY_CONFIG_RIGHT_ARM]
-            except KeyError as e:
-                raise KeyError("right_arm config key not found :: {}".format(e))
+            # # Right arm
+            # try:
+            #     self.right_arm_config = config[REACHY_CONFIG_RIGHT_ARM]
+            # except KeyError as e:
+            #     raise KeyError("right_arm config key not found :: {}".format(e))
 
-            # Left arm
+            # # Left arm
+            # try:
+            #     self.left_arm_config = config[REACHY_CONFIG_LEFT_ARM]
+            # except KeyError as e:
+            #     raise KeyError("left_arm config key not found :: {}".format(e))
+            
+            
             try:
-                self.left_arm_config = config[REACHY_CONFIG_LEFT_ARM]
+                self.right_shoulder_config = config[REACHY_CONFIG_RIGHT_SHOULDER]
             except KeyError as e:
-                raise KeyError("left_arm config key not found :: {}".format(e))
+                raise KeyError("right_shoulder_config key not found :: {}".format(e))
+            try:
+                self.right_elbow_config = config[REACHY_CONFIG_RIGHT_ELBOW]
+            except KeyError as e:
+                raise KeyError("right_elbow_config key not found :: {}".format(e))
+            try:
+                self.right_wrist_config = config[REACHY_CONFIG_RIGHT_WRIST]
+            except KeyError as e:
+                raise KeyError("right_wrist_config key not found :: {}".format(e))
+            try:
+                self.left_shoulder_config = config[REACHY_CONFIG_LEFT_SHOULDER]
+            except KeyError as e:
+                raise KeyError("left_shoulder_config key not found :: {}".format(e))
+            try:
+                self.left_elbow_config = config[REACHY_CONFIG_LEFT_ELBOW]
+            except KeyError as e:
+                raise KeyError("left_elbow_config key not found :: {}".format(e))
+            try:
+                self.left_wrist_config = config[REACHY_CONFIG_LEFT_WRIST]
+            except KeyError as e:
+                raise KeyError("left_wrist_config key not found :: {}".format(e))
+            try:
+                self.grippers_config = config[REACHY_CONFIG_GRIPPERS]
+            except KeyError as e:
+                raise KeyError("grippers_config key not found :: {}".format(e))
+            try:
+                self.antenna_config = config[REACHY_CONFIG_ANTENNA]
+            except KeyError as e:
+                raise KeyError("antenna_config key not found :: {}".format(e))
+            
+            
 
     def __str__(self):
         return (
@@ -125,10 +167,10 @@ class ReachyConfig:
             + "{}\n".format(self.model)
             + "neck_config".ljust(25, " ")
             + "{}\n".format(self.neck_config)
-            + "right_arm_config".ljust(25, " ")
-            + "{}\n".format(self.right_arm_config)
-            + "left_arm_config".ljust(25, " ")
-            + "{}\n".format(self.left_arm_config)
+            # + "right_arm_config".ljust(25, " ")
+            # + "{}\n".format(self.right_arm_config)
+            # + "left_arm_config".ljust(25, " ")
+            # + "{}\n".format(self.left_arm_config)
             + "ethercat".ljust(25, " ")
             + "{}\n".format(self.ethercat)
         )
