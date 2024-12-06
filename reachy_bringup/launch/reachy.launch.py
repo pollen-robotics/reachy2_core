@@ -72,7 +72,7 @@ def launch_setup(context, *args, **kwargs):
     verbose_logger_log_level_rl = LaunchConfiguration("log")
     nodes = []
 
-    clear_bags_and_logs(nb_runs_to_keep=10)
+    clear_bags_and_logs(nb_runs_to_keep=25)
 
     ####################
     ### Robot config ###
