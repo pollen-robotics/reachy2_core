@@ -7,8 +7,9 @@
 
 
   <xacro:include filename="$(find reachy_description)/urdf/head.urdf.xacro" />
-  <xacro:include filename="$(find arm_description)/urdf/arm.urdf.xacro" />
-
+  <xacro:include filename="$(find reachy_description)/urdf/arm.urdf.xacro" />
+  <xacro:include filename="$(find dynamixel_description)/urdf/dynamixel_gripper.urdf.xacro" />
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_gripper.ros2_control.xacro" />
 
   <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro" />
@@ -50,10 +51,18 @@
 
   <!-- config  -->
   <xacro:arg name="antenna_config" default="$(find dynamixel_description)/config/two_fake.yaml"/>
-  <!-- <xacro:arg name="antenna_config" default="$(find dynamixel_description)/config/antennas.yaml"/> -->
   <xacro:arg name="neck_config" default="$(find orbita3d_description)/config/fake_neck.yaml" />
-  <xacro:arg name="right_arm_config" default="$(find arm_description)/config/fake_r_arm.yaml" />
-  <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_l_arm.yaml" />
+  <xacro:arg name="right_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml" />
+  <xacro:arg name="right_elbow_config" default="$(find orbita2d_description)/config/fake.yaml" />
+  <xacro:arg name="right_wrist_config" default="$(find orbita3d_description)/config/fake.yaml" />
+
+  <xacro:arg name="left_shoulder_config" default="$(find orbita2d_description)/config/fake.yaml" />
+  <xacro:arg name="left_elbow_config" default="$(find orbita2d_description)/config/fake.yaml" />
+  <xacro:arg name="left_wrist_config" default="$(find orbita3d_description)/config/fake.yaml" />
+
+  <!-- <xacro:arg name="right_arm_config" default="$(find arm_description)/config/fake_r_arm.yaml" /> -->
+  <!-- <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_l_arm.yaml" /> -->
+  <xacro:arg name="grippers_config" default="$(find dynamixel_description)/config/two_fake.yaml"/>
   <xacro:arg name="robot_model" default="none" />
   <!-- config  -->
 
@@ -253,17 +262,114 @@
   <xacro:arm
     prefix="r" parent="torso" side="right"
     damping="${damping}" friction="${friction}"
-    config_file="$(arg right_arm_config)"
+    shoulder_config_file="$(arg right_shoulder_config)"
+    elbow_config_file="$(arg right_elbow_config)"
+    wrist_config_file="$(arg right_wrist_config)"
     robot_model="$(arg robot_model)"
   />
+
+
+    <xacro:dynamixel_gripper
+      prefix="r_hand" parent="r_wrist_out_link" side="right"
+      damping="${damping}" friction="${friction}"
+    />
+
+    <link name="r_arm_tip">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+    <joint name="r_tip_joint" type="fixed">
+      <!-- Rotated to be aligned with trunk in resting pos (elbows at -90°) -->
+      <!-- <origin xyz="-0.012 0 0.14432" rpy="${pi} ${-pi/2} 0" /> -->
+      <!-- <origin xyz="-0.012 0 0.14432" rpy="${pi} 0 0" /> -->
+      <!-- Aligned with trunk in zero position -->
+      <!-- <origin xyz="-0.012 0 0.14432" rpy="${pi} 0 0" /> -->
+      <!-- Hard coded in symbolic ik... -->
+      <origin xyz="0.0 0 0.10" rpy="${pi} 0 0" />
+      <parent link="r_hand_palm_link" />
+      <child link="r_arm_tip" />
+    </joint>
+
+
+    <link name="r_arm_tip_bottom">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+    <joint name="r_tip_joint_bottom" type="fixed">
+      <!-- <origin xyz="-0.028 0 0.14432" rpy="${pi} ${-pi/2} 0" /> -->
+      <origin xyz="-0.028 0 0.14432" rpy="${pi} 0 0" />
+      <parent link="r_hand_palm_link" />
+      <child link="r_arm_tip_bottom" />
+    </joint>
+
+
 
   <!-- LEFT ARM -->
   <xacro:arm
     prefix="l" parent="torso" side="left"
     damping="${damping}" friction="${friction}"
-    config_file="$(arg left_arm_config)"
+    shoulder_config_file="$(arg left_shoulder_config)"
+    elbow_config_file="$(arg left_elbow_config)"
+    wrist_config_file="$(arg left_wrist_config)"
     robot_model="$(arg robot_model)"
   />
+
+
+    <xacro:dynamixel_gripper
+      prefix="l_hand" parent="l_wrist_out_link" side="right"
+      damping="${damping}" friction="${friction}"
+    />
+
+    <link name="l_arm_tip">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+    <joint name="l_tip_joint" type="fixed">
+      <!-- Rotated to be aligned with trunk in resting pos (elbows at -90°) -->
+      <!-- <origin xyz="-0.012 0 0.14432" rpy="${pi} ${-pi/2} 0" /> -->
+      <!-- <origin xyz="-0.012 0 0.14432" rpy="${pi} 0 0" /> -->
+      <!-- Aligned with trunk in zero position -->
+      <!-- <origin xyz="-0.012 0 0.14432" rpy="${pi} 0 0" /> -->
+      <!-- Hard coded in symbolic ik... -->
+      <origin xyz="0.0 0 0.10" rpy="${pi} 0 0" />
+      <parent link="l_hand_palm_link" />
+      <child link="l_arm_tip" />
+    </joint>
+
+
+    <link name="l_arm_tip_bottom">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+    <joint name="l_tip_joint_bottom" type="fixed">
+      <!-- <origin xyz="-0.028 0 0.14432" rpy="${pi} ${-pi/2} 0" /> -->
+      <origin xyz="-0.028 0 0.14432" rpy="${pi} 0 0" />
+      <parent link="l_hand_palm_link" />
+      <child link="l_arm_tip_bottom" />
+    </joint>
+
+
+  <xacro:dynamixel_gripper_control
+    name="gripper" joint1="l_hand" joint2="r_hand"
+    config_file="$(arg grippers_config)"
+    />
+
 
 
   <link name="depth_cam_l_optical">

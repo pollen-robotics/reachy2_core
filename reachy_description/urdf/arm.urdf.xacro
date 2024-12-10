@@ -1,0 +1,312 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="arm" params="prefix parent side damping friction shoulder_config_file elbow_config_file wrist_config_file robot_model">
+
+
+    <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro" />
+    <xacro:include filename="$(find orbita3d_description)/ros2_control/orbita3d.ros2_control.xacro" />
+
+    <xacro:include filename="$(find orbita2d_description)/urdf/orbita2d.urdf.xacro" />
+    <xacro:include filename="$(find orbita2d_description)/ros2_control/orbita2d.ros2_control.xacro" />
+
+
+    <!-- <xacro:include filename="$(find reachy_description)/ros2_control/arm.ros2_control.xacro" /> -->
+
+
+    <!-- <!-\- Orbita2d config -\-> -->
+    <!-- <xacro:arg name="orbita2d_shoulder_config" default="$(find
+    orbita2d_description)/config/fake.yaml"/> -->
+    <!-- <xacro:arg name="orbita2d_elbow_config" default="$(find
+    orbita2d_description)/config/fake.yaml"/> -->
+
+    <!-- <!-\- Orbita3d config -\-> -->
+    <!-- <xacro:arg name="orbita3d_wrist_config" default="$(find
+    orbita3d_controller)/config/fake.yaml"/> -->
+
+
+    <!-- ARM PARAMETERS -->
+    <!-- Parameters comming from the hardware -->
+    <!-- <xacro:property name="arm_offset_x" value="-0.0465" /> -->
+    <xacro:property name="arm_offset_x" value="0.0" />
+    <xacro:property name="arm_offset_y" value="-0.2" />
+    <xacro:property name="arm_offset_z" value="0.0" />
+
+    <!-- Define robot model argument -->
+
+    <!-- Check if the robot model is 'beta' -->
+    <xacro:if value="${robot_model == 'beta'}">
+      <xacro:property name="arm_offset_yaw" value="0.2617993877991494" /> <!-- 15 degrees -->
+      <xacro:property name="arm_offset_roll" value="0.17453292519943295" /> <!-- 10 degrees -->
+
+    </xacro:if>
+
+    <!-- Check if the robot model is 'dvt' -->
+    <xacro:if value="${robot_model == 'dvt'}">
+      <xacro:property name="arm_offset_yaw" value="0.17453292519943295" /> <!-- 10 degrees -->
+      <xacro:property name="arm_offset_roll" value="-0.2617993877991494" /> <!-- -15 degrees -->
+    </xacro:if>
+
+    <!-- Throw an error if neither 'beta' nor 'dvt' is provided -->
+    <xacro:if value="${robot_model != 'beta' and robot_model != 'dvt'}">
+      Invalid robot model provided. Please provide either 'beta' or 'dvt'.
+    </xacro:if>
+
+
+    <!-- Virtual parameters for convenience -->
+    <!-- -15 degrees - virtual offset to make the forearm aligned with world axis -->
+    <xacro:property name="virtual_elbow_offset_yaw" value="-0.2617993877991494" />
+    <!-- 10 degrees  - virtual offset to make the arm completely vertical -->
+    <xacro:property name="virtual_shoulder_roll_offset" value="${arm_offset_roll}" />
+
+
+    <xacro:property name="arm_length" value="0.28" />
+    <xacro:property name="arm_radius" value="0.06" />
+    <xacro:property name="arm_mass" value="0.5" />
+    <xacro:property name="shoulder_ratio_a" value="47.519" />
+    <xacro:property name="shoulder_ratio_b" value="47.519" />
+
+    <xacro:property name="forearm_length" value="0.28" />
+    <xacro:property name="forearm_radius" value="0.058" />
+    <xacro:property name="forearm_mass" value="0.45" />
+    <xacro:property name="elbow_ratio_a" value="45.018" />
+    <xacro:property name="elbow_ratio_b" value="45.018" />
+
+    <xacro:property name="wrist_length" value="0.01" />
+    <xacro:property name="wrist_radius" value="0.02" />
+    <xacro:property name="wrist_mass" value="0.1" />
+    <xacro:property name="wrist_reduction" value="4.266667" />
+
+    <!-- ARM PARAMETERS -->
+
+
+    <xacro:if value="${side == 'left'}">
+      <xacro:property name="reflect" value="-1" />
+      <xacro:property name="min_shoulder_roll" value="-0.0" />
+      <xacro:property name="max_shoulder_roll" value="${pi}" />
+      <xacro:property name="shoulder_axis1_inverted" value="0" />
+      <xacro:property name="shoulder_axis2_inverted" value="0" />
+      <xacro:property name="elbow_axis1_inverted" value="0" />
+      <xacro:property name="elbow_axis2_inverted" value="0" />
+
+    </xacro:if>
+    <xacro:if value="${side == 'right'}">
+      <xacro:property name="reflect" value="1" />
+      <xacro:property name="min_shoulder_roll" value="-${pi}" />
+      <xacro:property name="max_shoulder_roll" value="0.0" />
+      <xacro:property name="shoulder_axis1_inverted" value="1" />
+      <xacro:property name="shoulder_axis2_inverted" value="0" />
+      <xacro:property name="elbow_axis1_inverted" value="1" />
+      <xacro:property name="elbow_axis2_inverted" value="0" />
+
+    </xacro:if>
+
+    <xacro:property name="p" value="${prefix}" />
+
+
+    <link name="${prefix}_shoulder_base_link">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_shoulder_base_joint" type="fixed">
+      <!-- <origin xyz="${arm_offset_x} ${arm_offset_y*reflect} ${arm_offset_z}"
+      rpy="${(1.5707963267948966+(virtual_shoulder_roll_offset - arm_offset_roll))*reflect} 0
+      ${arm_offset_yaw*reflect}" /> -->
+      <origin xyz="${arm_offset_x} ${arm_offset_y*reflect} ${arm_offset_z}"
+        rpy="${(1.5707963267948966+(arm_offset_roll))*reflect} 0 ${arm_offset_yaw*reflect}" />
+      <parent link="${parent}" />
+      <child link="${prefix}_shoulder_base_link" />
+    </joint>
+
+    <!-- joint1_min_angle="-${pi/2}" joint1_max_angle="${pi/2}" -->
+    <xacro:orbita2d
+      name="${p}_shoulder" parent="${prefix}_shoulder_base_link"
+      length="${arm_length}" radius="${arm_radius}" mass="${arm_mass}"
+      xyz="0 0 0"
+      rpy="0 0 0"
+      damping="${damping}" friction="${friction}"
+      joint1="pitch" joint2="roll"
+      joint1_min_angle="-${pi}" joint1_max_angle="${pi}"
+      joint2_min_angle="${min_shoulder_roll}" joint2_max_angle="${max_shoulder_roll}"
+      config_file="${shoulder_config_file}"
+    />
+
+    <link name="${prefix}_elbow_arm_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <!-- <mesh filename="package://arm_description/meshes/upper_arm_visual.dae" /> -->
+          <mesh filename="file://$(find reachy_description)/meshes/upper_arm_visual.dae" />
+
+        </geometry>
+
+      </visual>
+
+      <collision>
+        <!-- <origin xyz="0 0 ${arm_length/2}" rpy="0 0 0"/> -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+
+        <geometry>
+          <!-- <mesh filename="package://arm_description/meshes/upper_arm_collider.dae" /> -->
+          <mesh filename="file://$(find reachy_description)/meshes/upper_arm_collider.dae" />
+        </geometry>
+      </collision>
+
+
+      <inertial>
+        <origin xyz="-0.000669 0.000509 0.144798" rpy="0 0 0" />
+        <mass value="1.620" />
+        <inertia ixx="0.007864" ixy="0.000005410021" ixz="-0.000117782969"
+          iyx="0.000005410021" iyy="0.006998" iyz="0.000121931452"
+          izx="-0.000117782969" izy="0.000121931452" izz="0.001828" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}_elbow_arm_joint" type="fixed">
+      <origin xyz="0 0 0.0" rpy="0 ${1.5707963267948966*reflect} ${-1.5707963267948966*reflect}" />
+      <!-- <origin xyz="0 0 0.0" rpy="0 0 0" /> -->
+      <!-- <parent link="${p}_shoulder_ball_link" /> -->
+      <parent link="${p}_shoulder_fix_link" />
+      <child link="${prefix}_elbow_arm_link" />
+    </joint>
+
+
+    <link name="${prefix}_elbow_base_link">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+    <!-- <joint name="${prefix}_elbow_base_joint" type="fixed"> -->
+    <!--   <origin xyz="0 0 0" rpy="0 ${(1.5707963267948966 + virtual_elbow_offset_yaw)*reflect} 0" /> -->
+    <!--   <parent link="${p}_shoulder_ball_link" /> -->
+    <!--   <child link="${prefix}_elbow_base_link" /> -->
+    <!-- </joint> -->
+
+
+    <!-- <xacro:orbita2d -->
+    <!--   name="${p}_elbow" parent="${prefix}_elbow_base_link" -->
+    <!--   length="${forearm_length}" radius="${forearm_radius}" mass="${forearm_mass}" -->
+    <!--   xyz="0 -${arm_length} 0" rpy="${1.5707963267948966} 0 0" -->
+    <!--   damping="${damping}" friction="${friction}" -->
+    <!--   joint1="yaw" joint2="pitch" -->
+    <!--   joint1_min_angle="-${pi/2}" joint1_max_angle="${pi/2}" -->
+    <!--   joint2_min_angle="-2.25" joint2_max_angle="0.1" -->
+    <!-- /> -->
+
+
+    <joint name="${prefix}_elbow_base_joint" type="fixed">
+      <origin xyz="0 0 ${arm_length}" rpy="0 0 0" />
+      <parent link="${prefix}_elbow_arm_link" />
+      <child link="${prefix}_elbow_base_link" />
+    </joint>
+
+
+    <xacro:orbita2d
+      name="${p}_elbow" parent="${prefix}_elbow_base_link"
+      length="${forearm_length}" radius="${forearm_radius}" mass="${forearm_mass}"
+      xyz="0 0 0" rpy="0 0 0"
+      damping="${damping}" friction="${friction}"
+      joint1="yaw" joint2="pitch"
+      joint1_min_angle="-${pi}" joint1_max_angle="${pi}"
+      joint2_min_angle="-2.25" joint2_max_angle="0.1"
+      config_file="${elbow_config_file}"
+    />
+
+
+    <!-- <link name="${prefix}_elbow_forearm_link"> -->
+    <!--   <visual> -->
+    <!--   	<origin xyz="0 0 0" rpy="0 0 0"/> -->
+    <!--   	<geometry> -->
+    <!-- 	  <mesh filename="package://arm_description/meshes/Orbita2D_forearm.dae" /> -->
+    <!--   	</geometry> -->
+
+    <!--   </visual> -->
+    <!--   <inertial> -->
+    <!--   	<origin xyz="0.00092892 -0.00254548 0.14021211" rpy="0 0 0"/> -->
+    <!-- 	<mass value="0.90719109"/> -->
+    <!-- 	 <inertia ixx="0.00428278" ixy="-0.00000203" ixz="0.00011755" -->
+    <!-- 		  iyx="-0.00000203" iyy="0.0044585" iyz="-0.00004915" -->
+    <!-- 		  izx="0.00011755" izy="-0.00004915" izz="0.00047615"/> -->
+    <!--   </inertial> -->
+
+    <!-- </link> -->
+
+    <!-- <joint name="${prefix}_elbow_forearm_joint" type="fixed"> -->
+    <!--   <origin xyz="0 0 0.0" rpy="0 0 0" /> -->
+    <!--   <parent link="${p}_elbow_ball_link" /> -->
+    <!--   <child link="${prefix}_elbow_forearm_link" /> -->
+    <!-- </joint> -->
+
+
+    <link name="${prefix}_elbow_forearm_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <!-- <mesh filename="package://arm_description/meshes/forearm_visual.dae" /> -->
+          <mesh filename="file://$(find reachy_description)/meshes/forearm_visual.dae" />
+        </geometry>
+
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <!-- <origin xyz="0 0 ${forearm_length/2}" rpy="0 0 0"/> -->
+
+        <geometry>
+          <!-- <mesh filename="package://arm_description/meshes/forearm_collider.dae" /> -->
+          <mesh filename="file://$(find reachy_description)/meshes/forearm_collider.dae" />
+
+        </geometry>
+      </collision>
+
+
+      <inertial>
+        <origin xyz="0.00092892 -0.00254548 0.14021211" rpy="0 0 0" />
+        <mass value="0.90719109" />
+        <inertia ixx="0.00428278" ixy="-0.00000203" ixz="0.00011755"
+          iyx="-0.00000203" iyy="0.0044585" iyz="-0.00004915"
+          izx="0.00011755" izy="-0.00004915" izz="0.00047615" />
+      </inertial>
+
+    </link>
+
+    <joint name="${prefix}_elbow_forearm_joint" type="fixed">
+      <origin xyz="0 0 0.0" rpy="0 0 0" />
+      <!-- <parent link="${p}_elbow_ball_link" /> -->
+      <parent link="${p}_elbow_fix_link" />
+      <child link="${prefix}_elbow_forearm_link" />
+    </joint>
+
+
+    <!-- <xacro:orbita3d -->
+    <!--   name="${p}_wrist" parent="${p}_elbow_ball_link" -->
+    <!--   length="${wrist_length}" radius="${wrist_radius}" mass="${wrist_mass}" -->
+    <!--   xyz="0 0 ${forearm_length}" rpy="${pi} 0 0" -->
+    <!--   damping="${damping}" friction="${friction}" -->
+    <!-- /> -->
+
+    <xacro:orbita3d
+      name="${p}_wrist" parent="${p}_elbow_forearm_link"
+      length="${wrist_length}" radius="${wrist_radius}" mass="${wrist_mass}"
+      xyz="0 0 ${forearm_length}" rpy="${pi} 0 ${pi/2}"
+      damping="${damping}" friction="${friction}"
+      config_file="${wrist_config_file}"
+    />
+
+
+
+
+    <!-- <xacro:arm_control name="${p}_arm" prefix="${p}" config_file="${config_file}" /> -->
+    <!-- <xacro:orbita2d_control name="${p}_shoulder" config_file="${shoulder_config_file}" /> -->
+    <!-- <xacro:orbita2d_control name="${p}_elbow" config_file="${elbow_config_file}" /> -->
+    <!-- <xacro:orbita3d_control name="${p}_wrist" config_file="${wrist_config_file}" /> -->
+
+  </xacro:macro>
+</robot>

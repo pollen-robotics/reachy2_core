@@ -87,10 +87,17 @@ def launch_setup(context, *args, **kwargs):
         f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
         f" robot_config:={reachy_config.model}",
         f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
-        f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
-        f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
-        f' antenna_config:="{get_fake("dynamixel_description", "antennas.yaml", context) if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
-        f' robot_model:="{BETA if reachy_config.beta else DVT }"', # for now PVT urdf is assumed to be the same as dvt
+        # f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
+        # f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
+        f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
+        f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
+        f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+        f' left_shoulder_config:="{reachy_config.left_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_shoulder.yaml", context)}"',
+        f' left_elbow_config:="{reachy_config.left_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_elbow.yaml", context)}"',
+        f' left_wrist_config:="{reachy_config.left_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+        f' antenna_config:="{reachy_config.antenna_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
+        f' grippers_config:="{reachy_config.grippers_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
+        f' robot_model:="{BETA if reachy_config.beta else DVT }"',  # for now PVT urdf is assumed to be the same as dvt
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
 
@@ -207,6 +214,30 @@ def launch_setup(context, *args, **kwargs):
             "antenna_forward_position_controller",
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
+        # [
+        #     "r_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
         [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
@@ -235,6 +266,7 @@ def launch_setup(context, *args, **kwargs):
         ["forward_speed_limit_controller", f"not {gazebo_py}"],
         ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
         ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
+        ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_mode_controller", f"not {gazebo_py}"],
     ]:

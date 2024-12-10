@@ -2,11 +2,11 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_actuator_control.ros2_control.xacro"/>
-  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_gripper_axis_control.ros2_control.xacro"/>
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_axis_control.ros2_control.xacro"/>
   <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_raw_motor_control.ros2_control.xacro"/>
 
 
-  <xacro:macro name="dynamixel_control" params="name joint1 joint2 config_file ">
+  <xacro:macro name="dynamixel_gripper_control" params="name joint1 joint2 config_file ">
 
     <ros2_control name="${name}" type="system">
       <hardware>
@@ -33,14 +33,17 @@
         </xacro:if>
       </hardware>
 
-      <xacro:dynamixel_actuator_control name="${name}_${joint1}"/>
-      <xacro:dynamixel_actuator_control name="${name}_${joint2}"/>
+      <xacro:dynamixel_actuator_control name="${joint1}"/>
+      <xacro:dynamixel_actuator_control name="${joint2}"/>
 
-      <xacro:dynamixel_gripper_axis_control name="${name}_${joint1}" fake="$(arg use_fake_hardware)" gazebo="$(arg use_gazebo)"/>
-      <xacro:dynamixel_gripper_axis_control name="${name}_${joint2}" fake="$(arg use_fake_hardware)" gazebo="$(arg use_gazebo)"/>
+      <xacro:dynamixel_axis_control name="${joint1}_finger"/>
+      <xacro:dynamixel_axis_control name="${joint2}_finger"/>
 
-      <xacro:dynamixel_raw_motor_control name="${name}_${joint1}_raw_motor"/>
-      <xacro:dynamixel_raw_motor_control name="${name}_${joint2}_raw_motor"/>
+
+
+
+      <xacro:dynamixel_raw_motor_control name="${joint1}_raw_motor_1"/>
+      <xacro:dynamixel_raw_motor_control name="${joint2}_raw_motor_1"/>
 
     </ros2_control>
 
