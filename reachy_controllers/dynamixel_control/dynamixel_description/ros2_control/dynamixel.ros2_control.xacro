@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_actuator_control.ros2_control.xacro"/>
-  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_gripper_axis_control.ros2_control.xacro"/>
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_axis_control.ros2_control.xacro"/>
   <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_raw_motor_control.ros2_control.xacro"/>
 
 
@@ -36,8 +36,8 @@
       <xacro:dynamixel_actuator_control name="${name}_${joint1}"/>
       <xacro:dynamixel_actuator_control name="${name}_${joint2}"/>
 
-      <xacro:dynamixel_gripper_axis_control name="${name}_${joint1}" fake="$(arg use_fake_hardware)" gazebo="$(arg use_gazebo)"/>
-      <xacro:dynamixel_gripper_axis_control name="${name}_${joint2}" fake="$(arg use_fake_hardware)" gazebo="$(arg use_gazebo)"/>
+      <xacro:dynamixel_axis_control name="${name}_${joint1}" />
+      <xacro:dynamixel_axis_control name="${name}_${joint2}" />
 
       <xacro:dynamixel_raw_motor_control name="${name}_${joint1}_raw_motor"/>
       <xacro:dynamixel_raw_motor_control name="${name}_${joint2}_raw_motor"/>

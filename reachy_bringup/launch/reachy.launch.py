@@ -268,7 +268,7 @@ def launch_setup(context, *args, **kwargs):
         ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
         ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
-        ["antenna_mode_controller", f"not {gazebo_py}"],
+        ["antenna_mode_controller", f"not {fake_py} and not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(

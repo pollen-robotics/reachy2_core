@@ -80,6 +80,10 @@ DUMMY_SPECIAL_INTERFACES = {
         "l_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_hand": ["torque", "errors"],
         "l_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_left_raw_motor": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_right_raw_motor": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_left": ["torque", "errors"],
+        "antenna_right": ["torque", "errors"],
     },
     # "full_kit": {
     #     "neck":"state",
@@ -213,11 +217,17 @@ class FakeGzInterface(Node):
 
         fake = DynamicJointState()
         should_publish = False
+
+        # another horrible special case for the antennas...
+        if "antenna_left" in joints:
+            joints.remove("antenna_left")
+        if "antenna_right" in joints:
+            joints.remove("antenna_right")
+
         if not any(
             i in joints for i in list(DUMMY_SPECIAL_INTERFACES[self.robot_config].keys())
         ):  # there is none of the special interface
             # add dummy special interfaces
-
             for k, v in DUMMY_SPECIAL_INTERFACES[self.robot_config].items():
                 fake.joint_names.append(k)
                 inter = InterfaceValue()
