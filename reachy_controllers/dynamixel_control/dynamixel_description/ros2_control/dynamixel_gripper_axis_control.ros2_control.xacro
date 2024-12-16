@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="dynamixel_gripper_axis_control" params="name fake gazebo" >
+  <xacro:macro name="dynamixel_gripper_axis_control" params="name" >
     <joint name="${name}">
       <state_interface name="position">
         <param name="initial_value">0.0</param>
@@ -17,55 +17,55 @@
     </joint>
 
 
-    <xacro:if value="${fake}">
-      <!-- Use gazebo as hardware simulation, then handle the mimic joints. -->
-      <xacro:if value="${gazebo}">
+    <xacro:if value="$(arg use_fake_hardware)">
 
+      <xacro:if value="$(arg use_gazebo)">
+      <!-- Use gazebo as hardware simulation, then handle the mimic joints. -->
 	<joint name="${name}_proximal">
-	  <param name="mimic">${name}_finger</param>
-	  <param name="multiplier">-0.4689</param>
-	  <!-- offset = 0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -->
-        <!-- <param name="initial_value">0.554</param> -->
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+	  <!-- <param name="mimic">${name}_finger</param> -->
+	<!--   <param name="multiplier">-0.4689</param> -->
+	<!--   <!-\- offset = 0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -\-> -->
+        <!-- <!-\- <param name="initial_value">0.554</param> -\-> -->
+	<!--   <command_interface name="position"/> -->
+	<!--   <state_interface name="position"/> -->
+	<!--   <state_interface name="velocity"/> -->
+	<!--   <state_interface name="effort"/> -->
 
 	</joint>
 
 	<joint name="${name}_proximal_mimic" >
-	  <param name="mimic">${name}_finger_proximal</param>
-	  <param name="multiplier">1</param>
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+	  <!-- <param name="mimic">${name}_finger_proximal</param> -->
+	  <!-- <param name="multiplier">1</param> -->
+	  <!-- <command_interface name="position"/> -->
+	  <!-- <state_interface name="position"/> -->
+	  <!-- <state_interface name="velocity"/> -->
+	  <!-- <state_interface name="effort"/> -->
 
 	</joint>
 
 
 
 	<joint name="${name}_distal" >
-	  <param name="mimic">${name}_finger</param>
-	  <param name="multiplier">0.4689</param>
-	  <!-- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -->
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+	  <!-- <param name="mimic">${name}_finger</param> -->
+	  <!-- <param name="multiplier">0.4689</param> -->
+	  <!-- <!-\- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -\-> -->
+	  <!-- <command_interface name="position"/> -->
+	  <!-- <state_interface name="position"/> -->
+	  <!-- <state_interface name="velocity"/> -->
+	  <!-- <state_interface name="effort"/> -->
 
 
 	</joint>
 
 
 	<joint name="${name}_distal_mimic">
-	  <param name="mimic">${name}_finger</param>
-	  <param name="multiplier">0.4689</param>
-	  <!-- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -->
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+	  <!-- <param name="mimic">${name}_finger</param> -->
+	  <!-- <param name="multiplier">0.4689</param> -->
+	  <!-- <!-\- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -\-> -->
+	  <!-- <command_interface name="position"/> -->
+	  <!-- <state_interface name="position"/> -->
+	  <!-- <state_interface name="velocity"/> -->
+	  <!-- <state_interface name="effort"/> -->
 
 
 	</joint>

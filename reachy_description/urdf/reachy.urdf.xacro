@@ -104,12 +104,12 @@
   <!--   <child link="torso" /> -->
   <!-- </joint> -->
 
-  <!-- <link name="world" />
-  <joint name="world_joint" type="fixed">
-    <origin xyz="0 0 0.0" rpy="0 0 0" />
-    <parent link="world" />
-    <child link="base_link" />
-  </joint> -->
+  <!-- <link name="world" /> -->
+  <!-- <joint name="world_joint" type="fixed"> -->
+  <!--   <origin xyz="0 0 0.0" rpy="0 0 0" /> -->
+  <!--   <parent link="world" /> -->
+  <!--   <child link="base_link" /> -->
+  <!-- </joint> -->
 
   <link name="back_bar">
     <visual>
