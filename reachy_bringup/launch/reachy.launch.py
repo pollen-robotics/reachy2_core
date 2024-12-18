@@ -27,7 +27,8 @@ from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
 
-from reachy_utils.config import (
+# from reachy_config import ReachyConfig
+from reachy_utils.config import (  # ReachyConfig,
     BETA,
     DVT,
     FULL_KIT,
@@ -87,8 +88,6 @@ def launch_setup(context, *args, **kwargs):
         f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
         f" robot_config:={reachy_config.model}",
         f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
-        # f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
-        # f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
         f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
         f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
         f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
