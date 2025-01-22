@@ -78,41 +78,120 @@
   <xacro:property name="base_height" value="1.2" />
 
   <!-- Parameters for the 3 bar base height -->
-  <xacro:property name="back_bar_min_length" value="0.536" />
-  <xacro:property name="back_bar_max_length" value="0.936" />
-  <xacro:property name="bar_angle" value="${radians(27.458)}" />
+  <xacro:property name="back_bar_min_length" value="0.520" />
+  <xacro:property name="back_bar_max_length" value="${back_bar_min_length+0.210}" />
+  <!-- <xacro:property name="bar_angle" value="${radians(27.458)}" /> -->
+  <xacro:property name="bar_angle" value="${radians(10.937)}" />
+  <xacro:property name="bar_angle_offset" value="${pi/2-atan2(back_bar_min_length-0.03-0.018,bar_small_triangle_base-0.09)}" />
+
   <xacro:property name="bar_triangle_base" value="0.226186" />
-  <xacro:property name="bar_small_triangle_base" value="0.13857" />
+  <!-- <xacro:property name="bar_small_triangle_base" value="0.13857" /> -->
 
-  <xacro:property name="back_bar_z" value="0.164" />
-  <xacro:property name="back_bar_x" value="-0.122" />
-  <xacro:property name="left_bar_x" value="0.080966" />
-  <xacro:property name="left_bar_y" value="0.117182" />
-  <xacro:property name="right_bar_x" value="0.080966" />
-  <xacro:property name="right_bar_y" value="-0.117182" />
+  <xacro:property name="bar_small_triangle_base" value="0.186" />
 
-  <xacro:property name="back_bar_length" value="${base_height-0.2-back_bar_z}" />
+  <xacro:property name="back_bar_z" value="0.241" />
+  <xacro:property name="back_bar_x" value="-0.09" />
+
+  <!-- <xacro:property name="left_bar_x" value="0.080966" /> -->
+  <!-- <xacro:property name="left_bar_y" value="0.117182" /> -->
+  <!-- <xacro:property name="right_bar_x" value="0.080966" /> -->
+  <!-- <xacro:property name="right_bar_y" value="-0.117182" /> -->
+
+  <xacro:property name="left_bar_x" value="0.084" />
+  <xacro:property name="left_bar_y" value="0.066" />
+  <xacro:property name="right_bar_x" value="0.084" />
+  <xacro:property name="right_bar_y" value="-0.066" />
+  <xacro:property name="right_bar_anchor" value="0.03" />
+
+
+  <!-- <xacro:property name="back_bar_length" value="${base_height-0.2-back_bar_z}" /> -->
+  <xacro:property name="back_bar_length" value="0.485" />
 
   <xacro:property name="front_bar_length"
     value="${sqrt(back_bar_length*back_bar_length+bar_small_triangle_base*bar_small_triangle_base)}" />
 
 
-  <!-- <link name="world" /> -->
-  <!-- <joint name="world_joint" type="fixed"> -->
-  <!--   <origin xyz="0 0 1.0" rpy="0 0 0" /> -->
-  <!--   <parent link="world" /> -->
-  <!--   <child link="torso" /> -->
+  <!-- <link name="back_bar"> -->
+  <!--   <visual> -->
+  <!--     <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" /> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.04 0.04 ${back_bar_length}" /> -->
+  <!--     </geometry> -->
+  <!--     <xacro:reachy_grey /> -->
+  <!--   </visual> -->
+
+  <!--   <collision> -->
+  <!--     <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" /> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.04 0.04 ${back_bar_length}" /> -->
+  <!--     </geometry> -->
+  <!--   </collision> -->
+
+
+  <!-- </link> -->
+  <!-- <link name="left_bar"> -->
+  <!--   <visual> -->
+  <!--     <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" /> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.04 0.04 ${front_bar_length}" /> -->
+  <!--     </geometry> -->
+
+  <!--     <xacro:reachy_grey /> -->
+  <!--   </visual> -->
+  <!--   <collision> -->
+  <!--     <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" /> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.04 0.04 ${front_bar_length}" /> -->
+  <!--     </geometry> -->
+  <!--   </collision> -->
+
+  <!-- </link> -->
+
+  <!-- <link name="right_bar"> -->
+  <!--   <visual> -->
+  <!--     <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" /> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.04 0.04 ${front_bar_length}" /> -->
+  <!--     </geometry> -->
+  <!--     <xacro:reachy_grey /> -->
+  <!--   </visual> -->
+  <!--   <collision> -->
+  <!--     <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" /> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.04 0.04 ${front_bar_length}" /> -->
+  <!--     </geometry> -->
+  <!--   </collision> -->
+
+  <!-- </link> -->
+
+  <!-- <joint name="back_bar_joint" type="fixed"> -->
+  <!--   <!-\- <origin xyz="-0.122 0 0.057" rpy="0 0 0"/> -\-> -->
+  <!--   <origin xyz="${back_bar_x} 0 ${back_bar_z}" rpy="0 0 0" /> -->
+  <!--   <parent link="base_link" /> -->
+  <!--   <child link="back_bar" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="left_bar_joint" type="fixed"> -->
+
+  <!--   <!-\- <origin xyz="0.080966 0.11718 0.057" rpy="0 -->
+  <!--   ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/> -\-> -->
+  <!--   <origin xyz="${left_bar_x} ${left_bar_y} ${back_bar_z}" -->
+  <!--     rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}" /> -->
+  <!--   <parent link="base_link" /> -->
+  <!--   <child link="left_bar" /> -->
+  <!-- </joint> -->
+  <!-- <joint name="right_bar_joint" type="fixed"> -->
+
+  <!--   <!-\- <origin xyz="0.080966 -0.11718 0.057" rpy="0 -->
+  <!--   ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/> -\-> -->
+  <!--   <origin xyz="${right_bar_x} ${right_bar_y} ${back_bar_z}" -->
+  <!--     rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}" /> -->
+  <!--   <parent link="base_link" /> -->
+  <!--   <child link="right_bar" /> -->
   <!-- </joint> -->
 
-  <!-- <link name="world" />
-  <joint name="world_joint" type="fixed">
-    <origin xyz="0 0 0.0" rpy="0 0 0" />
-    <parent link="world" />
-    <child link="base_link" />
-  </joint> -->
 
-  <link name="back_bar">
-    <visual>
+  <link name="back_bar_base">
+   <visual>
       <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
       <geometry>
         <box size="0.04 0.04 ${back_bar_length}" />
@@ -127,67 +206,238 @@
       </geometry>
     </collision>
 
-
   </link>
-  <link name="left_bar">
-    <visual>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
 
+
+  <link name="back_bar_inner">
+   <visual>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
       <xacro:reachy_grey />
     </visual>
+
     <collision>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
       <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
+        <box size="0.03 0.03 ${back_bar_length}" />
       </geometry>
     </collision>
 
   </link>
 
-  <link name="right_bar">
-    <visual>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
-      <xacro:reachy_grey />
-    </visual>
-    <collision>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
-    </collision>
-
-  </link>
+  <joint name="back_bar_prism_joint" type="prismatic">
+    <origin xyz="0 0 0.035" rpy="0 0 0" />
+    <parent link="back_bar_base" />
+    <child link="back_bar_inner" />
+    <limit effort="1000.0" lower="0.0" upper="0.210" velocity="0.5"/>
+    <axis xyz="0 0 1"/>
+  </joint>
 
   <joint name="back_bar_joint" type="fixed">
-    <!-- <origin xyz="-0.122 0 0.057" rpy="0 0 0"/> -->
     <origin xyz="${back_bar_x} 0 ${back_bar_z}" rpy="0 0 0" />
     <parent link="base_link" />
-    <child link="back_bar" />
-  </joint>
-  <joint name="left_bar_joint" type="fixed">
+    <child link="back_bar_base" />
 
-    <!-- <origin xyz="0.080966 0.11718 0.057" rpy="0
-    ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/> -->
-    <origin xyz="${left_bar_x} ${left_bar_y} ${back_bar_z}"
-      rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}" />
-    <parent link="base_link" />
-    <child link="left_bar" />
   </joint>
-  <joint name="right_bar_joint" type="fixed">
 
-    <!-- <origin xyz="0.080966 -0.11718 0.057" rpy="0
-    ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/> -->
-    <origin xyz="${right_bar_x} ${right_bar_y} ${back_bar_z}"
-      rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}" />
+
+
+<link name="left_bar_base">
+   <visual>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.04 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.04 ${back_bar_length}" />
+      </geometry>
+    </collision>
+
+</link>
+
+<link name="left_bar_anchor">
+   <visual>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+    </collision>
+
+</link>
+
+<joint name="left_bar_anchor_to_base" type="fixed">
+    <origin xyz="${left_bar_x} ${left_bar_y} ${back_bar_z}" rpy="0 0 0" />
     <parent link="base_link" />
-    <child link="right_bar" />
+    <child link="left_bar_anchor" />
+</joint>
+
+
+<joint name="left_bar_anchor_to_bar" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="left_bar_anchor" />
+    <child link="left_bar_base" />
+</joint>
+
+
+  <joint name="left_bar_joint" type="revolute">
+    <origin xyz="0 0 ${right_bar_anchor}" rpy="0 0 ${bar_angle}" />
+    <parent link="left_bar_anchor" />
+    <child link="left_bar_base" />
+    <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="0.5"/>
+    <axis xyz="0 1 0"/>
+    <!-- fit of the arctan -->
+    <mimic joint="back_bar_prism_joint" multiplier="0.2864183599287582" offset="-0.1967146343049915" />
+
+    <!-- line from lowest to highest -->
+    <!-- <mimic joint="back_bar_prism_joint" multiplier="0.28998339732715084" offset="-0.2006528773198866" /> -->
+
   </joint>
+
+
+  <link name="left_bar_inner">
+   <visual>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="left_bar_prism_joint" type="prismatic">
+    <origin xyz="0 0 ${-back_bar_length}" rpy="0 0 0" />
+    <parent link="left_bar_base" />
+    <child link="left_bar_inner" />
+    <limit effort="1000.0" lower="0.0" upper="0.210" velocity="0.5"/>
+    <axis xyz="0 0 1"/>
+    <!-- fit of the hypothenus -->
+    <mimic joint="back_bar_prism_joint" multiplier="0.9861535348976198" offset="0.4814718126556904" />
+
+  </joint>
+
+
+
+
+<link name="right_bar_base">
+   <visual>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.04 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.04 ${back_bar_length}" />
+      </geometry>
+    </collision>
+
+</link>
+
+<link name="right_bar_anchor">
+   <visual>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${-bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${-bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+    </collision>
+
+</link>
+
+<joint name="right_bar_anchor_to_base" type="fixed">
+    <origin xyz="${right_bar_x} ${right_bar_y} ${back_bar_z}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="right_bar_anchor" />
+</joint>
+
+
+<joint name="right_bar_anchor_to_bar" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="right_bar_anchor" />
+    <child link="right_bar_base" />
+</joint>
+
+
+  <joint name="right_bar_joint" type="revolute">
+    <origin xyz="0 0 ${right_bar_anchor}" rpy="0 0 ${-bar_angle}" />
+    <parent link="right_bar_anchor" />
+    <child link="right_bar_base" />
+    <limit effort="1000.0" lower="-10.0" upper="10.0" velocity="0.5"/>
+    <axis xyz="0 1 0"/>
+    <!-- fit of the arctan -->
+    <mimic joint="back_bar_prism_joint" multiplier="0.2864183599287582" offset="-0.1967146343049915" />
+
+    <!-- line from lowest to highest -->
+    <!-- <mimic joint="back_bar_prism_joint" multiplier="0.28998339732715084" offset="-0.2006528773198866" /> -->
+
+  </joint>
+
+
+  <link name="right_bar_inner">
+   <visual>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+    </collision>
+  </link>
+
+
+  <joint name="right_bar_prism_joint" type="prismatic">
+    <origin xyz="0 0 ${-back_bar_length}" rpy="0 0 0" />
+    <parent link="right_bar_base" />
+    <child link="right_bar_inner" />
+    <limit effort="1000.0" lower="0.0" upper="0.210" velocity="0.5"/>
+    <axis xyz="0 0 1"/>
+    <mimic joint="back_bar_prism_joint" multiplier="0.9861535348976198" offset="0.4814718126556904" />
+
+  </joint>
+
+
+
+
+
 
 
   <!-- TORSO -->
@@ -227,8 +477,8 @@
   </link>
 
   <joint name="torso_base" type="fixed">
-    <origin xyz="0.0768 0 ${0.2+back_bar_length}" rpy="0 0 0" />
-    <parent link="back_bar" />
+    <origin xyz="0.08 0 ${0.235+back_bar_length-0.035}" rpy="0 0 0" />
+    <parent link="back_bar_inner" />
     <child link="torso" />
   </joint>
 
