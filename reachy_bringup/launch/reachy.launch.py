@@ -190,7 +190,7 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         exec_name="joint_state_broadcaster",
         name="joint_state_broadcaster",
-        namespace="toto",
+        # namespace="/",
         arguments=[
             *(
                 ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
@@ -269,6 +269,7 @@ def launch_setup(context, *args, **kwargs):
         ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_mode_controller", f"not {gazebo_py}"],
+        ["tripod_forward_position_controller", f"not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -438,7 +439,10 @@ def launch_setup(context, *args, **kwargs):
 
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
-        launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
+        launch_arguments={
+            "robot_config": f"{reachy_config.model}",
+            # "robot_model": {BETA if reachy_config.beta else DVT},
+        }.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 

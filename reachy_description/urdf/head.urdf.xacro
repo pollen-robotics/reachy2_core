@@ -14,7 +14,7 @@
   <!-- <xacro:property name="neck_offset_x" value="-0.0465"/> -->
   <xacro:property name="neck_offset_x" value="0.0"/>
   <xacro:property name="neck_offset_y" value="0"/>
-  <xacro:property name="neck_offset_z" value="0.125"/>
+  <xacro:property name="neck_offset_z" value="0.115"/>
   <xacro:property name="neck_offset_pitch" value="${radians(10)}"/> <!-- 10 degrees -->
   <xacro:property name="neck_offset_yaw" value="0.0"/>
 
@@ -66,7 +66,7 @@
         <geometry>
 
           <mesh filename="file://$(find reachy_description)/meshes/head_visual.dae"/>
-
+          <!-- <mesh filename="file://$(find reachy_description)/meshes/head_visual_high.dae"/> -->
         </geometry>
 
       </visual>
@@ -126,7 +126,7 @@
 
     <joint name="head_tip_fixed" type="fixed">
       <!-- between the cameras -->
-      <origin xyz="0.057 0.0 0.056" rpy="0 0.0 0"/>
+      <origin xyz="0.05643 0.0 0.062" rpy="0 0.0 0"/>
 
       <!-- Rotation center -->
       <!-- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -->
@@ -148,7 +148,8 @@
       <visual>
 	<origin xyz="0 0 0" rpy="0 0 0"/>
 	<geometry>
-	  <cylinder length="0.1" radius="0.005"/>
+	  <!-- <cylinder length="0.1" radius="0.005"/> -->
+        <mesh filename="file://$(find reachy_description)/meshes/head_antenna_visual.dae" />
 	</geometry>
 	<material name="neckwhite"/>
       </visual>
@@ -157,11 +158,16 @@
 
     <!-- revolute joint -->
     <joint name="antenna_left" type="revolute">
-      <origin xyz="0.0 0.1 0.1" rpy="0 0.0 0"/>
+      <!-- <origin xyz="-0.023 0.055 0.091" rpy="${radians(145-90)} 0.0 ${radians(32)}"/> -->
+      <!-- <origin xyz="-0.023 0.055 0.091" rpy="${radians(32)} ${radians(-55)} ${radians(-90)}"/> -->
+      <!-- Horrible... -->
+      <origin xyz="-0.023 0.055 0.091" rpy="${radians(4.225)} ${radians(-60.807)} ${radians(-57.500)}"/>
+
+
       <parent link="head" />
       <child link="antenna_left_link" />
-      <axis xyz="0 1 0"/>
-      <limit effort="0.0" velocity="0.0" lower="-0.5" upper="0.5"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="0.0" velocity="0.0" lower="${-pi/2}" upper="${pi/2}"/>
     </joint>
 
 
@@ -175,7 +181,8 @@
       <visual>
 	<origin xyz="0 0 0" rpy="0 0 0"/>
 	<geometry>
-	  <cylinder length="0.1" radius="0.005"/>
+	  <!-- <cylinder length="0.1" radius="0.005"/> -->
+          <mesh filename="file://$(find reachy_description)/meshes/head_antenna_visual.dae" />
 	</geometry>
 	<material name="neckwhite"/>
       </visual>
@@ -184,11 +191,15 @@
 
     <!-- revolute joint -->
     <joint name="antenna_right" type="revolute">
-      <origin xyz="0.0 -0.1 0.1" rpy="0 0.0 0"/>
+      <!-- <origin xyz="0.0 -0.1 0.1" rpy="0 0.0 0"/> -->
+
+      <origin xyz="-0.023 -0.055 0.091" rpy="${radians(-4.225)} ${radians(-60.807)} ${radians(57.500)}"/>
+
       <parent link="head" />
       <child link="antenna_right_link" />
-      <axis xyz="0 1 0"/>
-      <limit effort="0.0" velocity="0.0" lower="-0.5" upper="0.5"/>
+      <axis xyz="0 0 1"/>
+
+      <limit effort="0.0" velocity="0.0" lower="${-pi/2}" upper="${pi/2}"/>
     </joint>
 
   <xacro:dynamixel_control
@@ -202,7 +213,7 @@
 
 
       <joint name="left_cam_fixed" type="fixed">
-	<origin xyz="0.03531 0.0325 0.056" rpy="0.0 0.0  ${-camera_convergence/2.0}"/>
+	<origin xyz="0.03531 0.0325 0.062" rpy="0.0 0.0  ${-camera_convergence/2.0}"/>
 	<parent link="head" />
 	<child link="left_camera" />
       </joint>
@@ -240,7 +251,7 @@
 
 
       <joint name="right_cam_fixed" type="fixed">
-	<origin xyz="0.03531 -0.0325 0.056" rpy="0.0 0.0 ${camera_convergence/2.0}"/>
+	<origin xyz="0.03531 -0.0325 0.062" rpy="0.0 0.0 ${camera_convergence/2.0}"/>
 	<parent link="head" />
 	<child link="right_camera" />
       </joint>
@@ -270,6 +281,44 @@
 	<parent link="right_camera"/>
 	<child link="right_camera_optical"/>
       </joint>
+
+
+
+
+      <joint name="tof_cam_fixed" type="fixed">
+	<origin xyz="0.05643 0 0.061954" rpy="0.0 0.0 0"/>
+	<parent link="head" />
+	<child link="tof_camera" />
+      </joint>
+
+
+
+      <link name="tof_camera" >
+
+	<inertial>
+	  <mass value="1e-5" />
+	  <origin xyz="0 0 0" rpy="0 0 0"/>
+	  <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+	</inertial>
+      </link>
+
+
+      <link name="tof_camera_optical">
+      </link>
+
+
+      <joint name="tof_camera_optical_joint" type="fixed">
+	<!-- these values have to be these values otherwise the gazebo camera
+             image won't be aligned properly with the frame it is supposedly
+             originating from -->
+	<origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}"/>
+	<!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
+	<parent link="tof_camera"/>
+	<child link="tof_camera_optical"/>
+      </joint>
+
+
+
 
     <xacro:if value="$(arg use_gazebo)">
       <gazebo reference="left_camera">

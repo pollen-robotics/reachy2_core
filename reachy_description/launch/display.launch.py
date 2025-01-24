@@ -34,6 +34,8 @@ def generate_launch_description():
             "use_fake_hardware:=true",
             " ",
             "robot_model:=dvt",
+            " ",
+            "robot_config:=full_kit",
             "",
         ]
     )
