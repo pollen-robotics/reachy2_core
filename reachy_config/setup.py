@@ -20,8 +20,10 @@ setup(
     extras_require={
         "doc": ["sphinx"],
     },
-    entry_points={
-        "console_scripts": [],
+    entry_points={  # setup entrypoint config cheker to launch reachy_config.py
+        "console_scripts": [
+            "reachy_config = reachy_config.reachy_config:config_check",
+        ],
     },
     maintainer="Pollen Robotics",
     maintainer_email="contact@pollen-robotics.com",

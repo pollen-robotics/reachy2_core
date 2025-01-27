@@ -1,0 +1,97 @@
+generation: 2
+model: full_kit
+serial_number: reachy2-pvt-default
+ethercat: true
+reachy:
+  l_arm:
+    shoulder:
+      name: l_shoulder
+      actuator: orbita2d
+      axis1: pitch
+      axis2: roll
+    elbow:
+      name: l_elbow
+      actuator: orbita2d
+      axis1: yaw
+      axis2: pitch
+    wrist:
+      name: l_wrist
+      actuator: orbita3d
+      axis1: roll
+      axis2: pitch
+      axis3: yaw
+  l_hand:
+    two_fingers_gripper:
+      name: l_hand
+      actuator: dynamixel
+  r_arm:
+    shoulder:
+      name: r_shoulder
+      actuator: orbita2d
+      axis1: pitch
+      axis2: roll
+    elbow:
+      name: r_elbow
+      actuator: orbita2d
+      axis1: yaw
+      axis2: pitch
+    wrist:
+      name: r_wrist
+      actuator: orbita3d
+      axis1: roll
+      axis2: pitch
+      axis3: yaw
+  r_hand:
+    two_fingers_gripper:
+      name: r_hand
+      actuator: dynamixel
+  head:
+    neck:
+      name: neck
+      actuator: orbita3d
+      axis1: roll
+      axis2: pitch
+      axis3: yaw
+mobile_base:
+  enable: true
+  version_hard: 1.2
+  serial_number: MB-001
+  version_soft: 1.1
+
+reachy2_configuration:
+  neck_config:
+    mode: default
+    default: neck.yaml
+    fake: fake_neck.yaml
+  right_shoulder_config: #/home/reachy/.reachy_config/right_shoulder_poulpe2d.yaml
+    mode: default
+    default: right_shoulder_poulpe2d.yaml
+    fake: fake_r_shoulder.yaml
+  right_elbow_config: #/home/reachy/.reachy_config/right_elbow_poulpe2d.yaml
+    mode: default
+    default: right_elbow_poulpe2d.yaml
+    fake: fake_r_elbow.yaml
+  right_wrist_config: #/home/reachy/.reachy_config/right_wrist_poulpe3d.yaml
+    mode: default
+    default: right_wrist_poulpe3d.yaml
+    fake: fake.yaml
+  left_shoulder_config: #/home/reachy/.reachy_config/left_shoulder_poulpe2d.yaml
+    mode: default
+    default: left_shoulder_poulpe2d.yaml
+    fake: fake_l_shoulder.yaml
+  left_elbow_config: #/home/reachy/.reachy_config/left_elbow_poulpe2d.yaml
+    mode: default
+    default: left_elbow_poulpe2d.yaml
+    fake: fake_l_elbow.yaml
+  left_wrist_config: #/home/reachy/.reachy_config/left_wrist_poulpe3d.yaml
+    mode: default
+    default: left_wrist_poulpe3d.yaml
+    fake: fake.yaml
+  antenna_config: #/home/reachy/.reachy_config/antennas.yaml
+    mode: default
+    default: antennas.yaml
+    fake: two_fake.yaml
+  grippers_config: #/home/reachy/.reachy_config/grippers.yaml
+    mode: default
+    default: grippers.yaml
+    fake: two_fake.yaml

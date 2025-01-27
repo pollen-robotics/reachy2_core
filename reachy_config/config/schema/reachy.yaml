@@ -1,0 +1,314 @@
+generation:
+  type: integer
+  required: true
+model:
+  type: string
+  required: true
+  allowed:
+    - "full_kit"
+    - "starter_kit_right"
+    - "starter_kit_left"
+    - "headless"
+    - "mini"
+    - "starter_kit_right_no_head"
+serial_number:
+  type: string
+  required: true
+ethercat:
+  type: boolean
+  required: true
+reachy:
+  type: dict
+  required: true
+  schema:
+    l_arm:
+      type: dict
+      schema:
+        shoulder:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita2d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+        elbow:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita2d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+        wrist:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita3d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis3:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+    l_hand:
+      type: dict
+      schema:
+        two_fingers_gripper:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["dynamixel"] }
+    r_arm:
+      type: dict
+      schema:
+        shoulder:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita2d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+        elbow:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita2d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+        wrist:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita3d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis3:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+    r_hand:
+      type: dict
+      schema:
+        two_fingers_gripper:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["dynamixel"] }
+    head:
+      type: dict
+      schema:
+        neck:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["orbita3d"] }
+            axis1:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis2:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+            axis3:
+              {
+                type: string,
+                required: true,
+                allowed: ["roll", "pitch", "yaw"],
+              }
+mobile_base:
+  type: dict
+  required: true
+  schema:
+    enable:
+      type: boolean
+      required: true
+    version_hard:
+      type: float
+      required: true
+    serial_number:
+      type: string
+      required: true
+    version_soft:
+      type: float
+      required: true
+
+reachy2_configuration:
+  type: dict
+  required: true
+  schema:
+    antenna_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    grippers_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    left_elbow_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    left_shoulder_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    left_wrist_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    neck_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    right_elbow_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    right_shoulder_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }
+    right_wrist_config:
+      type: dict
+      required: true
+      schema:
+        default: { type: "string", required: true }
+        fake: { type: "string", required: true }
+        mode:
+          {
+            type: "string",
+            required: true,
+            allowed: ["fake", "default", "override"],
+          }

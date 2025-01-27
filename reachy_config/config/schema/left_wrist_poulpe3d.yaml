@@ -1,0 +1,50 @@
+io:
+  type: dict
+  required: true
+  schema:
+    url:
+      type: string
+      required: true
+    id:
+      type: integer
+      required: true
+
+disks:
+  type: dict
+  required: true
+  schema:
+    zeros:
+      type: firmwarezero
+      required: true
+    reduction:
+      type: float
+      required: true
+
+kinematics_model:
+  type: dict
+  required: true
+  schema:
+    alpha:
+      type: float
+      required: true
+    gamma_min:
+      type: float
+      required: true
+    offset:
+      type: float
+      required: true
+    beta:
+      type: float
+      required: true
+    gamma_max:
+      type: float
+      required: true
+    passiv_arms_direct:
+      type: boolean
+      required: true
+
+inverted_axes:
+  type: list
+  required: true
+  schema:
+    type: boolean

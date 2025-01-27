@@ -1,0 +1,20 @@
+!PoulpeEthercat
+url: http://127.0.0.1:50098
+id: 4
+firmware_zero: true
+motors_offset:
+  - 0.0
+  - -1.5707963267948966 # -90°
+motors_ratio:
+  - 1.9
+  - 1.9
+inverted_axes:
+  - true
+  - false
+orientation_limits:
+  - !AngleLimits:
+    min: -10000.0 # todo make better limts
+    max: 10000.0 # todo make better limts
+  - !AngleLimits:
+    min: -3.14 # touching at -3.20 withtout the plastic shells
+    max: 0.52 # touching at 0.53
