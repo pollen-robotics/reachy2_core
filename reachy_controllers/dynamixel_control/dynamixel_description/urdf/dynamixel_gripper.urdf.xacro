@@ -3,6 +3,7 @@
 <xacro:macro name="dynamixel_gripper" params="prefix parent side damping friction ">
 
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro"/>
+  <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro"/>
 
   <xacro:property name="gripper_length" value="0.12"/>
   <xacro:property name="gripper_radius" value="0.03"/>
@@ -108,6 +109,7 @@
 
   </link>
 
+
   <joint name="${p}_palm" type="fixed">
     <origin xyz="0 0 0" rpy="0.0 0 0"/>
     <parent link="${parent}"/>
@@ -117,11 +119,15 @@
 
 
   <link name="${p}_virtual_gripper_link">
-      <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.01"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
-      </inertial>
+      <!-- <inertial> -->
+      <!--   <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/> -->
+      <!--   <mass value="0.01"/> -->
+      <!--   <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/> -->
+      <!-- </inertial> -->
+
+      <xacro:inertial_cuboid mass="${0.01}" xyz="0 0 0"  rpy="0 0 0" x_length="0.01" y_length="0.01" z_length="0.01">
+      </xacro:inertial_cuboid>
+
   </link>
 
   <joint name="${p}_finger" type="revolute">
@@ -200,7 +206,6 @@
 
   </link>
 
-
   <joint name="${p}_finger_proximal" type="revolute">
     <origin xyz="-0.010196 0.03792 0.070028" rpy="0 0 0"/>
     <parent link="${p}_palm_link"/>
@@ -255,6 +260,7 @@
   </link>
 
 
+
   <joint name="${p}_finger_distal" type="revolute">
     <origin xyz="0 0 0.049997" rpy="0 0 0"/>
     <parent link="${p}_proximal_link"/>
@@ -302,7 +308,6 @@
 
   </link>
 
-
   <joint name="${p}_finger_distal_mimic" type="revolute">
     <origin xyz="0 0 0.049997" rpy="0 0 0"/>
     <parent link="${p}_proximal_mimic_link"/>
@@ -324,6 +329,46 @@
   <!-- <gazebo reference="${p}_finger_distal_link_mimic"> -->
   <!--   <selfCollide>false</selfCollide> -->
   <!-- </gazebo> -->
+
+
+  <xacro:if value="$(arg use_gazebo)">
+    <gazebo reference="${p}_palm_link">
+      <selfCollide>false</selfCollide>
+      <implicitSpringDamper>True</implicitSpringDamper>
+    </gazebo>
+  </xacro:if>
+
+
+  <xacro:if value="$(arg use_gazebo)">
+    <gazebo reference="${p}_proximal_link">
+      <selfCollide>false</selfCollide>
+      <implicitSpringDamper>True</implicitSpringDamper>
+    </gazebo>
+  </xacro:if>
+
+
+  <xacro:if value="$(arg use_gazebo)">
+    <gazebo reference="${p}_proximal_mimic_link">
+      <selfCollide>false</selfCollide>
+      <implicitSpringDamper>True</implicitSpringDamper>
+    </gazebo>
+  </xacro:if>
+
+
+  <xacro:if value="$(arg use_gazebo)">
+    <gazebo reference="${p}_distal_link">
+      <selfCollide>false</selfCollide>
+      <implicitSpringDamper>True</implicitSpringDamper>
+    </gazebo>
+  </xacro:if>
+
+
+  <xacro:if value="$(arg use_gazebo)">
+    <gazebo reference="${p}_distal_mimic_link">
+      <selfCollide>false</selfCollide>
+      <implicitSpringDamper>True</implicitSpringDamper>
+    </gazebo>
+  </xacro:if>
 
 
 </xacro:macro>

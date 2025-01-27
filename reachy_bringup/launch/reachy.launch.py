@@ -214,6 +214,10 @@ def launch_setup(context, *args, **kwargs):
             "antenna_forward_position_controller",
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
+        [
+            "tripod_forward_position_controller",
+            f"'{reachy_config.model}' != '{MINI}'",
+        ],
         # [
         #     "r_shoulder_forward_position_controller",
         #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
@@ -269,7 +273,7 @@ def launch_setup(context, *args, **kwargs):
         ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_mode_controller", f"not {gazebo_py}"],
-        ["tripod_forward_position_controller", f"not {gazebo_py}"],
+        # ["tripod_forward_position_controller", f"not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -487,7 +491,7 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    start_control_after_ehtercat = TimerAction(
+    start_control_after_ethercat = TimerAction(
         period=3.0 if not gazebo_py else 0.5,
         actions=[
             control_node if not gazebo_py else gazebo_node,
@@ -533,7 +537,7 @@ def launch_setup(context, *args, **kwargs):
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
-        start_control_after_ehtercat,
+        start_control_after_ethercat,
         start_everything_after_control,
         # speedlimit_set_announce,
         # speedlimit_set,

@@ -56,7 +56,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     return LaunchDescription(
         [
-            DeclareLaunchArgument("robot_name", default_value="reachy", description="Set robot name."),
+            DeclareLaunchArgument("robot_name", default_value="reachy2", description="Set robot name."),
             DeclareLaunchArgument("robot_config", default_value="full_kit", description="Robot configuration."),
             OpaqueFunction(function=launch_setup),
         ]

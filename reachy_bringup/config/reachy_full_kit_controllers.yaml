@@ -74,7 +74,7 @@ joint_state_broadcaster:
 tripod_forward_position_controller:
   ros__parameters:
     joints:
-      - back_bar_prism_joint
+      - tripod_joint
     interface_name: position
     use_sim_time: false
 

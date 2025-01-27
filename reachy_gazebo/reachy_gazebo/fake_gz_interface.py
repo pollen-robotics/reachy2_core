@@ -80,6 +80,10 @@ DUMMY_SPECIAL_INTERFACES = {
         "l_wrist_raw_motor_3": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "l_hand": ["torque", "errors"],
         "l_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_left": ["torque", "errors"],
+        "antenna_left_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_right": ["torque", "errors"],
+        "antenna_right_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
     },
     # "full_kit": {
     #     "neck":"state",
