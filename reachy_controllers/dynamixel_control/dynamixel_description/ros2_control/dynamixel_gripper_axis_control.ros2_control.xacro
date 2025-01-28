@@ -95,7 +95,7 @@
 
         </joint>
 
-        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_proximal_mimic" following_joint="${name}_proximal_mimic" mimic_joint="${name}_finger_proximal" multiplier="1" offset="0.0"/> -->
+
 
         <joint name="${name}_proximal_mimic" >
           <command_interface name="position"/>
@@ -106,7 +106,7 @@
         </joint>
 
 
-        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_distal" following_joint="${name}_distal" mimic_joint="${name}_finger" multiplier="0.4689" offset="0.0"/> -->
+
 
         <joint name="${name}_distal" >
 
@@ -116,7 +116,7 @@
           <state_interface name="effort"/>
         </joint>
 
-        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_distal_mimic" following_joint="${name}_distal" mimic_joint="${name}_finger" multiplier="0.4689" offset="0.0"/> -->
+
 
         <joint name="${name}_distal_mimic">
 

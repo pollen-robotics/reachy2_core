@@ -75,6 +75,7 @@ tripod_forward_position_controller:
   ros__parameters:
     joints:
       - tripod_joint
+      # - left_bar_joint_mimic
     interface_name: position
     use_sim_time: false
 

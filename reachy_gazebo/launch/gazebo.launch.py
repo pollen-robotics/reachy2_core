@@ -20,7 +20,11 @@ def launch_setup(context, *args, **kwargs):
                 ]
             )
         ),
-        launch_arguments={"verbose": "true"}.items(),
+        launch_arguments={
+            "verbose": "false",
+            "pause": "false",
+            "world": [FindPackageShare("reachy_gazebo"), "/worlds/empty.world"],
+        }.items(),
     )
 
     # Note: Environment variable GAZEBO_MODEL_PATH is extended as in

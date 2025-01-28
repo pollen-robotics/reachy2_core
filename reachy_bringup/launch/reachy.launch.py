@@ -357,7 +357,7 @@ def launch_setup(context, *args, **kwargs):
 
     ### SDK ###
     sdk_server_node = TimerAction(
-        period=2.0,
+        period=3.0,
         actions=[
             Node(
                 package="reachy_sdk_server",

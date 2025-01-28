@@ -81,9 +81,10 @@ DUMMY_SPECIAL_INTERFACES = {
         "l_hand": ["torque", "errors"],
         "l_hand_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "antenna_left": ["torque", "errors"],
-        "antenna_left_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_left_raw_motor": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
         "antenna_right": ["torque", "errors"],
-        "antenna_right_raw_motor_1": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        "antenna_right_raw_motor": ["speed_limit", "torque_limit", "p_gain", "i_gain", "d_gain"],
+        # "tripod_joint": ["torque", "errors"],
     },
     # "full_kit": {
     #     "neck":"state",
@@ -204,6 +205,8 @@ class FakeGzInterface(Node):
         dummy_joint_interface_present = False
 
         for j, interface in zip(msg.joint_names, msg.interface_values):
+            # if "antenna" in j:
+            #     continue
             joints.append(j)
             interfaces = {}
             if any(i in interface.interface_names for i in DUMMY_JOINT_INTERFACE_NAMES):
@@ -217,8 +220,11 @@ class FakeGzInterface(Node):
 
         fake = DynamicJointState()
         should_publish = False
+        testjoints = [
+            jj for jj in joints if "antenna" not in jj
+        ]  # FIXME we ignore antennas here because antenna_left and antenna_right appear in both the "normal" and "special" interfaces
         if not any(
-            i in joints for i in list(DUMMY_SPECIAL_INTERFACES[self.robot_config].keys())
+            i in testjoints for i in list(DUMMY_SPECIAL_INTERFACES[self.robot_config].keys())
         ):  # there is none of the special interface
             # add dummy special interfaces
 
@@ -265,7 +271,7 @@ class FakeGzInterface(Node):
 
         if should_publish:
             fake.header.stamp = self.get_clock().now().to_msg()
-            # print(f'DEBUG FAKE: {fake}\n')
+
             self.dyn_publisher.publish(fake)
 
 
