@@ -183,7 +183,7 @@ def launch_setup(context, *args, **kwargs):
     # start ethercat server
     ethercat_master_server = ExecuteProcess(
         name="ethercat_master_server",
-        cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
+        cmd=["/bin/bash", "-c", f'$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh {reachy_config.config["robot_ethercat_config"]["path"]}'],
         output="both",
         emulate_tty=True,
         condition=IfCondition(PythonExpression(f"not {fake_py}")),

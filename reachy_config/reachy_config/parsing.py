@@ -206,7 +206,60 @@ yaml.SafeDumper.add_representer(XL330, xl330_representer)
 yaml.SafeDumper.add_representer(XM, xm_representer)
 
 
-# Example classes for custom tags
+
+
+
+# Poulpe
+class Poulpe:
+    def __init__(self, id, orbita_type, name):
+        self.id = id
+        self.orbita_type = orbita_type
+        self.name = name
+
+        self.validate()
+
+    def __repr__(self):
+        return f"Poulpe(id={self.id}, orbita_type={self.orbita_type}, name={self.name})"
+
+    def __eq__(self, other):
+        return (
+            self.id == other.id
+            and self.orbita_type == other.orbita_type
+            and self.name == other.name
+        )
+
+    @staticmethod
+    def constructor(loader, node):
+        value = loader.construct_mapping(node, deep=True)
+        return Poulpe(
+            id=value["id"],
+            orbita_type=value["orbita_type"],
+            name=value["name"],
+        )
+
+    @staticmethod
+    def representer(dumper, data):
+        return dumper.represent_mapping(
+            "!Poulpe",
+            {
+                "id": data.id,
+                "orbita_type": data.orbita_type,
+                "name": data.name,
+            },
+        )
+
+    def validate(self):
+        if not isinstance(self.id, int) or self.id < 0:
+            perror(f"Poulpe : Invalid id: {self.id}")
+        if not isinstance(self.orbita_type, int) or self.orbita_type < 0:
+            perror(f"Poulpe : Invalid orbita_type: {self.orbita_type}")
+        if not isinstance(self.name, str) or not self.name.strip():
+            perror(f"Poulpe : Invalid name: {self.name}")
+
+
+# Register Poulpe with YAML
+yaml.SafeLoader.add_constructor("!Poulpe", Poulpe.constructor)
+yaml.SafeDumper.add_representer(Poulpe, Poulpe.representer)
 
 
 def load_yaml(file_path):

@@ -99,7 +99,7 @@ class ReachyConfig:
         # Process config customisation
         for custom_config_file in os.listdir(self.custom_config_dir):
 
-            if "~" in custom_config_file:
+            if "~" in custom_config_file or not ".yaml" in custom_config_file:
                 continue
             # print("parsing custom config: ", custom_config_file)
             custom_config_file_path = os.path.join(self.custom_config_dir, custom_config_file)
@@ -254,13 +254,13 @@ class ReachyConfig:
         def build_part_conf_path(part, mode):
             # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
             part_config_key = self.config["reachy"]["config"]["reachy2_configuration"][part]["default"].replace(".yaml", "")
-            print("part_config_key: ", part_config_key)
-            print("part: ", self.config[f"{part_config_key}"]["path"])
+            # print("part_config_key: ", part_config_key)
+            # print("part: ", self.config[f"{part_config_key}"]["path"])
             if mode != "fake":
                 return self.config[part_config_key]["path"]
             else:
                 return f'{self.config[part_config_key]["package_path"]}/fake/{self.config["reachy"]["config"]["reachy2_configuration"][part]["fake"]}'
-            return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
+            # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
 
         # force fake mode
         if fake:

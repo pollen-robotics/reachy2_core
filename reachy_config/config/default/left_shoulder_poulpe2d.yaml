@@ -1,13 +1,12 @@
 !PoulpeEthercat
 url: http://127.0.0.1:50098
-id: 1
+id: 4
 firmware_zero: true
+name: "LeftShoulderOrbita2d"
+
 motors_offset:
   - 0.0
-  # - 0.1348067879676819 real zero
-  #- 5.02172869355 # zero  180° + 90° +10°
-  #- 4.847195768352371 # zero + 180° + 90°
-  - 4.71238898038469 # 180° + 90°
+  - 4.7123889804 # 180° + 90°
 motors_ratio:
   - 1.9
   - 1.9
@@ -19,5 +18,5 @@ orientation_limits:
       min: -10000.0 # todo make better limts 
       max: 10000.0 # todo make better limts  
   - !AngleLimits:
-      min: -0.52 # touching at -0.53
-      max: 3.14 # touching at 3.20 withtout the plastic shells
+      min: -0.55 # touching at -0.61
+      max: 2.9 # touching at 2.94
