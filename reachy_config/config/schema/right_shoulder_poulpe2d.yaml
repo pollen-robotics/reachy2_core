@@ -1,0 +1,43 @@
+!PoulpeEthercat
+url:
+  type: string
+  regex: "^(http|https)://[a-zA-Z0-9.-]+(:[0-9]+)?(/.*)?$"
+  required: true
+id:
+  type: integer
+  min: 1
+  required: true
+firmware_zero:
+  type: boolean
+  required: true
+motors_offset:
+  type: list
+  required: true
+  minlength: 2
+  maxlength: 2
+  schema:
+    type: float
+    required: true
+motors_ratio:
+  type: list
+  required: true
+  minlength: 2
+  maxlength: 2
+  schema:
+    type: float
+
+inverted_axes:
+  type: list
+  required: true
+  minlength: 2
+  maxlength: 2
+  schema:
+    type: boolean
+orientation_limits:
+  type: list
+  required: true
+  minlength: 2
+  maxlength: 2
+  schema:
+    type: anglelimits
+    required: true

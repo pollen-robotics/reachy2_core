@@ -1,6 +1,6 @@
 generation: 2
 model: full_kit
-serial_number: reachy2-pvt01
+serial_number: dvt
 ethercat: true
 neck_orbita_zero:
   top: 1.7270766198635101
@@ -29,7 +29,7 @@ reachy:
       axis2: pitch
       axis3: yaw
   l_hand:
-    two_fingers_gripper:
+    two_fingers_gripper:  
       name: l_hand
       actuator: dynamixel
   r_arm:
@@ -61,12 +61,15 @@ reachy:
       axis2: pitch
       axis3: yaw
 mobile_base: # put some field to null to disable it
-  #serial_number: null
+  serial_number: null
   version_hard: 1.2
-  serial_number: MB-001
+  #serial_number: MB-001
   version_soft: 1.1
 
 neck_config: /home/reachy/.reachy_config/neck_beta.yaml
+#right_arm_config: /home/reachy/.reachy_config/right_arm.yaml
+#left_arm_config: /home/reachy/.reachy_config/left_arm.yaml
+
 right_shoulder_config: /home/reachy/.reachy_config/right_shoulder_poulpe2d.yaml
 right_elbow_config: /home/reachy/.reachy_config/right_elbow_poulpe2d.yaml
 right_wrist_config: /home/reachy/.reachy_config/right_wrist_poulpe3d.yaml

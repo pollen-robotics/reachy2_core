@@ -1,0 +1,19 @@
+left_config:
+  type: dict
+  required: true
+  schema:
+    io:
+      type: dynamixelserialio
+      required: true
+
+right_config:
+  type: dict
+  required: true
+  schema:
+    io:
+      type: dynamixelserialio
+      required: true
+
+background:
+  type: boolean
+  required: true

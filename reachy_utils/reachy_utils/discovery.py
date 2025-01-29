@@ -4,9 +4,8 @@ from typing import Dict
 
 import yaml
 from pypot.dynamixel import Dxl320IO, DxlIO
+from reachy_config import get_reachy_model
 from serial import SerialException
-
-from reachy_utils.config import get_reachy_model
 
 _latest_discovery_file = os.path.expanduser("~/.reachy-latest-discovery.yaml")
 
