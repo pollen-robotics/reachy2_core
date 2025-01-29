@@ -26,9 +26,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
-
-from reachy_config import ReachyConfig
-from reachy_utils.config import (  # ReachyConfig,
+from reachy_config import (
     BETA,
     DVT,
     FULL_KIT,
@@ -37,6 +35,7 @@ from reachy_utils.config import (  # ReachyConfig,
     STARTER_KIT_LEFT,
     STARTER_KIT_RIGHT,
     STARTER_KIT_RIGHT_NO_HEAD,
+    ReachyConfig,
     log_config,
 )
 from reachy_utils.launch import (

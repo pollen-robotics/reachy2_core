@@ -49,7 +49,7 @@ REACHY_CONFIG_PATH = os.path.expanduser("~/.reachy_config")
 
 
 class ReachyConfig:
-    def __init__(self, custom_config_file_path="~/.reachy_config_override"):
+    def __init__(self, custom_config_file_path="~/.reachy_config_override", no_print=False):
         self.custom_config_dir = os.path.expanduser(custom_config_file_path)
         # in package/default
         self.default_config_dir = os.path.dirname(os.path.realpath(__file__)) + "/../config/default"
@@ -116,7 +116,8 @@ class ReachyConfig:
 
             # TODO in case custom override is an add, we should load it and link it without creating file
             if not custom_config_file_name in self.config:
-                print("\033[93m" + f"[{custom_config_file}] custom configuration added" + "\033[0m")
+                if not no_print:
+                    print("\033[93m" + f"[{custom_config_file}] custom configuration added" + "\033[0m")
                 self.config[custom_config_file_name] = {}
                 self.config[custom_config_file_name]["mode"] = "override"
                 self.config[custom_config_file_name]["config"] = custom_config
@@ -134,7 +135,8 @@ class ReachyConfig:
 
             # compare custom content with default one stored at same file adress -> self.config[custom_config_file_name]["config"]
             if custom_config != self.config[custom_config_file_name]["config"]:  # some overriding will be done
-                print("\033[93m" + f"[{custom_config_file}] configuration override" + "\033[0m")
+                if not no_print:
+                    print("\033[93m" + f"[{custom_config_file}] configuration override" + "\033[0m")
 
                 # override default_config in place
                 # merged_config_content = default_config  # for clarity as merge is done in place
@@ -230,8 +232,8 @@ class ReachyConfig:
         #     )
 
         # TODO Multiple config
-
-        print("Reachy config loaded successfully")
+        if not no_print:
+            print("Reachy config loaded successfully")
         # exit(1)
 
     def __str__(self):
