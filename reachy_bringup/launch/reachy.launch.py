@@ -388,7 +388,7 @@ def launch_setup(context, *args, **kwargs):
         output="both",
         condition=IfCondition(start_sdk_server_rl),
     )
-    
+
     sdk_server_audio_server = ExecuteProcess(
         name="reachy_sdk_audio_server",
         cmd=["/bin/bash", "-c", "reachy2_sdk_audio_server_rs"],
