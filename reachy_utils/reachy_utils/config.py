@@ -124,8 +124,7 @@ class ReachyConfig:
             #     self.left_arm_config = config[REACHY_CONFIG_LEFT_ARM]
             # except KeyError as e:
             #     raise KeyError("left_arm config key not found :: {}".format(e))
-            
-            
+
             try:
                 self.right_shoulder_config = config[REACHY_CONFIG_RIGHT_SHOULDER]
             except KeyError as e:
@@ -158,8 +157,6 @@ class ReachyConfig:
                 self.antenna_config = config[REACHY_CONFIG_ANTENNA]
             except KeyError as e:
                 raise KeyError("antenna_config key not found :: {}".format(e))
-            
-            
 
     def __str__(self):
         return (
