@@ -311,7 +311,9 @@ def config_check():
     rc = ReachyConfig()
     print(rc)
     # print(rc.config["reachy"])
-    dump_yaml(None, rc.config["reachy"]["config"]["reachy2_configuration"])
+    # dump_yaml(None, rc.config["reachy"]["config"]["reachy2_configuration"])
+    dump_yaml(None, rc.config)
+
     # print(rc.config["reachy"]["config"]["mobile_base"]["enable"])
     # print(get_reachy_generation())
     # print(get_reachy_model())
