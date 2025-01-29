@@ -1,11 +1,6 @@
 from cerberus import TypeDefinition, Validator
-from reachy_config.parsing import (
-    AngleLimits,
-    DynamixelSerialIO,
-    FirmwareZero,
-    dump_yaml,
-    load_yaml,
-)
+
+from reachy_config.parsing import AngleLimits, DynamixelSerialIO, FirmwareZero, dump_yaml, load_yaml
 
 
 def validate_schema(schema_path, config_dict, logger):

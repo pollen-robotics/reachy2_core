@@ -26,6 +26,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
+
 from reachy_config import ReachyConfig
 from reachy_utils.config import (  # ReachyConfig,
     BETA,
@@ -183,7 +184,11 @@ def launch_setup(context, *args, **kwargs):
     # start ethercat server
     ethercat_master_server = ExecuteProcess(
         name="ethercat_master_server",
-        cmd=["/bin/bash", "-c", f'$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh {reachy_config.config["robot_ethercat_config"]["path"]}'],
+        cmd=[
+            "/bin/bash",
+            "-c",
+            f'$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh {reachy_config.config["robot_ethercat_config"]["path"]}',
+        ],
         output="both",
         emulate_tty=True,
         condition=IfCondition(PythonExpression(f"not {fake_py}")),

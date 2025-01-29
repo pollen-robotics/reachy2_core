@@ -98,7 +98,6 @@ class ReachyConfig:
 
         # Process config customisation
         for custom_config_file in os.listdir(self.custom_config_dir):
-
             if "~" in custom_config_file or not ".yaml" in custom_config_file:
                 continue
             # print("parsing custom config: ", custom_config_file)
@@ -250,7 +249,6 @@ class ReachyConfig:
         )
 
     def part_conf(self, part, fake=False):
-
         def build_part_conf_path(part, mode):
             # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
             part_config_key = self.config["reachy"]["config"]["reachy2_configuration"][part]["default"].replace(".yaml", "")

@@ -206,9 +206,6 @@ yaml.SafeDumper.add_representer(XL330, xl330_representer)
 yaml.SafeDumper.add_representer(XM, xm_representer)
 
 
-
-
-
 # Poulpe
 class Poulpe:
     def __init__(self, id, orbita_type, name):
@@ -222,11 +219,7 @@ class Poulpe:
         return f"Poulpe(id={self.id}, orbita_type={self.orbita_type}, name={self.name})"
 
     def __eq__(self, other):
-        return (
-            self.id == other.id
-            and self.orbita_type == other.orbita_type
-            and self.name == other.name
-        )
+        return self.id == other.id and self.orbita_type == other.orbita_type and self.name == other.name
 
     @staticmethod
     def constructor(loader, node):
