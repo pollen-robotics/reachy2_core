@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- from mimic_joint_gazebo_tutorial by @mintar, refer: https://github.com/mintar/mimic_joint_gazebo_tutorial -->
+  <xacro:macro name="mimic_joint_plugin_gazebo" params="name_prefix following_joint mimic_joint has_pid:=false multiplier:=1.0 offset:=0.0 k2:=0.0 k3:=0.0 sensitiveness:=0.0 max_effort:=1.0 robot_namespace:=''">
+
+    <xacro:property name="filename" value="libgazebo_mimic_joint_plugin.so" />
+    <gazebo>
+      <plugin name="${name_prefix}_mimic_joint_plugin" filename="${filename}">
+        <joint>${following_joint}</joint>
+        <mimicJoint>${mimic_joint}</mimicJoint>
+        <xacro:if value="${has_pid}">                     <!-- if set to true, PID parameters from "/gazebo_ros_control/pid_gains/${mimic_joint}" are loaded -->
+          <hasPID />
+        </xacro:if>
+        <multiplier>${multiplier}</multiplier>
+        <offset>${offset}</offset>
+        <k2>${k2}</k2>
+        <k3>${k3}</k3>
+
+        <sensitiveness>${sensitiveness}</sensitiveness>   <!-- if absolute difference between setpoint and process value is below this threshold, do nothing; 0.0 = disable [rad] -->
+        <maxEffort>${max_effort}</maxEffort>              <!-- only taken into account if has_pid:=true [Nm] -->
+        <xacro:if value="${robot_namespace != ''}">
+          <robotNamespace>($robot_namespace)</robotNamespace>
+        </xacro:if>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>
