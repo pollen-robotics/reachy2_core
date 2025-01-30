@@ -26,6 +26,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
+
 from reachy_config import (
     BETA,
     DVT,
@@ -397,19 +398,16 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
-    # sdk_server_audio_node = Node(
-    #     package="reachy_sdk_server",
-    #     executable="reachy_grpc_audio_sdk_server",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
-
-    # audio_node = Node(
-    #     package="sound_play",
-    #     executable="soundplay_node.py",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
+    sdk_server_audio_server = ExecuteProcess(
+        name="reachy_sdk_audio_server",
+        cmd=["/bin/bash", "-c", "reachy2_sdk_audio_server_rs"],
+        output="both",
+        emulate_tty=True,
+        condition=IfCondition(PythonExpression(f"{start_sdk_server_py}")),
+        # Ensure the process is killed when the launch file is stopped
+        sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
+    )
 
     ####################
     ### Tools et al. ###
@@ -477,8 +475,7 @@ def launch_setup(context, *args, **kwargs):
             delay_rviz_after_joint_state_broadcaster_spawner,
             delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
             sdk_server_node,
-            # sdk_server_audio_node,
-            # audio_node,
+            sdk_server_audio_server,
             sdk_server_video_node,
             orbbec_node,
             goto_server_node,
