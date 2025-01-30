@@ -268,6 +268,14 @@ class ReachyConfig:
         else:  # can be fake, override or default,
             return build_part_conf_path(part, self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"])
 
+    @property
+    def mobile_base(self):
+        return self.config["reachy"]["config"]["mobile_base"]
+
+    @property
+    def parts(self):
+        return self.config["reachy"]["config"]["reachy"]
+
 
 # def get_reachy_config():
 #     with open(config_file) as f:

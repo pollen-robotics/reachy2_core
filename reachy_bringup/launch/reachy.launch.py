@@ -439,7 +439,7 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(foxglove_rl),
     )
 
-    if reachy_config.config["reachy"]["config"]["mobile_base"]["enable"]:
+    if reachy_config.mobile_base["enable"]:
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
             launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
