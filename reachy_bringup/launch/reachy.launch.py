@@ -473,20 +473,20 @@ def launch_setup(context, *args, **kwargs):
     # Replace with your controller configuration file
 
     # Define the MuJoCo model path
-    mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/new_mjcf/reachy2.xml"
+    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"
 
     # Define MuJoCo node
-    node_mujoco_ros2_control = Node(
-        package="mujoco_ros2_control",
-        executable="mujoco_ros2_control",
-        output="both",
-        parameters=[robot_description, robot_controllers, {"mujoco_model_path": mujoco_model_path}],
-    )
+    # node_mujoco_ros2_control = Node(
+    #     package="mujoco_ros2_control",
+    #     executable="mujoco_ros2_control",
+    #     output="both",
+    #     parameters=[robot_description, robot_controllers, {"mujoco_model_path": mujoco_model_path}],
+    # )
 
     start_control_after_ehtercat = TimerAction(
         period=3.0 if not gazebo_py else 0.5,
         actions=[
-            node_mujoco_ros2_control if not gazebo_py else gazebo_node,
+            control_node if not gazebo_py else gazebo_node,
         ],
         cancel_on_shutdown=True,
     )
@@ -503,15 +503,24 @@ def launch_setup(context, *args, **kwargs):
     import xacro
     from ament_index_python.packages import get_package_share_directory
 
+    # cart conf
     mujoco_ros2_control_demos_path = os.path.join(get_package_share_directory("mujoco_ros2_control_demos"))
-
     xacro_file = os.path.join(mujoco_ros2_control_demos_path, "urdf", "test_cart_position.xacro.urdf")
-
     doc = xacro.parse(open(xacro_file))
     xacro.process_doc(doc)
     robot_description = {"robot_description": doc.toxml()}
-
+    print(robot_description)
     controller_config_file = os.path.join(mujoco_ros2_control_demos_path, "config", "cartpole_controller_position.yaml")
+    mujoco_model_path = os.path.join(mujoco_ros2_control_demos_path, "mujoco_models", "test_cart.xml")
+
+    # reachy conf
+    reachy2_urdl_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/modified_urdf/reachy2.urdf"
+    with open(reachy2_urdl_path, "r") as f:
+        mujoco_urdf_model = f.read()
+    robot_description = {"robot_description": mujoco_urdf_model}
+    # print(robot_description)
+    controller_config_file = robot_controllers
+    mujoco_model_path = reachy_mujoco_model_path
 
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
@@ -520,7 +529,8 @@ def launch_setup(context, *args, **kwargs):
         parameters=[
             robot_description,
             controller_config_file,
-            {"mujoco_model_path": os.path.join(mujoco_ros2_control_demos_path, "mujoco_models", "test_cart.xml")},
+            # {"mujoco_model_path": os.path.join(mujoco_ros2_control_demos_path, "mujoco_models", "test_cart.xml")},
+            {"mujoco_model_path": mujoco_model_path},
         ],
     )
 
@@ -536,22 +546,22 @@ def launch_setup(context, *args, **kwargs):
         cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_trajectory_controller"], output="screen"
     )
 
-    return [
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=node_mujoco_ros2_control,
-                on_start=[load_joint_state_controller],
-            )
-        ),
-        RegisterEventHandler(
-            event_handler=OnProcessExit(
-                target_action=load_joint_state_controller,
-                on_exit=[load_joint_trajectory_controller],
-            )
-        ),
-        node_mujoco_ros2_control,
-        node_robot_state_publisher,
-    ]
+    # return [
+    #     # RegisterEventHandler(
+    #     #     event_handler=OnProcessStart(
+    #     #         target_action=node_mujoco_ros2_control,
+    #     #         on_start=[load_joint_state_controller],
+    #     #     )
+    #     # ),
+    #     # RegisterEventHandler(
+    #     #     event_handler=OnProcessExit(
+    #     #         target_action=load_joint_state_controller,
+    #     #         on_exit=[load_joint_trajectory_controller],
+    #     #     )
+    #     # ),
+    #     node_mujoco_ros2_control,
+    #     node_robot_state_publisher,
+    # ]
 
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
