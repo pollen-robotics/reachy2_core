@@ -1,0 +1,21 @@
+!PoulpeEthercat
+url: http://127.0.0.1:50098
+id: 6
+firmware_zero: true
+name: "LeftElbowOrbita2d"
+motors_offset:
+  - -3.141592653589793
+  - 0.0
+motors_ratio:
+  - 1.9
+  - 1.9
+inverted_axes:
+  - true
+  - true
+orientation_limits: 
+  - !AngleLimits:
+      min: -10000.0 # todo make better limts 
+      max: 10000.0 # todo make better limts  
+  - !AngleLimits:
+      min: -2.22 # touching at -2.26 
+      max: 0.02 # touching at 0.06

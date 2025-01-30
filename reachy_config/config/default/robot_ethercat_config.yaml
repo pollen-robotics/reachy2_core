@@ -1,0 +1,36 @@
+ethercat:
+  master_id: 0
+  cycle_time_us: 1000 # us
+  command_drop_time_us: 5000 # us (5ms default)
+  mailbox_wait_time_ms: 10000 #ms  (1s default)
+  watchdog_timeout_ms: 500 # ms (500ms default)
+
+slaves:
+  - !Poulpe
+    id: 0
+    orbita_type: 3
+    name: "NeckOrbita3d"
+  - !Poulpe
+    id: 1
+    orbita_type: 2
+    name: "RightShoulderOrbita2d"
+  - !Poulpe
+    id: 2
+    orbita_type: 3
+    name: "RightWristOrbita3d"
+  - !Poulpe
+    id: 3
+    orbita_type: 2
+    name: "RightElbowOrbita2d"
+  - !Poulpe
+    id: 4
+    orbita_type: 2
+    name: "LeftShoulderOrbita2d"
+  - !Poulpe
+    id: 5
+    orbita_type: 3
+    name: "LeftWristOrbita3d"
+  - !Poulpe
+    id: 6
+    orbita_type: 2
+    name: "LeftElbowOrbita2d"
