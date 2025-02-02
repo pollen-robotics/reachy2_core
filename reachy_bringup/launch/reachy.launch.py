@@ -546,22 +546,22 @@ def launch_setup(context, *args, **kwargs):
         cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_trajectory_controller"], output="screen"
     )
 
-    # return [
-    #     # RegisterEventHandler(
-    #     #     event_handler=OnProcessStart(
-    #     #         target_action=node_mujoco_ros2_control,
-    #     #         on_start=[load_joint_state_controller],
-    #     #     )
-    #     # ),
-    #     # RegisterEventHandler(
-    #     #     event_handler=OnProcessExit(
-    #     #         target_action=load_joint_state_controller,
-    #     #         on_exit=[load_joint_trajectory_controller],
-    #     #     )
-    #     # ),
-    #     node_mujoco_ros2_control,
-    #     node_robot_state_publisher,
-    # ]
+    return [
+        # RegisterEventHandler(
+        #     event_handler=OnProcessStart(
+        #         target_action=node_mujoco_ros2_control,
+        #         on_start=[load_joint_state_controller],
+        #     )
+        # ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=load_joint_state_controller,
+        #         on_exit=[load_joint_trajectory_controller],
+        #     )
+        # ),
+        node_mujoco_ros2_control,
+        node_robot_state_publisher,
+    ]
 
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
