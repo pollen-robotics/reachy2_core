@@ -1,0 +1,69 @@
+generation: 2
+model: full_kit
+serial_number: dvt-cduss
+neck_orbita_zero:
+  top: 1.7270766198635101
+  middle: 0.725165493786335
+  bottom: 1.2497150525450706
+right_wrist_orbita_zero:
+  top: 0.5018094554543495
+  middle: 0.09122991235926747
+  bottom: 1.1696304380893707
+reachy:
+  l_arm:
+    shoulder:
+      name: l_shoulder
+      actuator: orbita2d
+      axis1: pitch
+      axis2: roll
+    elbow:
+      name: l_elbow
+      actuator: orbita2d
+      axis1: yaw
+      axis2: pitch
+    wrist:
+      name: l_wrist
+      actuator: orbita3d
+      axis1: roll
+      axis2: pitch
+      axis3: yaw
+  l_hand:
+    two_fingers_gripper:
+      name: l_hand
+      actuator: dynamixel
+  r_arm:
+    shoulder:
+      name: r_shoulder
+      actuator: orbita2d
+      axis1: pitch
+      axis2: roll
+    elbow:
+      name: r_elbow
+      actuator: orbita2d
+      axis1: yaw
+      axis2: pitch
+    wrist:
+      name: r_wrist
+      actuator: orbita3d
+      axis1: roll
+      axis2: pitch
+      axis3: yaw
+  r_hand:
+    two_fingers_gripper:
+      name: r_hand
+      actuator: dynamixel
+  head:
+    neck:
+      name: neck
+      actuator: orbita3d
+      axis1: roll
+      axis2: pitch
+      axis3: yaw
+mobile_base: # put some field to null to disable it
+  serial_number: null
+  version_hard: 1.2
+  #serial_number: MB-001
+  version_soft: 1.1
+neck_config: /home/reachy/.reachy_config/neck_beta.yaml
+right_arm_config: /home/reachy/.reachy_config/right_arm.yaml
+left_arm_config: /home/reachy/.reachy_config/left_arm.yaml

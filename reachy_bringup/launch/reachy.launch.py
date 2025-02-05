@@ -27,7 +27,7 @@ from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
 
-from reachy_utils.config import (
+from reachy_config import (
     BETA,
     DVT,
     FULL_KIT,
@@ -80,23 +80,47 @@ def launch_setup(context, *args, **kwargs):
 
     title_print("Configuration").execute(context=context)
     reachy_config = ReachyConfig()
-    LogInfo(msg="Reachy config {} : \n{}".format(reachy_config.config_file, reachy_config)).execute(context=context)
+    LogInfo(msg="Reachy config : \n{}".format(reachy_config)).execute(context=context)
+
+    # reachy_urdf_config = (
+    #     f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
+    #     f" use_gazebo:=true" if gazebo_py else " ",
+    #     f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
+    #     f" robot_config:={reachy_config.model}",
+    #     f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
+    #     f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
+    #     f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
+    #     f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+    #     f' left_shoulder_config:="{reachy_config.left_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_shoulder.yaml", context)}"',
+    #     f' left_elbow_config:="{reachy_config.left_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_elbow.yaml", context)}"',
+    #     f' left_wrist_config:="{reachy_config.left_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+    #     f' antenna_config:="{reachy_config.antenna_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
+    #     f' grippers_config:="{reachy_config.grippers_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
+    #     f' robot_model:="{BETA if reachy_config.beta else DVT }"',  # for now PVT urdf is assumed to be the same as dvt
+    # )
+
     reachy_urdf_config = (
         f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
         f" use_gazebo:=true" if gazebo_py else " ",
         f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
         f" robot_config:={reachy_config.model}",
-        f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
-        # f' right_arm_config:="{reachy_config.right_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_r_arm.yaml", context)}"',
-        # f' left_arm_config:="{reachy_config.left_arm_config if not fake_py and not gazebo_py else get_fake("arm_description", "fake_l_arm.yaml", context)}"',
-        f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
-        f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
-        f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-        f' left_shoulder_config:="{reachy_config.left_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_shoulder.yaml", context)}"',
-        f' left_elbow_config:="{reachy_config.left_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_elbow.yaml", context)}"',
-        f' left_wrist_config:="{reachy_config.left_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-        f' antenna_config:="{reachy_config.antenna_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
-        f' grippers_config:="{reachy_config.grippers_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
+        f' neck_config:="{reachy_config.part_conf("neck_config", fake= fake_py or gazebo_py)}"',
+        f' right_shoulder_config:="{reachy_config.part_conf("right_shoulder_config", fake= fake_py or gazebo_py)}"',
+        f' right_elbow_config:="{reachy_config.part_conf("right_elbow_config", fake= fake_py or gazebo_py)}"',
+        f' right_wrist_config:="{reachy_config.part_conf("right_wrist_config", fake= fake_py or gazebo_py)}"',
+        f' left_shoulder_config:="{reachy_config.part_conf("left_shoulder_config", fake= fake_py or gazebo_py)}"',
+        f' left_elbow_config:="{reachy_config.part_conf("left_elbow_config", fake= fake_py or gazebo_py)}"',
+        f' left_wrist_config:="{reachy_config.part_conf("left_wrist_config", fake= fake_py or gazebo_py)}"',
+        f' antenna_config:="{reachy_config.part_conf("antenna_config", fake= fake_py or gazebo_py)}"',
+        f' grippers_config:="{reachy_config.part_conf("grippers_config", fake= fake_py or gazebo_py)}"',
+        # f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
+        # f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
+        # f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+        # f' left_shoulder_config:="{reachy_config.left_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_shoulder.yaml", context)}"',
+        # f' left_elbow_config:="{reachy_config.left_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_elbow.yaml", context)}"',
+        # f' left_wrist_config:="{reachy_config.left_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
+        # f' antenna_config:="{reachy_config.antenna_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
+        # f' grippers_config:="{reachy_config.grippers_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
         f' robot_model:="{BETA if reachy_config.beta else DVT }"',  # for now PVT urdf is assumed to be the same as dvt
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
@@ -105,17 +129,18 @@ def launch_setup(context, *args, **kwargs):
         LogInfo(msg="Starting Gazebo simulation, setting UseSimTime").execute(context=context)
         SetUseSimTime(True)
 
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
-            *reachy_urdf_config,
-        ]
-    )
-
     robot_description = {
-        "robot_description": ParameterValue(robot_description_content, value_type=str),
+        "robot_description": ParameterValue(
+            Command(
+                [
+                    PathJoinSubstitution([FindExecutable(name="xacro")]),
+                    " ",
+                    PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
+                    *reachy_urdf_config,
+                ]
+            ),
+            value_type=str,
+        ),
     }
 
     robot_controllers = PathJoinSubstitution(
@@ -146,10 +171,10 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
-    start_mobile_base_py = start_mobile_base == "true"
+    # start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
+    # start_mobile_base_py = start_mobile_base == "true"
 
-    LogInfo(msg=f"Launching Mobile Base: {start_mobile_base_py}").execute(context=context)
+    # LogInfo(msg=f"Launching Mobile Base: {start_mobile_base_py}").execute(context=context)
 
     #############
     ### Nodes ###
@@ -159,10 +184,14 @@ def launch_setup(context, *args, **kwargs):
     # start ethercat server
     ethercat_master_server = ExecuteProcess(
         name="ethercat_master_server",
-        cmd=["/bin/bash", "-c", "$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh"],
+        cmd=[
+            "/bin/bash",
+            "-c",
+            f'$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh {reachy_config.config["robot_ethercat_config"]["path"]}',
+        ],
         output="both",
         emulate_tty=True,
-        condition=IfCondition(PythonExpression(f"{reachy_config.ethercat} and not {fake_py}")),
+        condition=IfCondition(PythonExpression(f"not {fake_py}")),
         # Ensure the process is killed when the launch file is stopped
         sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
         sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
@@ -202,7 +231,9 @@ def launch_setup(context, *args, **kwargs):
         ],
     )
 
-    #### Controllers ###
+    ###################
+    ### Controllers ###
+    ###################
 
     position_controllers = []
     for controller, condition in [
@@ -355,7 +386,9 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
+    ###########
     ### SDK ###
+    ###########
     sdk_server_node = TimerAction(
         period=3.0,
         actions=[
@@ -365,7 +398,7 @@ def launch_setup(context, *args, **kwargs):
                 output="both",
                 emulate_tty=True,
                 arguments=[
-                    reachy_config.config_file,
+                    reachy_config.config["reachy"]["path"],
                     str(ReachyCoreMode.GAZEBO if gazebo_py else ReachyCoreMode.FAKE if fake_py else ReachyCoreMode.REAL),
                 ],
                 condition=IfCondition(start_sdk_server_rl),
@@ -394,21 +427,20 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
-    # sdk_server_audio_node = Node(
-    #     package="reachy_sdk_server",
-    #     executable="reachy_grpc_audio_sdk_server",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
+    sdk_server_audio_server = ExecuteProcess(
+        name="reachy_sdk_audio_server",
+        cmd=["/bin/bash", "-c", "reachy2_sdk_audio_server_rs"],
+        output="both",
+        emulate_tty=True,
+        condition=IfCondition(PythonExpression(f"{start_sdk_server_py}")),
+        # Ensure the process is killed when the launch file is stopped
+        sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
+    )
 
-    # audio_node = Node(
-    #     package="sound_play",
-    #     executable="soundplay_node.py",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
-
+    ####################
     ### Tools et al. ###
+    ####################
     delay_rviz_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
             target_action=joint_state_broadcaster_spawner,
@@ -434,7 +466,7 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(foxglove_rl),
     )
 
-    if start_mobile_base_py:
+    if reachy_config.mobile_base["enable"]:
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
             launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
@@ -462,11 +494,6 @@ def launch_setup(context, *args, **kwargs):
             "-o",
             f"{get_current_run_log_dir()}/reachy.bag",
             *ROSBAG_TOPICS,
-            # "/r_arm/ik_target_pose",
-            # "/l_arm/ik_target_pose",
-            # "/head/target_pose",
-            # "/joint_commands",
-            # "/joint_states",
         ],
         output="screen",
     )
@@ -480,8 +507,7 @@ def launch_setup(context, *args, **kwargs):
             delay_rviz_after_joint_state_broadcaster_spawner,
             delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
             sdk_server_node,
-            # sdk_server_audio_node,
-            # audio_node,
+            sdk_server_audio_server,
             sdk_server_video_node,
             orbbec_node,
             goto_server_node,
