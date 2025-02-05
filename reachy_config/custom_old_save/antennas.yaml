@@ -1,0 +1,18 @@
+
+left_config:
+  io: !DynamixelSerialIO
+    serial_port_name: /dev/antennas
+    id: 61
+    mode: 5
+    current_limit: 0.4
+    model: !XL330
+
+right_config:
+  io: !DynamixelSerialIO
+    serial_port_name: /dev/antennas
+    id: 62
+    mode: 5
+    current_limit: 0.4
+    model: !XL330
+
+background: true

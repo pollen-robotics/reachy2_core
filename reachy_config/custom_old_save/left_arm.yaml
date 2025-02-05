@@ -1,0 +1,9 @@
+shoulder: /home/reachy/.reachy_config/left_shoulder_poulpe2d.yaml
+elbow: /home/reachy/.reachy_config/left_elbow_poulpe2d.yaml
+wrist: /home/reachy/.reachy_config/left_wrist_poulpe3d.yaml
+# wrist: /home/reachy/reachy_ws/src/arm_control/arm_controller/config/fake_orbita3d.yaml
+gripper: /home/reachy/reachy_ws/src/arm_control/arm_controller/config/fake_gripper.yaml
+#gripper: /home/reachy/.reachy_config/left_gripper.yaml
+background: gripper # - false: griper and orbitas in the same thread
+                    # - true: griper and orbitas in background (separate thread) - for dynamixel
+                    # - gripper: gripper in background (separate thread), orbiatas in foreground - for ethercat

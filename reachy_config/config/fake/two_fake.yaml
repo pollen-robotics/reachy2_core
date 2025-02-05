@@ -1,0 +1,7 @@
+left_config:
+  io: !FakeIO
+
+right_config:
+  io: !FakeIO
+
+background: true

@@ -1,0 +1,22 @@
+!PoulpeEthercat
+url: http://127.0.0.1:50098
+id: 1
+firmware_zero: true
+name: "RightShoulderOrbita2d"
+
+motors_offset:
+  - 0.0
+  - -1.5707963267948966 # -90°
+motors_ratio:
+  - 1.9
+  - 1.9
+inverted_axes:
+  - true
+  - false
+orientation_limits: 
+  - !AngleLimits:
+      min: -10000.0 # todo make better limts 
+      max: 10000.0 # todo make better limts  
+  - !AngleLimits:
+      min: -2.9 # touching at -2.94
+      max: 0.55 # touching at 0.61

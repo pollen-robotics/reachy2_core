@@ -1,0 +1,18 @@
+
+right_config:
+  io: !DynamixelSerialIO
+    serial_port_name: /dev/grippers
+    id: 53
+    mode: 5
+    current_limit: 0.4
+    model: !XM
+
+left_config:
+  io: !DynamixelSerialIO
+    serial_port_name: /dev/grippers
+    id: 43
+    mode: 5
+    current_limit: 0.4
+    model: !XM
+
+background: true
