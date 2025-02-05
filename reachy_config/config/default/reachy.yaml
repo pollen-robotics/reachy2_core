@@ -53,7 +53,7 @@ reachy:
       axis2: pitch
       axis3: yaw
 mobile_base:
-  enable: true
+  enable: false
   version_hard: 1.2
   serial_number: MB-001
   version_soft: 1.1
