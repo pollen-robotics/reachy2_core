@@ -467,9 +467,14 @@ def launch_setup(context, *args, **kwargs):
     )
 
     if reachy_config.mobile_base["enable"]:
+        if fake_py and not gazebo_py:  # boom
+            error_msg = "A mobile base is declared in the config but zuuu_hal does not support FAKE mode.\n"
+            error_msg += "Please set the mobile_base parameter 'enable' to 'false' in the config file when using FAKE mode."
+            LogInfo(msg=f"{error_msg}").execute(context=context)
+            exit(1)
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
+            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake": f"{fake_py}", "gazebo": f"{gazebo_py}"}.items(),
         )
         nodes.append(mobile_base_node)
 
