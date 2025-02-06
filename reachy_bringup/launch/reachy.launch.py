@@ -469,7 +469,7 @@ def launch_setup(context, *args, **kwargs):
     if reachy_config.mobile_base["enable"]:
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
+            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake": f"{fake_py}", "gazebo": f"{gazebo_py}"}.items()
         )
         nodes.append(mobile_base_node)
 
