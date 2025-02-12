@@ -3,7 +3,7 @@ right_config:
   #io: !FakeIO
   io: !DynamixelSerialIO
     serial_port_name: /dev/grippers
-    id: 43
+    id: 53
     mode: 5
     current_limit: 0.4
     model: !XM
@@ -12,7 +12,7 @@ left_config:
   # io: !FakeIO
   io: !DynamixelSerialIO
     serial_port_name: /dev/grippers
-    id: 53
+    id: 43
     mode: 5
     current_limit: 0.4
     model: !XM
