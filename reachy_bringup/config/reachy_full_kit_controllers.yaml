@@ -63,9 +63,22 @@ controller_manager:
     forward_pid_controller:
       type: pid_command_controller/PIDCommandController
 
+    tripod_forward_position_controller:
+      type: forward_command_controller/ForwardCommandController
+
 joint_state_broadcaster:
   ros__parameters:
     use_sim_time: false
+
+
+tripod_forward_position_controller:
+  ros__parameters:
+    joints:
+      - tripod_joint
+      # - left_bar_joint_mimic
+    interface_name: position
+    use_sim_time: false
+
 
 neck_forward_position_controller:
   ros__parameters:
