@@ -219,7 +219,7 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         exec_name="joint_state_broadcaster",
         name="joint_state_broadcaster",
-        namespace="toto",
+        # namespace="/",
         arguments=[
             *(
                 ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
@@ -245,6 +245,34 @@ def launch_setup(context, *args, **kwargs):
             "antenna_forward_position_controller",
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
+        [
+            "tripod_forward_position_controller",
+            f"'{reachy_config.model}' != '{MINI}'",
+        ],
+        # [
+        #     "r_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
         [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
@@ -276,6 +304,7 @@ def launch_setup(context, *args, **kwargs):
         ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_mode_controller", f"not {gazebo_py}"],
+        # ["tripod_forward_position_controller", f"not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -361,7 +390,7 @@ def launch_setup(context, *args, **kwargs):
     ### SDK ###
     ###########
     sdk_server_node = TimerAction(
-        period=2.0,
+        period=3.0,
         actions=[
             Node(
                 package="reachy_sdk_server",
@@ -438,15 +467,23 @@ def launch_setup(context, *args, **kwargs):
     )
 
     if reachy_config.mobile_base["enable"]:
+        if fake_py and not gazebo_py:  # boom
+            error_msg = "A mobile base is declared in the config but zuuu_hal does not support FAKE mode.\n"
+            error_msg += "Please set the mobile_base parameter 'enable' to 'false' in the config file when using FAKE mode."
+            LogInfo(msg=f"{error_msg}").execute(context=context)
+            exit(1)
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
+            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake": f"{fake_py}", "gazebo": f"{gazebo_py}"}.items(),
         )
         nodes.append(mobile_base_node)
 
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
-        launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
+        launch_arguments={
+            "robot_config": f"{reachy_config.model}",
+            # "robot_model": {BETA if reachy_config.beta else DVT},
+        }.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
@@ -485,7 +522,7 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    start_control_after_ehtercat = TimerAction(
+    start_control_after_ethercat = TimerAction(
         period=3.0 if not gazebo_py else 0.5,
         actions=[
             control_node if not gazebo_py else gazebo_node,
@@ -531,7 +568,7 @@ def launch_setup(context, *args, **kwargs):
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
-        start_control_after_ehtercat,
+        start_control_after_ethercat,
         start_everything_after_control,
         # speedlimit_set_announce,
         # speedlimit_set,

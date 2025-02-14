@@ -20,7 +20,11 @@ def launch_setup(context, *args, **kwargs):
                 ]
             )
         ),
-        launch_arguments={"verbose": "true"}.items(),
+        launch_arguments={
+            "verbose": "false",
+            "pause": "false",
+            "world": [FindPackageShare("reachy_gazebo"), "/worlds/empty.world"],
+        }.items(),
     )
 
     # Note: Environment variable GAZEBO_MODEL_PATH is extended as in
@@ -56,7 +60,7 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     return LaunchDescription(
         [
-            DeclareLaunchArgument("robot_name", default_value="reachy", description="Set robot name."),
+            DeclareLaunchArgument("robot_name", default_value="reachy2", description="Set robot name."),
             DeclareLaunchArgument("robot_config", default_value="full_kit", description="Robot configuration."),
             OpaqueFunction(function=launch_setup),
         ]

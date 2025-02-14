@@ -1,6 +1,12 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="$(find reachy_description)/urdf/gz_mimic.urdf.xacro" />
+
+
+
   <xacro:macro name="dynamixel_gripper_axis_control" params="name fake gazebo" >
+
+
     <joint name="${name}">
       <state_interface name="position">
         <param name="initial_value">0.0</param>
@@ -20,61 +26,114 @@
     <xacro:if value="${fake}">
       <!-- Use gazebo as hardware simulation, then handle the mimic joints. -->
       <xacro:if value="${gazebo}">
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_proximal" following_joint="${name}_proximal" mimic_joint="${name}_finger" multiplier="-0.4689" offset="0.554"/> -->
 
-	<joint name="${name}_proximal">
-	  <param name="mimic">${name}_finger</param>
-	  <param name="multiplier">-0.4689</param>
-	  <!-- offset = 0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -->
-        <!-- <param name="initial_value">0.554</param> -->
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+        <!-- <joint name="${name}_proximal"> -->
+        <!--   <param name="mimic">${name}_finger</param> -->
+        <!--   <param name="multiplier">-0.4689</param> -->
+        <!--   <!-\- offset = 0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -\-> -->
+        <!-- <!-\- <param name="initial_value">0.554</param> -\-> -->
+        <!--   <command_interface name="position"/> -->
+        <!--   <state_interface name="position"/> -->
+        <!--   <state_interface name="velocity"/> -->
+        <!--   <state_interface name="effort"/> -->
 
-	</joint>
+        <!-- </joint> -->
 
-	<joint name="${name}_proximal_mimic" >
-	  <param name="mimic">${name}_finger_proximal</param>
-	  <param name="multiplier">1</param>
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_proximal_mimic" following_joint="${name}_proximal_mimic" mimic_joint="${name}_finger_proximal" multiplier="1" offset="0.0"/> -\-> -->
 
-	</joint>
+        <!-- <joint name="${name}_proximal_mimic" > -->
+        <!--   <param name="mimic">${name}_finger_proximal</param> -->
+        <!--   <param name="multiplier">1</param> -->
+        <!--   <command_interface name="position"/> -->
+        <!--   <state_interface name="position"/> -->
+        <!--   <state_interface name="velocity"/> -->
+        <!--   <state_interface name="effort"/> -->
 
-
-
-	<joint name="${name}_distal" >
-	  <param name="mimic">${name}_finger</param>
-	  <param name="multiplier">0.4689</param>
-	  <!-- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -->
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+        <!-- </joint> -->
 
 
-	</joint>
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_distal" following_joint="${name}_distal" mimic_joint="${name}_finger" multiplier="0.4689" offset="0.0"/> -\-> -->
+
+        <!-- <joint name="${name}_distal" > -->
+        <!--   <param name="mimic">${name}_finger</param> -->
+        <!--   <param name="multiplier">0.4689</param> -->
+        <!--   <!-\- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -\-> -->
+        <!--   <command_interface name="position"/> -->
+        <!--   <state_interface name="position"/> -->
+        <!--   <state_interface name="velocity"/> -->
+        <!--   <state_interface name="effort"/> -->
+        <!-- </joint> -->
+
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${name}_distal_mimic" following_joint="${name}_distal" mimic_joint="${name}_finger" multiplier="0.4689" offset="0.0"/> -\-> -->
+
+        <!-- <joint name="${name}_distal_mimic"> -->
+        <!--   <param name="mimic">${name}_finger</param> -->
+        <!--   <param name="multiplier">0.4689</param> -->
+        <!--   <!-\- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -\-> -->
+        <!--   <command_interface name="position"/> -->
+        <!--   <state_interface name="position"/> -->
+        <!--   <state_interface name="velocity"/> -->
+        <!--   <state_interface name="effort"/> -->
 
 
-	<joint name="${name}_distal_mimic">
-	  <param name="mimic">${name}_finger</param>
-	  <param name="multiplier">0.4689</param>
-	  <!-- offset = -0.554 WHY DIDN'T YOU IMPLEMENT THAT?!! -->
-	  <command_interface name="position"/>
-	  <state_interface name="position"/>
-	  <state_interface name="velocity"/>
-	  <state_interface name="effort"/>
+        <!-- </joint> -->
 
 
-	</joint>
+
+
+
+
+
+
+        <joint name="${name}_proximal">
+
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+
+        </joint>
+
+
+
+        <joint name="${name}_proximal_mimic" >
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+
+        </joint>
+
+
+
+
+        <joint name="${name}_distal" >
+
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+
+
+
+        <joint name="${name}_distal_mimic">
+
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+
+
+        </joint>
+
+
 
 
 
       </xacro:if>
     </xacro:if>
-
 
 
   </xacro:macro>
