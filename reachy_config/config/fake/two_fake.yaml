@@ -4,4 +4,4 @@ left_config:
 right_config:
   io: !FakeIO
 
-background: true
+background: false
