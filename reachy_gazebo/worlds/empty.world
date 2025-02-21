@@ -2,9 +2,9 @@
 <sdf version="1.5">
   <world name="default">
       <gravity>0 0 -9.8</gravity>
-  <physics default="1" name="default_physics" type="bullet">
+  <!-- <physics default="1" name="default_physics" type="bullet"> -->
   <!-- <physics default="1" name="default_physics" type="simbody"> -->
-  <!-- <physics default="1" name="default_physics" type="dart"> -->
+  <physics default="1" name="default_physics" type="dart">
   <!-- <physics default="1" name="default_physics" type="ode"> -->
     <real_time_update_rate>1000.0</real_time_update_rate>
     <bullet>
