@@ -57,6 +57,9 @@ mobile_base:
   version_hard: 1.2
   serial_number: MB-001
   version_soft: 1.1
+tripod:
+  enable: true
+  version_hard: 0.1
 
 reachy2_configuration:
   neck_config:
