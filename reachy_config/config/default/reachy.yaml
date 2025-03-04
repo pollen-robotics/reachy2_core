@@ -52,6 +52,12 @@ reachy:
       axis1: roll
       axis2: pitch
       axis3: yaw
+    l_antenna:
+      name: antenna_left
+      actuator: dynamixel
+    r_antenna:
+      name: antenna_right
+      actuator: dynamixel
 mobile_base:
   enable: true
   version_hard: 1.2
