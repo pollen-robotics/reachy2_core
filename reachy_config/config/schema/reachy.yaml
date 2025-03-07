@@ -199,6 +199,16 @@ mobile_base:
     version_soft:
       type: float
       required: true
+tripod:
+  type: dict
+  required: true
+  schema:
+    enable:
+      type: boolean
+      required: true
+    version_hard:
+      type: float
+      required: true
 
 reachy2_configuration:
   type: dict
