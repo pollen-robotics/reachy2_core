@@ -183,6 +183,16 @@ reachy:
                 required: true,
                 allowed: ["roll", "pitch", "yaw"],
               }
+        l_antenna:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["dynamixel"] }
+        r_antenna:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["dynamixel"] }
 mobile_base:
   type: dict
   required: true
