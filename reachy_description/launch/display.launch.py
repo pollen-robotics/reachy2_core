@@ -32,6 +32,10 @@ def generate_launch_description():
             PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
             " ",
             "use_fake_hardware:=true",
+            " ",
+            "robot_model:=dvt",
+            " ",
+            "robot_config:=full_kit",
             "",
         ]
     )

@@ -183,6 +183,16 @@ reachy:
                 required: true,
                 allowed: ["roll", "pitch", "yaw"],
               }
+        l_antenna:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["dynamixel"] }
+        r_antenna:
+          type: dict
+          schema:
+            name: { type: string, required: true }
+            actuator: { type: string, required: true, allowed: ["dynamixel"] }
 mobile_base:
   type: dict
   required: true
@@ -197,6 +207,16 @@ mobile_base:
       type: string
       required: true
     version_soft:
+      type: float
+      required: true
+tripod:
+  type: dict
+  required: true
+  schema:
+    enable:
+      type: boolean
+      required: true
+    version_hard:
       type: float
       required: true
 

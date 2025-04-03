@@ -14,6 +14,8 @@
   <xacro:include filename="$(find pollen_generic_description)/urdf/inertial_primitives.urdf.xacro" />
   <xacro:include filename="$(find pollen_generic_description)/urdf/materials.urdf.xacro" />
 
+
+  <xacro:include filename="$(find reachy_description)/urdf/gz_mimic.urdf.xacro" />
   <!-- Zuuu mobile base -->
 
   <xacro:arg name="zuuu_prefix" default="" />
@@ -64,55 +66,112 @@
   <!-- <xacro:arg name="left_arm_config" default="$(find arm_description)/config/fake_l_arm.yaml" /> -->
   <xacro:arg name="grippers_config" default="$(find dynamixel_description)/config/two_fake.yaml"/>
   <xacro:arg name="robot_model" default="none" />
+  <xacro:arg name="robot_config" default="full_kit" />
+
+
+
+
+  <!-- all the robot configurations -->
+  <xacro:property name="mobile_base" value="false" />
+  <xacro:property name="left_arm" value="false" />
+  <xacro:property name="right_arm" value="false" />
+  <xacro:property name="left_gripper" value="false" />
+  <xacro:property name="right_gripper" value="false" />
+
+  <!-- <xacro:property name="config" value="$(arg robot_config)" /> -->
+  <xacro:property name="config" value="full_kit" />
+
+  <xacro:if value="${config == 'full_kit'}">
+      <xacro:property name="mobile_base" value="true" />
+      <xacro:property name="left_arm" value="true" />
+      <xacro:property name="left_gripper" value="true" />
+      <xacro:property name="right_arm" value="true" />
+      <xacro:property name="right_gripper" value="true" />
+  </xacro:if>
+
+  <xacro:if value="${config == 'full_kit_no_gripper'}">
+      <xacro:property name="mobile_base" value="true" />
+      <xacro:property name="left_arm" value="true" />
+      <xacro:property name="right_arm" value="true" />
+
+  </xacro:if>
+
+  <xacro:if value="${config == 'left_arm'}">
+      <xacro:property name="mobile_base" value="true" />
+      <xacro:property name="left_arm" value="true" />
+      <xacro:property name="left_gripper" value="true" />
+  </xacro:if>
+
+
+  <xacro:if value="${config == 'right_arm'}">
+      <xacro:property name="mobile_base" value="true" />
+      <xacro:property name="right_arm" value="true" />
+      <xacro:property name="right_gripper" value="true" />
+  </xacro:if>
+
+
+  <xacro:if value="${config == 'left_arm_no_gripper'}">
+      <xacro:property name="mobile_base" value="true" />
+      <xacro:property name="left_arm" value="true" />
+  </xacro:if>
+
+
+  <xacro:if value="${config == 'right_arm_no_gripper'}">
+      <xacro:property name="mobile_base" value="true" />
+      <xacro:property name="right_arm" value="true" />
+  </xacro:if>
+
+
+
   <!-- config  -->
 
 
   <!-- MODEL PARAMETERS -->
   <xacro:property name="base_collision" value="true" />
   <xacro:property name="base_visual" value="true" />
-  <xacro:property name="damping" value="0.1" />
+  <xacro:property name="damping" value="0.01" />
   <xacro:property name="friction" value="0.1" />
 
 
-  <!-- Height of the Torso Origin Min=0.9 Max=1.3 (TODO: make it a parameter at launch)  -->
-  <xacro:property name="base_height" value="1.2" />
 
+  <!-- Base height (torso) = 1000mm when back bar joint=525mm -->
   <!-- Parameters for the 3 bar base height -->
-  <xacro:property name="back_bar_min_length" value="0.536" />
-  <xacro:property name="back_bar_max_length" value="0.936" />
-  <xacro:property name="bar_angle" value="${radians(27.458)}" />
-  <xacro:property name="bar_triangle_base" value="0.226186" />
-  <xacro:property name="bar_small_triangle_base" value="0.13857" />
+  <xacro:property name="back_bar_min_length" value="0.520" />
+  <xacro:property name="back_bar_max_length" value="${back_bar_min_length+0.210}" />
+  <!-- <xacro:property name="bar_angle" value="${radians(27.458)}" /> -->
+  <xacro:property name="bar_angle" value="${radians(10.937)}" />
+  <xacro:property name="bar_angle_offset" value="${pi/2-atan2(back_bar_min_length-0.03-0.018,bar_small_triangle_base-0.09)}" />
 
-  <xacro:property name="back_bar_z" value="0.164" />
-  <xacro:property name="back_bar_x" value="-0.122" />
-  <xacro:property name="left_bar_x" value="0.080966" />
-  <xacro:property name="left_bar_y" value="0.117182" />
-  <xacro:property name="right_bar_x" value="0.080966" />
-  <xacro:property name="right_bar_y" value="-0.117182" />
+  <xacro:property name="bar_small_triangle_base" value="0.186" />
 
-  <xacro:property name="back_bar_length" value="${base_height-0.2-back_bar_z}" />
+  <xacro:property name="back_bar_z" value="0.241" />
+  <xacro:property name="back_bar_x" value="-0.09" />
 
-  <xacro:property name="front_bar_length"
-    value="${sqrt(back_bar_length*back_bar_length+bar_small_triangle_base*bar_small_triangle_base)}" />
+  <xacro:property name="left_bar_x" value="0.084" />
+  <xacro:property name="left_bar_y" value="0.066" />
+  <xacro:property name="right_bar_x" value="0.084" />
+  <xacro:property name="right_bar_y" value="-0.066" />
+  <xacro:property name="right_bar_anchor" value="0.03" />
 
 
-  <!-- <link name="world" /> -->
-  <!-- <joint name="world_joint" type="fixed"> -->
-  <!--   <origin xyz="0 0 1.0" rpy="0 0 0" /> -->
-  <!--   <parent link="world" /> -->
-  <!--   <child link="torso" /> -->
-  <!-- </joint> -->
+  <!-- <xacro:property name="back_bar_length" value="${base_height-0.2-back_bar_z}" /> -->
+  <xacro:property name="back_bar_length" value="0.485" />
 
-  <!-- <link name="world" />
-  <joint name="world_joint" type="fixed">
-    <origin xyz="0 0 0.0" rpy="0 0 0" />
-    <parent link="world" />
-    <child link="base_link" />
-  </joint> -->
 
-  <link name="back_bar">
-    <visual>
+  <!-- TODO: replace by primitives -->
+    <xacro:macro name="box_inertia" params="m w h d">
+      <inertial>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}" />
+        <mass value="${m}" />
+        <inertia ixx="${(m/12) * (h*h + d*d)}" ixy="0.0" ixz="0.0" iyy="${(m/12) * (w*w + d*d)}"
+          iyz="0.0" izz="${(m/12) * (w*w + h*h)}" />
+      </inertial>
+    </xacro:macro>
+
+
+
+  <link name="back_bar_base">
+   <visual>
       <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
       <geometry>
         <box size="0.04 0.04 ${back_bar_length}" />
@@ -123,71 +182,351 @@
     <collision>
       <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
       <geometry>
-        <box size="0.04 0.04 ${back_bar_length}" />
+        <box size="0.05 0.05 ${back_bar_length}" />
       </geometry>
     </collision>
 
-
-  </link>
-  <link name="left_bar">
-    <visual>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
-
-      <xacro:reachy_grey />
-    </visual>
-    <collision>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
-    </collision>
-
-  </link>
-
-  <link name="right_bar">
-    <visual>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
-      <xacro:reachy_grey />
-    </visual>
-    <collision>
-      <origin xyz="0.0 0 ${front_bar_length/2}" rpy="0 0 0" />
-      <geometry>
-        <box size="0.04 0.04 ${front_bar_length}" />
-      </geometry>
-    </collision>
-
+    <xacro:box_inertia m="0.759" w="0.04" h="0.04" d="0.04"/>
   </link>
 
   <joint name="back_bar_joint" type="fixed">
-    <!-- <origin xyz="-0.122 0 0.057" rpy="0 0 0"/> -->
     <origin xyz="${back_bar_x} 0 ${back_bar_z}" rpy="0 0 0" />
     <parent link="base_link" />
-    <child link="back_bar" />
+    <child link="back_bar_base" />
   </joint>
-  <joint name="left_bar_joint" type="fixed">
 
-    <!-- <origin xyz="0.080966 0.11718 0.057" rpy="0
-    ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}"/> -->
-    <origin xyz="${left_bar_x} ${left_bar_y} ${back_bar_z}"
-      rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${bar_angle}" />
-    <parent link="base_link" />
-    <child link="left_bar" />
-  </joint>
-  <joint name="right_bar_joint" type="fixed">
 
-    <!-- <origin xyz="0.080966 -0.11718 0.057" rpy="0
-    ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}"/> -->
-    <origin xyz="${right_bar_x} ${right_bar_y} ${back_bar_z}"
-      rpy="0 ${-pi/2+atan2(back_bar_length,bar_small_triangle_base)} ${-bar_angle}" />
-    <parent link="base_link" />
-    <child link="right_bar" />
+  <link name="back_bar_inner">
+   <visual>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 ${back_bar_length}" />
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="0.759" w="0.04" h="0.04" d="0.04"/>
+  </link>
+
+
+
+
+  <joint name="tripod_joint" type="prismatic">
+    <origin xyz="0 0 0.035" rpy="0 0 0" />
+    <parent link="back_bar_base" />
+    <child link="back_bar_inner" />
+    <limit effort="1.0" lower="0.0" upper="0.210" velocity="0.1"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="${damping}" friction="${friction}"/>
   </joint>
+
+
+
+
+
+
+<link name="left_bar_base">
+   <visual>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+      <geometry>
+        <box size="0.04 0.04 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 ${back_bar_length}" />
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="1.759" w="0.04" h="0.04" d="0.04"/>
+</link>
+
+<link name="left_bar_anchor">
+   <visual>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="1.759" w="0.03" h="0.03" d="0.03"/>
+</link>
+
+
+
+
+<joint name="left_bar_anchor_to_base" type="fixed">
+    <origin xyz="${left_bar_x} ${left_bar_y} ${back_bar_z}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="left_bar_anchor" />
+</joint>
+
+
+
+  <joint name="left_bar_joint_mimic" type="revolute">
+    <origin xyz="0 0.048 -0.258" rpy="0 0 ${bar_angle}" />
+    <parent link="torso" />
+    <child link="left_bar_inner" />
+    <limit effort="0.01" lower="-1.0" upper="1.0" velocity="0.01"/>
+    <axis xyz="0 1 0"/>
+    <mimic joint="tripod_joint" multiplier="0.2864183599287582" offset="-0.1967146343049915" />
+    <!-- <mimic joint="tripod_joint" multiplier="0" offset="0" /> -->
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+
+
+  <link name="left_bar_inner">
+   <visual>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 ${back_bar_length}" />
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="0.759" w="0.04" h="0.04" d="0.04"/>
+  </link>
+
+
+
+  <joint name="left_bar_prism_joint_mimic" type="prismatic">
+    <origin xyz="0 0 ${-back_bar_length}" rpy="0 0 0" />
+    <parent link="left_bar_inner" />
+    <child link="left_bar_base" />
+    <limit effort="1.0" lower="-1.0" upper="1.0" velocity="0.5"/>
+    <axis xyz="0 0 1"/>
+    <mimic joint="tripod_joint" multiplier="-0.9861535348976198" offset="0.4814718126556904" />
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+
+
+
+  <!-- right bar -->
+
+<link name="right_bar_base">
+   <visual>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
+      <geometry>
+        <box size="0.04 0.04 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 ${back_bar_length}" />
+      </geometry>
+    </collision>
+    <!-- <xacro:box_inertia m="1.759" w="0.04" h="0.04" d="0.04"/> -->
+    <xacro:box_inertia m="1.759" w="0.04" h="0.04" d="0.04"/>
+</link>
+
+<link name="right_bar_anchor">
+   <visual>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${-bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${right_bar_anchor/2}" rpy="0 0 ${-bar_angle}" />
+      <geometry>
+        <box size="0.03 0.03 ${right_bar_anchor}" />
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="1.759" w="0.03" h="0.03" d="0.03"/>
+</link>
+
+
+
+
+<joint name="right_bar_anchor_to_base" type="fixed">
+    <origin xyz="${right_bar_x} ${right_bar_y} ${back_bar_z}" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="right_bar_anchor" />
+</joint>
+
+
+
+  <joint name="right_bar_joint_mimic" type="revolute">
+    <origin xyz="0 -0.048 -0.258" rpy="0 0 ${-bar_angle}" />
+    <parent link="torso" />
+    <child link="right_bar_inner" />
+    <limit effort="0.01" lower="-1.0" upper="1.0" velocity="0.01"/>
+    <axis xyz="0 1 0"/>
+    <mimic joint="tripod_joint" multiplier="0.2864183599287582" offset="-0.1967146343049915" />
+    <!-- <mimic joint="tripod_joint" multiplier="0" offset="0" /> -->
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+
+
+  <link name="right_bar_inner">
+   <visual>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 ${back_bar_length}" />
+      </geometry>
+      <xacro:reachy_grey />
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 ${-back_bar_length/2}" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 ${back_bar_length}" />
+      </geometry>
+    </collision>
+    <xacro:box_inertia m="0.759" w="0.04" h="0.04" d="0.04"/>
+  </link>
+
+
+
+  <joint name="right_bar_prism_joint_mimic" type="prismatic">
+    <origin xyz="0 0 ${-back_bar_length}" rpy="0 0 0" />
+    <parent link="right_bar_inner" />
+    <child link="right_bar_base" />
+    <limit effort="1.0" lower="-1.0" upper="1.0" velocity="0.5"/>
+    <axis xyz="0 0 1"/>
+    <mimic joint="tripod_joint" multiplier="-0.9861535348976198" offset="0.4814718126556904" />
+    <dynamics damping="${damping}" friction="${friction}"/>
+  </joint>
+
+
+
+
+
+<xacro:if value="$(arg use_gazebo)">
+      <!-- 3rd order poly fit (pretty good): -0.82037152*x**3 + 0.74428024*x**2 -0.40967047*x + 0.20061291 -->
+  <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_left_rev" following_joint="tripod_joint" mimic_joint="left_bar_joint_mimic" multiplier="0.2864183599287582" offset="-0.1967146343049915"/> -->
+  <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_left_rev" following_joint="tripod_joint" mimic_joint="left_bar_joint_mimic" multiplier="0.40967047" offset="-0.20061291" k2="-0.74428024," k3="0.82037152"/>
+  <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_left_prism" following_joint="tripod_joint" mimic_joint="left_bar_prism_joint_mimic" multiplier="-0.9861535348976198" offset="0.4814718126556904"/>
+
+  <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_right_rev" following_joint="tripod_joint" mimic_joint="right_bar_joint_mimic" multiplier="0.2864183599287582" offset="-0.1967146343049915"/> -->
+  <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_right_rev" following_joint="tripod_joint" mimic_joint="right_bar_joint_mimic" multiplier="0.40967047" offset="-0.20061291" k2="-0.74428024," k3="0.82037152"/>
+  <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_right_prism" following_joint="tripod_joint" mimic_joint="right_bar_prism_joint_mimic" multiplier="-0.9861535348976198" offset="0.4814718126556904"/>
+
+</xacro:if>
+
+
+
+
+  <ros2_control name="tripod" type="system">
+    <hardware>
+
+
+      <!-- Use gazebo as hardware simulation. -->
+      <xacro:if value="$(arg use_gazebo)">
+        <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+
+      </xacro:if>
+
+      <!-- Use fake components. -->
+      <xacro:unless value="$(arg use_gazebo)">
+        <plugin>fake_components/GenericSystem</plugin>
+      </xacro:unless>
+
+
+
+    </hardware>
+
+    <joint name="tripod_joint">
+      <state_interface name="position">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="velocity">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+      <state_interface name="effort">
+        <param name="initial_value">0.0</param>
+      </state_interface>
+
+      <!-- <command_interface name="position"> -->
+      <!--   <param name="min">0.0</param> -->
+      <!--   <param name="max">0.21</param> -->
+      <!-- </command_interface> -->
+      <command_interface name="position"/>
+
+
+    </joint>
+
+      <xacro:if value="$(arg use_gazebo)">
+        <joint name="left_bar_joint_mimic">
+          <!-- <param name="mimic">tripod_joint</param> -->
+          <!-- <param name="multiplier">0.2864183599287582</param> -->
+
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+
+
+
+
+
+        <joint name="left_bar_prism_joint_mimic">
+          <!-- <param name="mimic">tripod_joint</param> -->
+          <!-- <param name="multiplier">0.9861535348976198</param> -->
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+
+
+        <joint name="right_bar_joint_mimic">
+          <!-- <param name="mimic">tripod_joint</param> -->
+          <!-- <param name="multiplier">0.2864183599287582</param> -->
+
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+
+        <joint name="right_bar_prism_joint_mimic">
+          <!-- <param name="mimic">tripod_joint</param> -->
+          <!-- <param name="multiplier">0.9861535348976198</param> -->
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+
+      </xacro:if>
+
+  </ros2_control>
+
+
+
 
 
   <!-- TORSO -->
@@ -195,9 +534,9 @@
     <visual>
       <origin xyz="0 0 0 " rpy="0 0 0" />
       <geometry>
-        <!-- <mesh filename="package://reachy_description/meshes/torso_visual_high.dae" /> -->
-        <mesh filename="file://$(find reachy_description)/meshes/torso_visual_high.dae" />
-        <!-- <mesh filename="file://$(find reachy_description)/meshes/torso_visual_high2.dae" /> -->
+
+        <!-- <mesh filename="file://$(find reachy_description)/meshes/torso_visual_high.dae" /> -->
+        <mesh filename="file://$(find reachy_description)/meshes/torso_visual.dae" />
       </geometry>
 
     </visual>
@@ -217,8 +556,10 @@
     <collision>
       <origin xyz="0 0 0 " rpy="0 0 0" />
       <geometry>
-        <!-- <mesh filename="package://reachy_description/meshes/torso_collider_no_cone.dae" /> -->
-        <mesh filename="file://$(find reachy_description)/meshes/torso_collider_no_cone.dae" />
+
+        <!-- <mesh filename="file://$(find reachy_description)/meshes/torso_collider_no_cone.dae" /> -->
+        <mesh filename="file://$(find reachy_description)/meshes/torso_collider.dae" />
+
       </geometry>
 
     </collision>
@@ -227,23 +568,33 @@
   </link>
 
   <joint name="torso_base" type="fixed">
-    <origin xyz="0.0768 0 ${0.2+back_bar_length}" rpy="0 0 0" />
-    <parent link="back_bar" />
+    <!-- <origin xyz="0.08 0 ${0.235 + back_bar_length}" rpy="0 0 0" /> -->
+    <origin xyz="0.08 0 ${0.235 + back_bar_length}" rpy="0 0 0" />
+    <parent link="back_bar_inner" />
     <child link="torso" />
   </joint>
 
-  <link name="logo">
-    <inertial>
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-      <mass value="0.001" />
-      <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
-    </inertial>
-  </link>
-  <joint name="logo_joint" type="fixed">
-    <origin xyz="0.047 0 0.0" rpy="0 0 0" />
-    <parent link="torso" />
-    <child link="logo" />
-  </joint>
+
+  <!-- <joint name="torso_base" type="fixed"> -->
+  <!--   <origin xyz="0.08 0 1.0" rpy="0 0 0" /> -->
+  <!--   <parent link="base_link" /> -->
+  <!--   <child link="torso" /> -->
+  <!-- </joint> -->
+
+
+
+  <!-- <link name="logo"> -->
+  <!--   <inertial> -->
+  <!--     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" /> -->
+  <!--     <mass value="0.001" /> -->
+  <!--     <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" /> -->
+  <!--   </inertial> -->
+  <!-- </link> -->
+  <!-- <joint name="logo_joint" type="fixed"> -->
+  <!--   <origin xyz="0.047 0 0.0" rpy="0 0 0" /> -->
+  <!--   <parent link="torso" /> -->
+  <!--   <child link="logo" /> -->
+  <!-- </joint> -->
 
 
   <!-- <gazebo reference="torso"> -->
@@ -259,6 +610,9 @@
   />
 
   <!-- RIGHT ARM -->
+
+  <xacro:if value="${right_arm}">
+
   <xacro:arm
     prefix="r" parent="torso" side="right"
     damping="${damping}" friction="${friction}"
@@ -268,6 +622,9 @@
     robot_model="$(arg robot_model)"
   />
 
+</xacro:if>
+
+  <xacro:if value="${right_gripper}">
 
     <xacro:dynamixel_gripper
       prefix="r_hand" parent="r_wrist_out_link" side="right"
@@ -309,10 +666,13 @@
       <parent link="r_hand_palm_link" />
       <child link="r_arm_tip_bottom" />
     </joint>
+</xacro:if>
 
 
 
   <!-- LEFT ARM -->
+  <xacro:if value="${left_arm}">
+
   <xacro:arm
     prefix="l" parent="torso" side="left"
     damping="${damping}" friction="${friction}"
@@ -321,7 +681,9 @@
     wrist_config_file="$(arg left_wrist_config)"
     robot_model="$(arg robot_model)"
   />
+</xacro:if>
 
+  <xacro:if value="${left_gripper}">
 
     <xacro:dynamixel_gripper
       prefix="l_hand" parent="l_wrist_out_link" side="right"
@@ -365,10 +727,15 @@
     </joint>
 
 
+</xacro:if>
+
+<xacro:if value="${left_gripper or right_gripper}">
+
   <xacro:dynamixel_gripper_control
     name="gripper" joint1="l_hand" joint2="r_hand"
     config_file="$(arg grippers_config)"
     />
+</xacro:if>
 
 
 
@@ -388,15 +755,43 @@
   </link>
 
   <joint name="depth_cam_l_optical_joint" type="fixed">
-    <origin xyz="0.002597 0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}" />
-    <parent link="logo" />
+    <origin xyz="0.058 0.025 -0.03" rpy="${radians(-47.5-90.0)} 0.0 ${-pi/2}" />
+    <parent link="torso" />
     <child link="depth_cam_l_optical" />
   </joint>
   <joint name="depth_cam_l_frame_joint" type="fixed">
-    <origin xyz="0.002597 0.009989 0.038089" rpy="0.0 ${radians(48.0)} 0.0" />
-    <parent link="logo" />
+    <origin xyz="0.058 0.025 -0.03" rpy="0.0 ${radians(47.5)} 0.0" />
+    <parent link="torso" />
     <child link="depth_cam_l_frame" />
   </joint>
+
+
+  <link name="depth_cam_rgb_optical">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <mass value="0.001" />
+      <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+    </inertial>
+  </link>
+  <link name="depth_cam_rgb_frame">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <mass value="0.001" />
+      <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+    </inertial>
+  </link>
+
+  <joint name="depth_cam_rgb_optical_joint" type="fixed">
+    <origin xyz="0.058 0.0155 -0.03" rpy="${radians(-47.5-90.0)} 0.0 ${-pi/2}" />
+    <parent link="torso" />
+    <child link="depth_cam_rgb_optical" />
+  </joint>
+  <joint name="depth_cam_rgb_frame_joint" type="fixed">
+    <origin xyz="0.058 0.0155 -0.03" rpy="0.0 ${radians(47.5)} 0.0" />
+    <parent link="torso" />
+    <child link="depth_cam_rgb_frame" />
+  </joint>
+
 
 
   <link name="depth_cam_r_optical">
@@ -414,13 +809,13 @@
     </inertial>
   </link>
   <joint name="depth_cam_r_optical_joint" type="fixed">
-    <origin xyz="0.002597 -0.009989 0.038089" rpy="${radians(-48.0-90.0)} 0.0 ${-pi/2}" />
-    <parent link="logo" />
+    <origin xyz="0.058 -0.025 -0.03" rpy="${radians(-47.5-90.0)} 0.0 ${-pi/2}" />
+    <parent link="torso" />
     <child link="depth_cam_r_optical" />
   </joint>
   <joint name="depth_cam_r_frame_joint" type="fixed">
-    <origin xyz="0.002597 -0.009989 0.038089" rpy="0.0 ${radians(48.0)} 0.0 " />
-    <parent link="logo" />
+    <origin xyz="0.058 -0.025 -0.03" rpy="0.0 ${radians(47.5)} 0.0 " />
+    <parent link="torso" />
     <child link="depth_cam_r_frame" />
   </joint>
 
@@ -597,8 +992,7 @@
 
 
       </camera>
-      <!-- https://github.com/mlherd/ros2_turtlebot3_waffle_intel_realsense -->
-      <!-- <plugin name="intel_realsense_d430_depth_driver" filename="libgazebo_ros_camera.so"> -->
+
       <plugin name="depth_driver" filename="libgazebo_ros_camera.so">
         <ros>
           <namespace>/</namespace>

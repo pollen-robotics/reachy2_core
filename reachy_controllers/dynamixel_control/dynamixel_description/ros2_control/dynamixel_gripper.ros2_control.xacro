@@ -33,19 +33,84 @@
         </xacro:if>
       </hardware>
 
+      <!-- <xacro:unless value="$(arg use_gazebo)"> -->
       <xacro:dynamixel_actuator_control name="${joint1}"/>
       <xacro:dynamixel_actuator_control name="${joint2}"/>
+
 
       <xacro:dynamixel_axis_control name="${joint1}_finger"/>
       <xacro:dynamixel_axis_control name="${joint2}_finger"/>
 
 
-
-
       <xacro:dynamixel_raw_motor_control name="${joint1}_raw_motor_1"/>
       <xacro:dynamixel_raw_motor_control name="${joint2}_raw_motor_1"/>
+      <!-- </xacro:unless> -->
 
     </ros2_control>
+
+    <xacro:if value="$(arg use_gazebo)">
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal" following_joint="${joint1}_finger_proximal" mimic_joint="${joint1}_finger" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal_mimic" following_joint="${joint1}_finger_proximal_mimic" mimic_joint="${joint1}_finger_proximal" multiplier="1" offset="0.0"/> -\-> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal_mimic" following_joint="${joint1}_finger_proximal_mimic" mimic_joint="${joint1}_finger" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_distal" following_joint="${joint1}_finger_distal" mimic_joint="${joint1}_finger" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_distal_mimic" following_joint="${joint1}_finger_distal" mimic_joint="${joint1}_finger" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+
+
+
+
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal" following_joint="${joint2}_finger_proximal" mimic_joint="${joint2}_finger" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal_mimic" following_joint="${joint2}_finger_proximal_mimic" mimic_joint="${joint2}_finger_proximal" multiplier="1" offset="0.0"/> -\-> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal_mimic" following_joint="${joint2}_finger_proximal_mimic" mimic_joint="${joint2}_finger" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_distal" following_joint="${joint2}_finger_distal" mimic_joint="${joint2}_finger" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_distal_mimic" following_joint="${joint2}_finger_distal" mimic_joint="${joint2}_finger" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_proximal" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal_mimic" following_joint="${joint1}_finger_proximal_mimic" mimic_joint="${joint1}_finger_proximal" multiplier="1" offset="0.0"/> -\-> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal_mimic" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_proximal_mimic" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_distal" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_distal" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_distal_mimic" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_distal" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+
+
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_proximal" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+        <!-- <!-\- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal_mimic" following_joint="${joint2}_finger_proximal_mimic" mimic_joint="${joint2}_finger_proximal" multiplier="1" offset="0.0"/> -\-> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal_mimic" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_proximal_mimic" multiplier="-0.4689" offset="0.554" has_pid="true"/> -->
+
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_distal" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_distal" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_distal_mimic" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_distal" multiplier="0.4689" offset="0.0" has_pid="true"/> -->
+
+
+
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_proximal" multiplier="-0.4689" offset="0.554"/>
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal_mimic" following_joint="${joint1}_finger_proximal_mimic" mimic_joint="${joint1}_finger_proximal" multiplier="1" offset="0.0"/> -->
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_proximal_mimic" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_proximal_mimic" multiplier="-0.4689" offset="0.554" />
+
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_distal" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_distal" multiplier="0.4689" offset="-0.554" />
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint1}_finger_distal_mimic" following_joint="${joint1}_finger" mimic_joint="${joint1}_finger_distal_mimic" multiplier="0.4689" offset="-0.554" />
+
+
+
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_proximal" multiplier="-0.4689" offset="0.554"/>
+        <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal_mimic" following_joint="${joint2}_finger_proximal_mimic" mimic_joint="${joint2}_finger_proximal" multiplier="1" offset="0.0"/> -->
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_proximal_mimic" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_proximal_mimic" multiplier="-0.4689" offset="0.554" />
+
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_distal" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_distal" multiplier="0.4689" offset="-0.554" />
+        <xacro:mimic_joint_plugin_gazebo name_prefix="${joint2}_finger_distal_mimic" following_joint="${joint2}_finger" mimic_joint="${joint2}_finger_distal_mimic" multiplier="0.4689" offset="-0.554" />
+
+
+
+
+
+
+
+
+    </xacro:if>
+
 
   </xacro:macro>
 </robot>

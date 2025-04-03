@@ -26,6 +26,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
+
 from reachy_config import (
     BETA,
     DVT,
@@ -218,7 +219,7 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         exec_name="joint_state_broadcaster",
         name="joint_state_broadcaster",
-        namespace="toto",
+        # namespace="/",
         arguments=[
             *(
                 ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
@@ -244,6 +245,34 @@ def launch_setup(context, *args, **kwargs):
             "antenna_forward_position_controller",
             f"'{reachy_config.model}' != '{HEADLESS}'",
         ],
+        [
+            "tripod_forward_position_controller",
+            f"'{reachy_config.model}' != '{MINI}'",
+        ],
+        # [
+        #     "r_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "r_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_shoulder_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_elbow_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
+        # [
+        #     "l_wrist_forward_position_controller",
+        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        # ],
         [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
@@ -275,6 +304,7 @@ def launch_setup(context, *args, **kwargs):
         ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
         ["antenna_mode_controller", f"not {gazebo_py}"],
+        # ["tripod_forward_position_controller", f"not {gazebo_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -339,7 +369,7 @@ def launch_setup(context, *args, **kwargs):
     ### SDK ###
     ###########
     sdk_server_node = TimerAction(
-        period=2.0,
+        period=3.0,
         actions=[
             Node(
                 package="reachy_sdk_server",
@@ -376,19 +406,16 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(start_sdk_server_rl),
     )
 
-    # sdk_server_audio_node = Node(
-    #     package="reachy_sdk_server",
-    #     executable="reachy_grpc_audio_sdk_server",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
-
-    # audio_node = Node(
-    #     package="sound_play",
-    #     executable="soundplay_node.py",
-    #     output="both",
-    #     condition=IfCondition(start_sdk_server_rl),
-    # )
+    sdk_server_audio_server = ExecuteProcess(
+        name="reachy_sdk_audio_server",
+        cmd=["/bin/bash", "-c", "reachy2_sdk_audio_server_rs"],
+        output="both",
+        emulate_tty=True,
+        condition=IfCondition(PythonExpression(f"{start_sdk_server_py}")),
+        # Ensure the process is killed when the launch file is stopped
+        sigterm_timeout="2",  # Grace period before sending SIGKILL (optional)
+        sigkill_timeout="2",  # Time to wait after SIGTERM before sending SIGKILL (optional)
+    )
 
     ####################
     ### Tools et al. ###
@@ -418,16 +445,19 @@ def launch_setup(context, *args, **kwargs):
         condition=IfCondition(foxglove_rl),
     )
 
-    if reachy_config.config["reachy"]["config"]["mobile_base"]["enable"]:
+    if reachy_config.mobile_base["enable"]:
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake_hardware": f"{gazebo_py}"}.items(),
+            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake": f"{fake_py}", "gazebo": f"{gazebo_py}"}.items(),
         )
         nodes.append(mobile_base_node)
 
     gazebo_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
-        launch_arguments={"robot_config": f"{reachy_config.model}"}.items(),
+        launch_arguments={
+            "robot_config": f"{reachy_config.model}",
+            # "robot_model": {BETA if reachy_config.beta else DVT},
+        }.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
 
@@ -456,8 +486,7 @@ def launch_setup(context, *args, **kwargs):
             delay_rviz_after_joint_state_broadcaster_spawner,
             delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
             sdk_server_node,
-            # sdk_server_audio_node,
-            # audio_node,
+            sdk_server_audio_server,
             sdk_server_video_node,
             orbbec_node,
             goto_server_node,
@@ -566,7 +595,7 @@ def launch_setup(context, *args, **kwargs):
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
-        start_control_after_ehtercat,
+        start_control_after_ethercat,
         start_everything_after_control,
         # SetEnvironmentVariable(
         #     name="PYTHONPATH",
