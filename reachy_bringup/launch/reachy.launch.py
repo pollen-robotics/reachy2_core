@@ -12,7 +12,7 @@ from launch.actions import (
     TimerAction,
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit, OnShutdown
+from launch.event_handlers import OnProcessExit, OnProcessStart, OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
@@ -317,27 +317,6 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
-    # antenna_forward_position_controller_spawner = Node(
-    #     package='controller_manager',
-    #     executable='spawner',
-    #     arguments=['antenna_forward_position_controller', '-c', '/controller_manager'],
-    #     condition=IfCondition(
-    #         PythonExpression(
-    #             f"'{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']")
-    #     )
-    # )
-
-    # forward_fan_controller_spawner = Node(
-    #     package='controller_manager',
-    #     executable='spawner',
-    #     arguments=['forward_fan_controller', '-c', '/controller_manager'],
-    # )
-
-    # fan_controller_spawner = Node(
-    #     package='fans_controller',
-    #     executable='fans_controller',
-    # )
-
     kinematics_node = LifecycleNode(
         name="kinematics",
         namespace="",
@@ -517,7 +496,23 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    start_control_after_ethercat = TimerAction(
+    # Mujoco stuff
+    # Replace with your robot's URDF file
+
+    # Replace with your controller configuration file
+
+    # Define the MuJoCo model path
+    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"
+
+    # Define MuJoCo node
+    # node_mujoco_ros2_control = Node(
+    #     package="mujoco_ros2_control",
+    #     executable="mujoco_ros2_control",
+    #     output="both",
+    #     parameters=[robot_description, robot_controllers, {"mujoco_model_path": mujoco_model_path}],
+    # )
+
+    start_control_after_ehtercat = TimerAction(
         period=3.0 if not gazebo_py else 0.5,
         actions=[
             control_node if not gazebo_py else gazebo_node,
@@ -533,40 +528,75 @@ def launch_setup(context, *args, **kwargs):
         cancel_on_shutdown=True,
     )
 
-    # TEMPORARY SPEED LIMIT FORCE
-    safety_speed_limit = 0.5
-    speedlimit_set_announce = TimerAction(
-        period=8.0,
-        actions=[
-            LogInfo(msg=f"Safety speed limitation to {safety_speed_limit}"),
+    # MUJOCO DEMO STUFF
+    import xacro
+    from ament_index_python.packages import get_package_share_directory
+
+    # cart conf
+    mujoco_ros2_control_demos_path = os.path.join(get_package_share_directory("mujoco_ros2_control_demos"))
+    xacro_file = os.path.join(mujoco_ros2_control_demos_path, "urdf", "test_cart_position.xacro.urdf")
+    doc = xacro.parse(open(xacro_file))
+    xacro.process_doc(doc)
+    robot_description = {"robot_description": doc.toxml()}
+    print(robot_description)
+    controller_config_file = os.path.join(mujoco_ros2_control_demos_path, "config", "cartpole_controller_position.yaml")
+    mujoco_model_path = os.path.join(mujoco_ros2_control_demos_path, "mujoco_models", "test_cart.xml")
+
+    # reachy conf
+    reachy2_urdl_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/modified_urdf/reachy2.urdf"
+    with open(reachy2_urdl_path, "r") as f:
+        mujoco_urdf_model = f.read()
+    robot_description = {"robot_description": mujoco_urdf_model}
+    # print(robot_description)
+    controller_config_file = robot_controllers
+    mujoco_model_path = reachy_mujoco_model_path
+
+    node_mujoco_ros2_control = Node(
+        package="mujoco_ros2_control",
+        executable="mujoco_ros2_control",
+        output="screen",
+        parameters=[
+            robot_description,
+            controller_config_file,
+            # {"mujoco_model_path": os.path.join(mujoco_ros2_control_demos_path, "mujoco_models", "test_cart.xml")},
+            {"mujoco_model_path": mujoco_model_path},
         ],
     )
-    speedlimit_set = TimerAction(
-        period=10.0,
-        actions=[
-            ExecuteProcess(
-                name="speedlimit_set",
-                cmd=[
-                    "ros2",
-                    "topic",
-                    "pub",
-                    "/forward_speed_limit_controller/commands",
-                    "std_msgs/msg/Float64MultiArray",
-                    f"{{ data : {[safety_speed_limit] * 19} }}",
-                    "--once",
-                ],
-                output="screen",
-            )
-        ],
+
+    node_robot_state_publisher = Node(
+        package="robot_state_publisher", executable="robot_state_publisher", output="screen", parameters=[robot_description]
     )
+
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_state_broadcaster"], output="screen"
+    )
+
+    load_joint_trajectory_controller = ExecuteProcess(
+        cmd=["ros2", "control", "load_controller", "--set-state", "active", "joint_trajectory_controller"], output="screen"
+    )
+
+    return [
+        # RegisterEventHandler(
+        #     event_handler=OnProcessStart(
+        #         target_action=node_mujoco_ros2_control,
+        #         on_start=[load_joint_state_controller],
+        #     )
+        # ),
+        # RegisterEventHandler(
+        #     event_handler=OnProcessExit(
+        #         target_action=load_joint_state_controller,
+        #         on_exit=[load_joint_trajectory_controller],
+        #     )
+        # ),
+        node_mujoco_ros2_control,
+        node_robot_state_publisher,
+    ]
 
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
         start_control_after_ethercat,
         start_everything_after_control,
-        # speedlimit_set_announce,
-        # speedlimit_set,
         # SetEnvironmentVariable(
         #     name="PYTHONPATH",
         #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",
