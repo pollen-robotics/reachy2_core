@@ -48,3 +48,11 @@ inverted_axes:
   required: true
   schema:
     type: boolean
+
+orientation_limits:
+  type: dict
+    required: true
+    schema:
+      orbita3D_max_angle:
+        type: float
+        required: true

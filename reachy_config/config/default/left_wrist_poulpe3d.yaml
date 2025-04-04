@@ -17,3 +17,5 @@ inverted_axes:
   - false
   - true
   - true
+orientation_limits: 
+  orbita3D_max_angle: 0.7417649320975901 # 42.5 degrees
