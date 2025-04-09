@@ -13,10 +13,19 @@ motors_ratio:
 inverted_axes:
   - false
   - true
-orientation_limits: 
+orientation_limits:
   - !AngleLimits:
-      min: -10000.0 # todo make better limts 
-      max: 10000.0 # todo make better limts  
+      min: -10000.0 # todo make better limts
+      max: 10000.0 # todo make better limts
   - !AngleLimits:
       min: -0.55 # touching at -0.61
       max: 2.9 # touching at 2.94
+motor_gearbox_params:
+  motor_gearbox_ratio: 35.0307692308 #ec45
+  motor_nominal_current: 3.96 #A
+  motor_max_current: 6.0 #A
+  motor_nominal_torque: 0.167 #Nm
+  motor_nominal_velocity: 10.0 #rad/s
+  motor_max_velocity: 10.0 #rad/s
+  motor_efficiency: 0.84
+  motor_gearbox_efficiency: 0.93
