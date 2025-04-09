@@ -249,36 +249,28 @@ def launch_setup(context, *args, **kwargs):
             "tripod_forward_position_controller",
             f"'{reachy_config.model}' != '{MINI}'",
         ],
-        # [
-        #     "r_shoulder_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "r_elbow_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "r_wrist_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "l_shoulder_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "l_elbow_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "l_wrist_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
         [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         [
             "l_arm_forward_position_controller",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        ],
+        [
+            "r_arm_forward_velocity_controller",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        ],
+        [
+            "l_arm_forward_velocity_controller",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+        ],
+        [
+            "r_arm_forward_effort_controller",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+        ],
+        [
+            "l_arm_forward_effort_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
         ],
         ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
