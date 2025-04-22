@@ -401,7 +401,7 @@
   </joint>
 
 
-  <xacro:if value="$(arg use_gazebo)">
+  <xacro:if value="${'$(arg use_gazebo)'=='true' or '$(arg use_mujoco)'=='true'}">
     <!-- 3rd order poly fit (pretty good): -0.82037152*x**3 + 0.74428024*x**2 -0.40967047*x +
     0.20061291 -->
     <!-- <xacro:mimic_joint_plugin_gazebo name_prefix="tripod_left_rev"
@@ -459,16 +459,22 @@
         <param name="initial_value">0.0</param>
       </state_interface>
 
-      <!-- <command_interface name="position"> -->
-      <!--   <param name="min">0.0</param> -->
-      <!--   <param name="max">0.21</param> -->
-      <!-- </command_interface> -->
-      <command_interface name="position" />
+
+      <xacro:unless value="$(arg use_mujoco)">
+        <command_interface name="position" />
+      </xacro:unless>
+      <xacro:if value="$(arg use_mujoco)">
+        <command_interface name="position_pid" />
+        <param name="position_kp">20</param>
+        <param name="position_ki">10</param>
+        <param name="position_kd">1</param>
+        <param name="position_i_max">10000</param>
+      </xacro:if>
 
 
     </joint>
 
-    <xacro:if value="$(arg use_gazebo)">
+    <xacro:if value="${'$(arg use_gazebo)'=='true' or '$(arg use_mujoco)'=='true'}">
       <joint name="left_bar_joint_mimic">
         <!-- <param name="mimic">tripod_joint</param> -->
         <!-- <param name="multiplier">0.2864183599287582</param> -->
