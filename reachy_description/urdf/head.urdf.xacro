@@ -330,6 +330,8 @@
 
     <link name="tof_camera_optical">
     </link>
+    <link name="tof_camera_optical_frame">
+    </link>
 
 
     <joint name="tof_camera_optical_joint" type="fixed">
@@ -340,6 +342,16 @@
       <!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
       <parent link="tof_camera" />
       <child link="tof_camera_optical" />
+    </joint>
+
+    <joint name="tof_camera_optical_frame_joint" type="fixed">
+      <!-- these values have to be these values otherwise the gazebo camera
+             image won't be aligned properly with the frame it is supposedly
+             originating from -->
+      <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
+      <parent link="tof_camera" />
+      <child link="tof_camera_optical_frame" />
     </joint>
 
 
