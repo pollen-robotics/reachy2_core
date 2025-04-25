@@ -456,7 +456,8 @@ def launch_setup(context, *args, **kwargs):
 
     # Mujoco stuff
     # Define the MuJoCo model path
-    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"  # TODO better
+    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/scene.xml"  # TODO better
+    # reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"  # TODO better
 
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
