@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 500  # Hz
+    update_rate: 500 # Hz
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -25,7 +25,6 @@ controller_manager:
 
     # l_wrist_forward_position_controller:
     #   type: forward_command_controller/ForwardCommandController
-
 
     r_arm_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
@@ -70,7 +69,6 @@ joint_state_broadcaster:
   ros__parameters:
     use_sim_time: false
 
-
 tripod_forward_position_controller:
   ros__parameters:
     joints:
@@ -78,7 +76,6 @@ tripod_forward_position_controller:
       # - left_bar_joint_mimic
     interface_name: position
     use_sim_time: false
-
 
 neck_forward_position_controller:
   ros__parameters:
@@ -88,7 +85,6 @@ neck_forward_position_controller:
       - neck_yaw
     interface_name: position
     use_sim_time: false
-
 
 # r_shoulder_forward_position_controller:
 #   ros__parameters:
@@ -152,7 +148,6 @@ r_arm_forward_position_controller:
     interface_name: position
     use_sim_time: false
 
-
 l_arm_forward_position_controller:
   ros__parameters:
     joints:
@@ -174,7 +169,6 @@ antenna_forward_position_controller:
     interface_name: position
     use_sim_time: false
 
-
 gripper_forward_position_controller:
   ros__parameters:
     joints:
@@ -190,7 +184,6 @@ gripper_current_controller:
       - l_hand_raw_motor_1
     interface_name: current
     use_sim_time: false
-
 
 antenna_current_controller:
   ros__parameters:
@@ -208,7 +201,6 @@ antenna_mode_controller:
     interface_name: mode
     use_sim_time: false
 
-
 gripper_mode_controller:
   ros__parameters:
     joints:
@@ -216,7 +208,6 @@ gripper_mode_controller:
       - r_hand_raw_motor_1
     interface_name: mode
     use_sim_time: false
-
 
 forward_torque_controller:
   ros__parameters:
@@ -288,7 +279,6 @@ forward_speed_limit_controller:
       - antenna_right_raw_motor
     interface_name: speed_limit
     use_sim_time: false
-
 
 forward_pid_controller:
   ros__parameters:

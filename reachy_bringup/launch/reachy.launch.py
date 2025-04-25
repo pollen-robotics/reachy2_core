@@ -12,7 +12,7 @@ from launch.actions import (
     TimerAction,
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit, OnShutdown
+from launch.event_handlers import OnProcessExit, OnProcessStart, OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
@@ -26,7 +26,6 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
-
 from reachy_config import (
     BETA,
     DVT,
@@ -70,6 +69,9 @@ def launch_setup(context, *args, **kwargs):
     orbbec_rl = LaunchConfiguration("orbbec")
     orbbec_py = orbbec_rl.perform(context) == "true"
     verbose_logger_log_level_rl = LaunchConfiguration("log")
+    mujoco_rl = LaunchConfiguration("mujoco")
+    mujoco_py = mujoco_rl.perform(context) == "true"
+
     nodes = []
 
     clear_bags_and_logs(nb_runs_to_keep=25)
@@ -82,26 +84,10 @@ def launch_setup(context, *args, **kwargs):
     reachy_config = ReachyConfig()
     LogInfo(msg="Reachy config : \n{}".format(reachy_config)).execute(context=context)
 
-    # reachy_urdf_config = (
-    #     f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
-    #     f" use_gazebo:=true" if gazebo_py else " ",
-    #     f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
-    #     f" robot_config:={reachy_config.model}",
-    #     f' neck_config:="{reachy_config.neck_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake_neck.yaml", context)}"',
-    #     f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
-    #     f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
-    #     f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-    #     f' left_shoulder_config:="{reachy_config.left_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_shoulder.yaml", context)}"',
-    #     f' left_elbow_config:="{reachy_config.left_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_elbow.yaml", context)}"',
-    #     f' left_wrist_config:="{reachy_config.left_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-    #     f' antenna_config:="{reachy_config.antenna_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
-    #     f' grippers_config:="{reachy_config.grippers_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
-    #     f' robot_model:="{BETA if reachy_config.beta else DVT }"',  # for now PVT urdf is assumed to be the same as dvt
-    # )
-
     reachy_urdf_config = (
-        f" use_fake_hardware:=true" if fake_py or gazebo_py else " ",
+        f" use_fake_hardware:=true" if fake_py or gazebo_py or mujoco_py else " ",
         f" use_gazebo:=true" if gazebo_py else " ",
+        f" use_mujoco:=true" if mujoco_py else " ",
         f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
         f" robot_config:={reachy_config.model}",
         f' neck_config:="{reachy_config.part_conf("neck_config", fake= fake_py or gazebo_py)}"',
@@ -113,14 +99,6 @@ def launch_setup(context, *args, **kwargs):
         f' left_wrist_config:="{reachy_config.part_conf("left_wrist_config", fake= fake_py or gazebo_py)}"',
         f' antenna_config:="{reachy_config.part_conf("antenna_config", fake= fake_py or gazebo_py)}"',
         f' grippers_config:="{reachy_config.part_conf("grippers_config", fake= fake_py or gazebo_py)}"',
-        # f' right_shoulder_config:="{reachy_config.right_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_shoulder.yaml", context)}"',
-        # f' right_elbow_config:="{reachy_config.right_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_r_elbow.yaml", context)}"',
-        # f' right_wrist_config:="{reachy_config.right_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-        # f' left_shoulder_config:="{reachy_config.left_shoulder_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_shoulder.yaml", context)}"',
-        # f' left_elbow_config:="{reachy_config.left_elbow_config if not fake_py and not gazebo_py else get_fake("orbita2d_description", "fake_l_elbow.yaml", context)}"',
-        # f' left_wrist_config:="{reachy_config.left_wrist_config if not fake_py and not gazebo_py else get_fake("orbita3d_description", "fake.yaml", context)}"',
-        # f' antenna_config:="{reachy_config.antenna_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
-        # f' grippers_config:="{reachy_config.grippers_config if not fake_py and not gazebo_py else get_fake("dynamixel_description", "two_fake.yaml", context)}"',
         f' robot_model:="{BETA if reachy_config.beta else DVT }"',  # for now PVT urdf is assumed to be the same as dvt
     )
     LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
@@ -171,11 +149,6 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    # start_mobile_base = "true" if None not in reachy_config.mobile_base_config.values() else "false"
-    # start_mobile_base_py = start_mobile_base == "true"
-
-    # LogInfo(msg=f"Launching Mobile Base: {start_mobile_base_py}").execute(context=context)
-
     #############
     ### Nodes ###
     #############
@@ -223,7 +196,7 @@ def launch_setup(context, *args, **kwargs):
         arguments=[
             *(
                 ("joint_state_broadcaster", "-p", gazebo_state_broadcaster_params)
-                if gazebo_py
+                if gazebo_py or mujoco_py
                 else ("joint_state_broadcaster",)
             ),
             "--controller-manager",
@@ -249,30 +222,6 @@ def launch_setup(context, *args, **kwargs):
             "tripod_forward_position_controller",
             f"'{reachy_config.model}' != '{MINI}'",
         ],
-        # [
-        #     "r_shoulder_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "r_elbow_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "r_wrist_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "l_shoulder_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "l_elbow_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
-        # [
-        #     "l_wrist_forward_position_controller",
-        #     f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
-        # ],
         [
             "r_arm_forward_position_controller",
             f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
@@ -296,15 +245,14 @@ def launch_setup(context, *args, **kwargs):
 
     generic_controllers = []
     for controller, condition in [
-        ["forward_torque_controller", f"not {gazebo_py}"],
-        ["forward_torque_limit_controller", f"not {gazebo_py}"],
-        ["forward_speed_limit_controller", f"not {gazebo_py}"],
-        ["forward_pid_controller", f"not {fake_py} and not {gazebo_py}"],
-        ["gripper_current_controller", f"not {fake_py} and not {gazebo_py}"],
-        ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py}"],
-        ["antenna_current_controller", f"not {fake_py} and not {gazebo_py}"],
-        ["antenna_mode_controller", f"not {gazebo_py}"],
-        # ["tripod_forward_position_controller", f"not {gazebo_py}"],
+        ["forward_torque_controller", f"not {gazebo_py} and not {mujoco_py}"],
+        ["forward_torque_limit_controller", f"not {gazebo_py} and not {mujoco_py}"],
+        ["forward_speed_limit_controller", f"not {gazebo_py} and not {mujoco_py}"],
+        ["forward_pid_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
+        ["gripper_current_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
+        ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
+        ["antenna_current_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
+        ["antenna_mode_controller", f"not {gazebo_py} and not {mujoco_py}"],
     ]:
         generic_controllers.append(
             Node(
@@ -316,27 +264,6 @@ def launch_setup(context, *args, **kwargs):
                 condition=IfCondition(PythonExpression(condition)),
             )
         )
-
-    # antenna_forward_position_controller_spawner = Node(
-    #     package='controller_manager',
-    #     executable='spawner',
-    #     arguments=['antenna_forward_position_controller', '-c', '/controller_manager'],
-    #     condition=IfCondition(
-    #         PythonExpression(
-    #             f"'{reachy_config.model}' not in ['{HEADLESS}', '{STARTER_KIT_RIGHT_NO_HEAD}']")
-    #     )
-    # )
-
-    # forward_fan_controller_spawner = Node(
-    #     package='controller_manager',
-    #     executable='spawner',
-    #     arguments=['forward_fan_controller', '-c', '/controller_manager'],
-    # )
-
-    # fan_controller_spawner = Node(
-    #     package='fans_controller',
-    #     executable='fans_controller',
-    # )
 
     kinematics_node = LifecycleNode(
         name="kinematics",
@@ -354,25 +281,26 @@ def launch_setup(context, *args, **kwargs):
         arguments=[robot_controllers],
     )
 
-    # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
-    trajectory_controllers = []
-    for traj_controller in [
-        "left_arm_controller",
-        "right_arm_controller",
-        "head_controller",
-        "left_gripper_controller",
-        "right_gripper_controller",
-    ]:
-        trajectory_controllers.append(
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                exec_name=traj_controller,
-                arguments=[traj_controller, "-c", "/controller_manager"],
-                output="screen",
-                parameters=[{"use_sim_time": True}],
-            )
-        )
+    # Used for MoveIt support, to be maintenained
+    # # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
+    # # trajectory_controllers = []
+    # # for traj_controller in [
+    # #     "left_arm_controller",
+    # #     "right_arm_controller",
+    # #     "head_controller",
+    # #     "left_gripper_controller",
+    # #     "right_gripper_controller",
+    # # ]:
+    # #     trajectory_controllers.append(
+    # #         Node(
+    # #             package="controller_manager",
+    # #             executable="spawner",
+    # #             exec_name=traj_controller,
+    # #             arguments=[traj_controller, "-c", "/controller_manager"],
+    # #             output="screen",
+    # #             parameters=[{"use_sim_time": True}],
+    # #         )
+    # #     )
 
     delay_robot_controller_spawner_after_joint_state_broadcaster_spawner = RegisterEventHandler(
         event_handler=OnProcessExit(
@@ -380,7 +308,7 @@ def launch_setup(context, *args, **kwargs):
             on_exit=[
                 *generic_controllers,
                 *(position_controllers if controllers_py != "trajectory" else []),
-                *(trajectory_controllers if controllers_py == "trajectory" else []),
+                # DO NOT REMOVE, unused for now but, who knows # *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
         ),
@@ -457,7 +385,7 @@ def launch_setup(context, *args, **kwargs):
         ),
     )
 
-    # start foxglove bridge like this ros2 launch foxglove_bridge foxglove_bridge_launch.xml
+    # start foxglove bridge like this > ros2 launch foxglove_bridge foxglove_bridge_launch.xml
     foxglove_bridge_node = Node(
         package="foxglove_bridge",
         executable="foxglove_bridge",
@@ -469,7 +397,11 @@ def launch_setup(context, *args, **kwargs):
     if reachy_config.mobile_base["enable"]:
         mobile_base_node = IncludeLaunchDescription(
             PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
-            launch_arguments={"use_sim_time": f"{gazebo_py}", "fake": f"{fake_py}", "gazebo": f"{gazebo_py}"}.items(),
+            launch_arguments={
+                "use_sim_time": f"{gazebo_py or mujoco_py}",
+                "fake": f"{fake_py}",
+                "gazebo": f"{gazebo_py}",
+            }.items(),
         )
         nodes.append(mobile_base_node)
 
@@ -477,7 +409,6 @@ def launch_setup(context, *args, **kwargs):
         PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
         launch_arguments={
             "robot_config": f"{reachy_config.model}",
-            # "robot_model": {BETA if reachy_config.beta else DVT},
         }.items(),
     )
     # For Gazebo simulation, we should not launch the controller manager (Gazebo does its own stuff)
@@ -502,6 +433,12 @@ def launch_setup(context, *args, **kwargs):
         [
             # *((control_node,) if not gazebo_py else (gazebo_node,)),  # SetUseSimTime does not seem to work...
             # fake_camera_node,
+            Node(
+                package="reachy_gazebo",
+                executable="fake_gz_interface",
+                output="screen",
+                parameters=[{"robot_config": reachy_config.model}],
+            ),
             robot_state_publisher_node,
             joint_state_broadcaster_spawner,
             delay_rviz_after_joint_state_broadcaster_spawner,
@@ -517,10 +454,36 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    start_control_after_ethercat = TimerAction(
+    # Mujoco stuff
+    # Define the MuJoCo model path
+    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/scene.xml"  # TODO better
+    # reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"  # TODO better
+
+    node_mujoco_ros2_control = Node(
+        package="mujoco_ros2_control",
+        executable="mujoco_ros2_control",
+        output="screen",
+        parameters=[
+            robot_description,
+            robot_controllers,
+            {"use_sim_time": True},
+            {"mujoco_model_path": reachy_mujoco_model_path},
+        ],
+    )
+
+    fake_interface = Node(
+        package="reachy_gazebo",
+        executable="fake_gz_interface",
+        output="screen",
+        parameters=[{"robot_config": reachy_config.model}],
+        condition=IfCondition(mujoco_rl),
+    )
+
+    start_control_after_ehtercat = TimerAction(
         period=3.0 if not gazebo_py else 0.5,
         actions=[
-            control_node if not gazebo_py else gazebo_node,
+            node_mujoco_ros2_control if mujoco_py else gazebo_node if gazebo_py else control_node,
+            fake_interface,
         ],
         cancel_on_shutdown=True,
     )
@@ -533,40 +496,11 @@ def launch_setup(context, *args, **kwargs):
         cancel_on_shutdown=True,
     )
 
-    # TEMPORARY SPEED LIMIT FORCE
-    safety_speed_limit = 0.5
-    speedlimit_set_announce = TimerAction(
-        period=8.0,
-        actions=[
-            LogInfo(msg=f"Safety speed limitation to {safety_speed_limit}"),
-        ],
-    )
-    speedlimit_set = TimerAction(
-        period=10.0,
-        actions=[
-            ExecuteProcess(
-                name="speedlimit_set",
-                cmd=[
-                    "ros2",
-                    "topic",
-                    "pub",
-                    "/forward_speed_limit_controller/commands",
-                    "std_msgs/msg/Float64MultiArray",
-                    f"{{ data : {[safety_speed_limit] * 19} }}",
-                    "--once",
-                ],
-                output="screen",
-            )
-        ],
-    )
-
     return [
         *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
         ethercat_master_server,
-        start_control_after_ethercat,
+        start_control_after_ehtercat,
         start_everything_after_control,
-        # speedlimit_set_announce,
-        # speedlimit_set,
         # SetEnvironmentVariable(
         #     name="PYTHONPATH",
         #     value=f"/home/reachy/.local/lib/python3.10/site-packages/:{os.environ['PYTHONPATH']}",
@@ -590,6 +524,12 @@ def generate_launch_description():
                 "gazebo",
                 default_value="false",
                 description="Start a fake_hardware with gazebo as simulation tool.",
+                choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "mujoco",
+                default_value="false",
+                description="Start a fake_hardware with mujoco as simulation tool.",
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(

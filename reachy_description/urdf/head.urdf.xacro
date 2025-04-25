@@ -1,49 +1,52 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:arg name="depth_camera" default="true"/>
+  <xacro:arg name="depth_camera" default="true" />
   <xacro:property name="camera_link" value="0.05" /> <!-- Size of square 'camera' box -->
-  <xacro:property name="camera_convergence" value="0.0" /> <!-- convergence angle (rad) of the cameras. 0=parallel-->
+  <xacro:property name="camera_convergence" value="0.0" /> <!-- convergence angle (rad) of the
+  cameras. 0=parallel-->
 
 
-  <xacro:property name="neck_length" value="0.05"/>
-  <xacro:property name="neck_radius" value="0.03"/>
-  <xacro:property name="neck_mass" value="0.5"/>
+  <xacro:property name="neck_length" value="0.05" />
+  <xacro:property name="neck_radius" value="0.03" />
+  <xacro:property name="neck_mass" value="0.5" />
 
 
   <!-- <xacro:property name="neck_offset_x" value="-0.0465"/> -->
-  <xacro:property name="neck_offset_x" value="0.0"/>
-  <xacro:property name="neck_offset_y" value="0"/>
-  <xacro:property name="neck_offset_z" value="0.115"/>
-  <xacro:property name="neck_offset_pitch" value="${radians(10)}"/> <!-- 10 degrees -->
-  <xacro:property name="neck_offset_yaw" value="0.0"/>
+  <xacro:property name="neck_offset_x" value="0.0" />
+  <xacro:property name="neck_offset_y" value="0" />
+  <xacro:property name="neck_offset_z" value="0.115" />
+  <xacro:property name="neck_offset_pitch" value="${radians(10)}" /> <!-- 10 degrees -->
+  <xacro:property name="neck_offset_yaw" value="0.0" />
 
-  <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro"/>
+  <xacro:include filename="$(find orbita3d_description)/urdf/orbita3d.urdf.xacro" />
 
-  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel.ros2_control.xacro"/>
+  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel.ros2_control.xacro" />
 
-    <material name="camblack">
-        <color rgba="0.2 0.2 0.2 1"/>
-    </material>
-    <material name="neckwhite">
-        <color rgba="0.9 0.9 0.9 1"/>
-    </material>
+  <material name="camblack">
+    <color rgba="0.2 0.2 0.2 1" />
+  </material>
+  <material name="neckwhite">
+    <color rgba="0.9 0.9 0.9 1" />
+  </material>
 
 
   <xacro:macro name="head" params="parent damping friction neck_config antenna_config">
 
-    <!-- xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="${pi} ${neck_offset_pitch} ${neck_offset_yaw}" -->
-  <xacro:orbita3d
-    name="neck" parent="${parent}"
-    length="${neck_length}" radius="${neck_radius}" mass="${neck_mass}"
-    xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="0 ${neck_offset_pitch} ${neck_offset_yaw}"
-    damping="${damping}" friction="${friction}"
-    config_file="${neck_config}"
+    <!-- xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}" rpy="${pi} ${neck_offset_pitch}
+    ${neck_offset_yaw}" -->
+    <xacro:orbita3d
+      name="neck" parent="${parent}"
+      length="${neck_length}" radius="${neck_radius}" mass="${neck_mass}"
+      xyz="${neck_offset_x} ${neck_offset_y} ${neck_offset_z}"
+      rpy="0 ${neck_offset_pitch} ${neck_offset_yaw}"
+      damping="${damping}" friction="${friction}"
+      config_file="${neck_config}"
     />
 
 
     <joint name="neck_fixed" type="fixed">
-      <origin xyz="0 0 0" rpy="0.0 0.0 0.0"/>
+      <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
       <parent link="neck_out_link" />
       <child link="head" />
     </joint>
@@ -53,43 +56,43 @@
 
     <link name="head">
       <inertial>
-        <origin xyz="0.0116978 -0.00022144 0.0611705" rpy="0.0 0.0 0.0"/>
-        <mass value="0.325"/>
-	 <inertia ixx="0.00085265" ixy="-0.00000298" ixz="0.00000932"
-		  iyx="-0.00000298" iyy="0.00063136" iyz="-0.000000039"
-		  izx="0.00000932" izy="-0.000000039" izz="0.0008951"/>
+        <origin xyz="0.0116978 -0.00022144 0.0611705" rpy="0.0 0.0 0.0" />
+        <mass value="0.325" />
+        <inertia ixx="0.00085265" ixy="-0.00000298" ixz="0.00000932"
+          iyx="-0.00000298" iyy="0.00063136" iyz="-0.000000039"
+          izx="0.00000932" izy="-0.000000039" izz="0.0008951" />
       </inertial>
       <visual>
 
-        <origin xyz="0.00 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <origin xyz="0.00 0.0 0.0" rpy="0.0 0.0 0.0" />
 
         <geometry>
 
-          <mesh filename="file://$(find reachy_description)/meshes/head_visual.dae"/>
+          <mesh filename="file://$(find reachy_description)/meshes/head_visual.dae" />
           <!-- <mesh filename="file://$(find reachy_description)/meshes/head_visual_high.dae"/> -->
         </geometry>
 
       </visual>
       <collision>
-	<!-- <origin xyz="0.0 0.0 0.05" rpy="0.0 0.0 0.0"/> -->
-	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+        <!-- <origin xyz="0.0 0.0 0.05" rpy="0.0 0.0 0.0"/> -->
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
         <geometry>
-	  <!-- <box size="0.12 0.162 0.1"/> -->
-          <mesh filename="file://$(find reachy_description)/meshes/head_collider.dae"/>
+          <!-- <box size="0.12 0.162 0.1"/> -->
+          <mesh filename="file://$(find reachy_description)/meshes/head_collider.dae" />
         </geometry>
       </collision>
     </link>
 
     <link name="head_base">
       <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
       </inertial>
     </link>
 
     <joint name="head_base_fixed" type="fixed">
-      <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/>
+      <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0" />
       <parent link="head" />
       <child link="head_base" />
     </joint>
@@ -115,18 +118,17 @@
     <!-- </joint> -->
 
 
-
-    <link name="head_tip" >
+    <link name="head_tip">
       <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
       </inertial>
     </link>
 
     <joint name="head_tip_fixed" type="fixed">
       <!-- between the cameras -->
-      <origin xyz="0.05643 0.0 0.062" rpy="0 0.0 0"/>
+      <origin xyz="0.05643 0.0 0.062" rpy="0 0.0 0" />
 
       <!-- Rotation center -->
       <!-- <origin xyz="0.0 0 0.0" rpy="0.0 0.0 0"/> -->
@@ -135,23 +137,22 @@
     </joint>
 
 
-
     <!-- test antennas -->
 
-    <link name="antenna_left_link" >
+    <link name="antenna_left_link">
       <inertial>
-	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-	<mass value="0.001"/>
-	<inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
       </inertial>
       <!-- cylinder geometry -->
       <visual>
-	<origin xyz="0 0 0" rpy="0 0 0"/>
-	<geometry>
-	  <!-- <cylinder length="0.1" radius="0.005"/> -->
-        <mesh filename="file://$(find reachy_description)/meshes/head_antenna_visual.dae" />
-	</geometry>
-	<material name="neckwhite"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <!-- <cylinder length="0.1" radius="0.005"/> -->
+          <mesh filename="file://$(find reachy_description)/meshes/head_antenna_visual.dae" />
+        </geometry>
+        <material name="neckwhite" />
       </visual>
 
     </link>
@@ -161,30 +162,31 @@
       <!-- <origin xyz="-0.023 0.055 0.091" rpy="${radians(145-90)} 0.0 ${radians(32)}"/> -->
       <!-- <origin xyz="-0.023 0.055 0.091" rpy="${radians(32)} ${radians(-55)} ${radians(-90)}"/> -->
       <!-- Horrible... -->
-      <origin xyz="-0.023 0.055 0.091" rpy="${radians(4.225)} ${radians(-60.807)} ${radians(-57.500)}"/>
+      <origin xyz="-0.023 0.055 0.091"
+        rpy="${radians(4.225)} ${radians(-60.807)} ${radians(-57.500)}" />
 
 
       <parent link="head" />
       <child link="antenna_left_link" />
-      <axis xyz="0 0 1"/>
-      <limit effort="0.0" velocity="0.0" lower="${-pi/2}" upper="${pi/2}"/>
+      <axis xyz="0 0 1" />
+      <limit effort="0.0" velocity="0.0" lower="${-pi/2}" upper="${pi/2}" />
     </joint>
 
 
-    <link name="antenna_right_link" >
+    <link name="antenna_right_link">
       <inertial>
-	<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-	<mass value="0.001"/>
-	<inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
       </inertial>
       <!-- cylinder geometry -->
       <visual>
-	<origin xyz="0 0 0" rpy="0 0 0"/>
-	<geometry>
-	  <!-- <cylinder length="0.1" radius="0.005"/> -->
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <!-- <cylinder length="0.1" radius="0.005"/> -->
           <mesh filename="file://$(find reachy_description)/meshes/head_antenna_visual.dae" />
-	</geometry>
-	<material name="neckwhite"/>
+        </geometry>
+        <material name="neckwhite" />
       </visual>
 
     </link>
@@ -193,137 +195,170 @@
     <joint name="antenna_right" type="revolute">
       <!-- <origin xyz="0.0 -0.1 0.1" rpy="0 0.0 0"/> -->
 
-      <origin xyz="-0.023 -0.055 0.091" rpy="${radians(-4.225)} ${radians(-60.807)} ${radians(57.500)}"/>
+      <origin xyz="-0.023 -0.055 0.091"
+        rpy="${radians(-4.225)} ${radians(-60.807)} ${radians(57.500)}" />
 
       <parent link="head" />
       <child link="antenna_right_link" />
-      <axis xyz="0 0 1"/>
+      <axis xyz="0 0 1" />
 
-      <limit effort="0.0" velocity="0.0" lower="${-pi/2}" upper="${pi/2}"/>
+      <limit effort="0.0" velocity="0.0" lower="${-pi/2}" upper="${pi/2}" />
     </joint>
 
-  <xacro:dynamixel_control
-    name="antenna" joint1="left" joint2="right"
-    config_file="${antenna_config}"
+    <xacro:dynamixel_control
+      name="antenna" joint1="left" joint2="right"
+      config_file="${antenna_config}"
     />
-
 
 
     <!-- Reachy Cameras -->
 
 
-      <joint name="left_cam_fixed" type="fixed">
-	<origin xyz="0.03531 0.0325 0.062" rpy="0.0 0.0  ${-camera_convergence/2.0}"/>
-	<parent link="head" />
-	<child link="left_camera" />
-      </joint>
+    <joint name="left_cam_fixed" type="fixed">
+      <origin xyz="0.03531 0.0325 0.062" rpy="0.0 0.0  ${-camera_convergence/2.0}" />
+      <parent link="head" />
+      <child link="left_camera" />
+    </joint>
 
-      <link name="left_camera" >
+    <link name="left_camera">
 
-	<inertial>
-	  <mass value="1e-5" />
-	  <origin xyz="0 0 0" rpy="0 0 0"/>
-	  <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-	</inertial>
-      </link>
-
-
-
-
-      <link name="left_camera_optical">
       <inertial>
-        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
-        <mass value="0.001"/>
-        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6"/>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
       </inertial>
-      </link>
+    </link>
 
 
-      <joint name="left_camera_optical_joint" type="fixed">
-	<!-- these values have to be these values otherwise the gazebo camera
+    <link name="left_camera_optical">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
+
+
+    <joint name="left_camera_optical_joint" type="fixed">
+      <!-- these values have to be these values otherwise the gazebo camera
              image won't be aligned properly with the frame it is supposedly
              originating from -->
-	<origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}"/>
-	<parent link="left_camera"/>
-	<child link="left_camera_optical"/>
-      </joint>
+      <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <parent link="left_camera" />
+      <child link="left_camera_optical" />
+    </joint>
 
 
-
-      <joint name="right_cam_fixed" type="fixed">
-	<origin xyz="0.03531 -0.0325 0.062" rpy="0.0 0.0 ${camera_convergence/2.0}"/>
-	<parent link="head" />
-	<child link="right_camera" />
-      </joint>
-
-
-
-      <link name="right_camera" >
-
-	<inertial>
-	  <mass value="1e-5" />
-	  <origin xyz="0 0 0" rpy="0 0 0"/>
-	  <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-	</inertial>
-      </link>
+    <link name="left_camera_optical_frame">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+        <mass value="0.001" />
+        <inertia ixx="1.0e-6" ixy="1.0e-8" ixz="1.0e-8" iyy="1.0e-6" iyz="1.0e-8" izz="1.0e-6" />
+      </inertial>
+    </link>
 
 
-      <link name="right_camera_optical">
-      </link>
+    <joint name="left_camera_optical_frame_joint" type="fixed">
+
+      <origin xyz="0.01 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <parent link="left_camera" />
+      <child link="left_camera_optical_frame" />
+    </joint>
 
 
-      <joint name="right_camera_optical_joint" type="fixed">
-	<!-- these values have to be these values otherwise the gazebo camera
+    <joint name="right_cam_fixed" type="fixed">
+      <origin xyz="0.03531 -0.0325 0.062" rpy="0.0 0.0 ${camera_convergence/2.0}" />
+      <parent link="head" />
+      <child link="right_camera" />
+    </joint>
+
+
+    <link name="right_camera">
+
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+
+
+    <link name="right_camera_optical">
+    </link>
+
+
+    <joint name="right_camera_optical_joint" type="fixed">
+      <!-- these values have to be these values otherwise the gazebo camera
              image won't be aligned properly with the frame it is supposedly
              originating from -->
-	<origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}"/>
-	<!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
-	<parent link="right_camera"/>
-	<child link="right_camera_optical"/>
-      </joint>
+      <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
+      <parent link="right_camera" />
+      <child link="right_camera_optical" />
+    </joint>
 
 
+    <link name="right_camera_optical_frame">
+    </link>
 
 
-      <joint name="tof_cam_fixed" type="fixed">
-	<origin xyz="0.05643 0 0.061954" rpy="0.0 0.0 0"/>
-	<parent link="head" />
-	<child link="tof_camera" />
-      </joint>
+    <joint name="right_camera_optical_frame_joint" type="fixed">
+
+      <origin xyz="0.01 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
+      <parent link="right_camera" />
+      <child link="right_camera_optical_frame" />
+    </joint>
 
 
-
-      <link name="tof_camera" >
-
-	<inertial>
-	  <mass value="1e-5" />
-	  <origin xyz="0 0 0" rpy="0 0 0"/>
-	  <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-	</inertial>
-      </link>
+    <joint name="tof_cam_fixed" type="fixed">
+      <origin xyz="0.05643 0 0.061954" rpy="0.0 0.0 0" />
+      <parent link="head" />
+      <child link="tof_camera" />
+    </joint>
 
 
-      <link name="tof_camera_optical">
-      </link>
+    <link name="tof_camera">
+
+      <inertial>
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
 
 
-      <joint name="tof_camera_optical_joint" type="fixed">
-	<!-- these values have to be these values otherwise the gazebo camera
+    <link name="tof_camera_optical">
+    </link>
+    <link name="tof_camera_optical_frame">
+    </link>
+
+
+    <joint name="tof_camera_optical_joint" type="fixed">
+      <!-- these values have to be these values otherwise the gazebo camera
              image won't be aligned properly with the frame it is supposedly
              originating from -->
-	<origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}"/>
-	<!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
-	<parent link="tof_camera"/>
-	<child link="tof_camera_optical"/>
-      </joint>
+      <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
+      <parent link="tof_camera" />
+      <child link="tof_camera_optical" />
+    </joint>
 
-
+    <joint name="tof_camera_optical_frame_joint" type="fixed">
+      <!-- these values have to be these values otherwise the gazebo camera
+             image won't be aligned properly with the frame it is supposedly
+             originating from -->
+      <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}" />
+      <!-- <origin xyz="0.03531 -0.0325 0.056" rpy="${-pi/2.0} 0 ${-pi/2.0}"/> -->
+      <parent link="tof_camera" />
+      <child link="tof_camera_optical_frame" />
+    </joint>
 
 
     <xacro:if value="$(arg use_gazebo)">
       <gazebo reference="left_camera">
-	<!-- <link name="left_camera"> -->
-	<sensor type="camera" name="left_camera">
+        <!-- <link name="left_camera"> -->
+        <sensor type="camera" name="left_camera">
 
 
           <!-- Set always_on only sensor, not on plugin -->
@@ -345,7 +380,7 @@
               <!-- <k3>0.0</k3> -->
               <!-- <p1>-0.021608084440231323</p1> -->
               <!-- <p2>0.006187329534441233</p2> -->
-	      <k1>0.0</k1>
+              <k1>0.0</k1>
               <k2>0.0</k2>
               <k3>0.0</k3>
               <p1>0.0</p1>
@@ -364,12 +399,12 @@
 
           <!-- Use camera, not camera_triggered -->
           <plugin name="left_camera_controller" filename="libgazebo_ros_camera.so">
-              <ros>
-                <namespace>/teleop_camera</namespace>
-                <remapping>image_raw:=image_raw</remapping>
-                <remapping>camera_info:=camera_info</remapping>
-              </ros>
-              <camera_name>left_image</camera_name>
+            <ros>
+              <namespace>/teleop_camera</namespace>
+              <remapping>image_raw:=image_raw</remapping>
+              <remapping>camera_info:=camera_info</remapping>
+            </ros>
+            <camera_name>left_image</camera_name>
 
 
             <!-- <ros> -->
@@ -392,13 +427,8 @@
       </gazebo>
 
 
-
-
-
-
-
       <gazebo reference="right_camera">
-	<sensor type="camera" name="right_camera">
+        <sensor type="camera" name="right_camera">
 
 
           <!-- Set always_on only sensor, not on plugin -->
@@ -420,7 +450,7 @@
               <!-- <k3>0.0</k3> -->
               <!-- <p1>-0.021608084440231323</p1> -->
               <!-- <p2>0.006187329534441233</p2> -->
-	      <k1>0.0</k1>
+              <k1>0.0</k1>
               <k2>0.0</k2>
               <k3>0.0</k3>
               <p1>0.0</p1>
@@ -438,12 +468,12 @@
 
           <!-- Use camera, not camera_triggered -->
           <plugin name="right_camera_controller" filename="libgazebo_ros_camera.so">
-              <ros>
-                <namespace>/teleop_camera</namespace>
-                <remapping>image_raw:=image_raw</remapping>
-                <remapping>camera_info:=camera_info</remapping>
-              </ros>
-              <camera_name>right_image</camera_name>
+            <ros>
+              <namespace>/teleop_camera</namespace>
+              <remapping>image_raw:=image_raw</remapping>
+              <remapping>camera_info:=camera_info</remapping>
+            </ros>
+            <camera_name>right_image</camera_name>
 
             <!-- <ros> -->
             <!--   <namespace>custom_ns</namespace> -->
@@ -463,7 +493,6 @@
           </plugin>
         </sensor>
       </gazebo>
-
 
 
       <!-- <link name="depth_camera_link" > -->
@@ -496,7 +525,6 @@
       <!-- </joint> -->
 
 
-
       <!-- <xacro:if value="$(arg depth_camera)"> -->
       <!-- 	<gazebo reference="depth_camera_link"> -->
       <!-- 	  <sensor name="depth_camera" type="depth"> -->
@@ -516,7 +544,8 @@
       <!--         </clip> -->
       <!--       </camera> -->
       <!--       <!-\- https://github.com/mlherd/ros2_turtlebot3_waffle_intel_realsense -\-> -->
-      <!--       <!-\- <plugin name="intel_realsense_d430_depth_driver" filename="libgazebo_ros_camera.so"> -\-> -->
+      <!--       <!-\- <plugin name="intel_realsense_d430_depth_driver"
+      filename="libgazebo_ros_camera.so"> -\-> -->
       <!--       <plugin name="intel_realsense_r200_depth_driver" filename="libgazebo_ros_camera.so"> -->
       <!--         <ros> -->
       <!--           <namespace>depth_camera</namespace> -->
@@ -535,9 +564,8 @@
       <!-- 	  </sensor> -->
       <!-- 	</gazebo> -->
       <!-- </xacro:if> -->
-</xacro:if>
+    </xacro:if>
 
 
-
-</xacro:macro>
+  </xacro:macro>
 </robot>

@@ -1,10 +1,14 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_actuator_control.ros2_control.xacro"/>
-  <!-- <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_gripper_axis_control.ros2_control.xacro"/> -->
-  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_axis_control.ros2_control.xacro"/>
-  <xacro:include filename="$(find dynamixel_description)/ros2_control/dynamixel_raw_motor_control.ros2_control.xacro"/>
+  <xacro:include
+    filename="$(find dynamixel_description)/ros2_control/dynamixel_actuator_control.ros2_control.xacro" />
+  <!-- <xacro:include filename="$(find
+  dynamixel_description)/ros2_control/dynamixel_gripper_axis_control.ros2_control.xacro"/> -->
+  <xacro:include
+    filename="$(find dynamixel_description)/ros2_control/dynamixel_axis_control.ros2_control.xacro" />
+  <xacro:include
+    filename="$(find dynamixel_description)/ros2_control/dynamixel_raw_motor_control.ros2_control.xacro" />
 
 
   <xacro:macro name="dynamixel_control" params="name joint1 joint2 config_file ">
@@ -22,26 +26,30 @@
           <xacro:if value="$(arg use_gazebo)">
             <plugin>gazebo_ros2_control/GazeboSystem</plugin>
           </xacro:if>
-
-          <!-- Use fake components. -->
+          <!-- Else, when gazebo is not enabled -->
           <xacro:unless value="$(arg use_gazebo)">
-            <!-- <plugin>fake_components/GenericSystem</plugin> -->
-	    <!-- test -->
-          <plugin>dynamixel_2joints_system_hwi/DynamixelSystem</plugin>
-          <param name="dxl_config_file">${config_file}</param>
-
+            <!-- If mujoco mode is enabled -->
+            <xacro:if value="$(arg use_mujoco)">
+              <plugin>mujoco_ros2_control/MujocoSystem</plugin>
+            </xacro:if>
+            <!-- If neither gazebo nor mujoco are enabled -->
+            <xacro:unless value="$(arg use_mujoco)">
+              <!-- Pollen controller fake system -->
+              <plugin>dynamixel_2joints_system_hwi/DynamixelSystem</plugin>
+              <param name="dxl_config_file">${config_file}</param>
+            </xacro:unless>
           </xacro:unless>
         </xacro:if>
       </hardware>
 
-      <xacro:dynamixel_actuator_control name="${name}_${joint1}"/>
-      <xacro:dynamixel_actuator_control name="${name}_${joint2}"/>
+      <xacro:dynamixel_actuator_control name="${name}_${joint1}" />
+      <xacro:dynamixel_actuator_control name="${name}_${joint2}" />
 
       <xacro:dynamixel_axis_control name="${name}_${joint1}" />
       <xacro:dynamixel_axis_control name="${name}_${joint2}" />
 
-      <xacro:dynamixel_raw_motor_control name="${name}_${joint1}_raw_motor"/>
-      <xacro:dynamixel_raw_motor_control name="${name}_${joint2}_raw_motor"/>
+      <xacro:dynamixel_raw_motor_control name="${name}_${joint1}_raw_motor" />
+      <xacro:dynamixel_raw_motor_control name="${name}_${joint2}_raw_motor" />
 
     </ros2_control>
 
