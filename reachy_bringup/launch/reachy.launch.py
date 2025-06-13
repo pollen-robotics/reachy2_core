@@ -135,7 +135,7 @@ def launch_setup(context, *args, **kwargs):
 
     # Determine the rviz configuration file name based on mode and start_rviz argument
     is_real_mode = not (fake_py or gazebo_py or mujoco_py)
-    
+
     if start_rviz_py not in ["true", "false"]:
         # A specific rviz config file name was passed (e.g., "my_setup" from launch arg "start_rviz=my_setup")
         # This will be resolved to "{passed_name}.rviz"
@@ -150,7 +150,7 @@ def launch_setup(context, *args, **kwargs):
         [
             FindPackageShare("reachy_description"),
             "config",
-            _rviz_filename, # Use the determined string
+            _rviz_filename,  # Use the determined string
         ]
     )
 
