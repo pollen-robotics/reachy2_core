@@ -467,12 +467,11 @@ def launch_setup(context, *args, **kwargs):
 
     # Mujoco stuff
     # Define the MuJoCo model path
-    if mujoco_py:
-        scene_name = LaunchConfiguration("scene").perform(context)
-        reachy_mujoco_model_path = os.path.join(SCENES_DIR, f"{scene_name}_scene.xml")
+    scene_name = LaunchConfiguration("scene").perform(context)
+    reachy_mujoco_model_path = os.path.join(SCENES_DIR, f"{scene_name}_scene.xml")
 
-        if not os.path.exists(reachy_mujoco_model_path):
-            raise RuntimeError(f"Scene file not found: {reachy_mujoco_model_path}")
+    if not os.path.exists(reachy_mujoco_model_path):
+        raise RuntimeError(f"Scene file not found: {reachy_mujoco_model_path}")
 
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
