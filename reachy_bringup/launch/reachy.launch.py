@@ -49,6 +49,17 @@ from reachy_utils.launch import (
     title_print,
 )
 
+SCENES_DIR = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf"
+
+def get_scene_choices():
+    files = os.listdir(SCENES_DIR)
+    scenes = []
+    for f in files:
+        if f.endswith(".xml"):
+            scene_name = f.replace("_scene.xml", "").replace(".xml", "")
+            scenes.append(scene_name)
+    return scenes
+
 
 def launch_setup(context, *args, **kwargs):
     # perform(context) returns arg as a string, hence the conversion
@@ -339,7 +350,7 @@ def launch_setup(context, *args, **kwargs):
         executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
-        arguments=["--gazebo"] if gazebo_py else [],
+        arguments=["--gazebo"] if (gazebo_py or mujoco_py) else [],
     )
 
     orbbec_node = IncludeLaunchDescription(
@@ -456,8 +467,11 @@ def launch_setup(context, *args, **kwargs):
 
     # Mujoco stuff
     # Define the MuJoCo model path
-    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/scene.xml"  # TODO better
-    # reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"  # TODO better
+    scene_name = LaunchConfiguration("scene").perform(context)
+    reachy_mujoco_model_path = os.path.join(SCENES_DIR, f"{scene_name}_scene.xml")
+
+    if not os.path.exists(reachy_mujoco_model_path):
+        raise RuntimeError(f"Scene file not found: {reachy_mujoco_model_path}")
 
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
@@ -510,6 +524,7 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
+    scene_choices = get_scene_choices()
     return LaunchDescription(
         [
             # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79
@@ -531,6 +546,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start a fake_hardware with mujoco as simulation tool.",
                 choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "scene",
+                default_value="table",
+                description="Select the Mujoco scene to load.",
+                choices=scene_choices,
             ),
             DeclareLaunchArgument(
                 "start_sdk_server",
