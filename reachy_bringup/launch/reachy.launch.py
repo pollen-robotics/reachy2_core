@@ -26,6 +26,7 @@ from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
+
 from reachy_config import (
     BETA,
     DVT,
@@ -48,6 +49,17 @@ from reachy_utils.launch import (
     get_rviz_conf_choices,
     title_print,
 )
+
+SCENES_DIR = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf"
+
+def get_scene_choices():
+    files = os.listdir(SCENES_DIR)
+    scenes = []
+    for f in files:
+        if f.endswith(".xml"):
+            scene_name = f.replace("_scene.xml", "").replace(".xml", "")
+            scenes.append(scene_name)
+    return scenes
 
 
 def launch_setup(context, *args, **kwargs):
@@ -135,11 +147,24 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+    # Determine the rviz configuration file name based on mode and start_rviz argument
+    is_real_mode = not (fake_py or gazebo_py or mujoco_py)
+
+    if start_rviz_py not in ["true", "false"]:
+        # A specific rviz config file name was passed (e.g., "my_setup" from launch arg "start_rviz=my_setup")
+        # This will be resolved to "{passed_name}.rviz"
+        _rviz_filename = f"{start_rviz_py}.rviz"
+    else:
+        if is_real_mode:
+            _rviz_filename = "reachy.rviz"
+        else:
+            _rviz_filename = "reachy_simu.rviz"
+
     rviz_config_file = PathJoinSubstitution(
         [
             FindPackageShare("reachy_description"),
             "config",
-            f"{start_rviz_py}.rviz" if start_rviz_py != "true" else "reachy.rviz",
+            _rviz_filename,  # Use the determined string
         ]
     )
 
@@ -359,7 +384,7 @@ def launch_setup(context, *args, **kwargs):
         executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
-        arguments=["--gazebo"] if gazebo_py else [],
+        arguments=["--gazebo"] if (gazebo_py or mujoco_py) else [],
     )
 
     orbbec_node = IncludeLaunchDescription(
@@ -476,8 +501,11 @@ def launch_setup(context, *args, **kwargs):
 
     # Mujoco stuff
     # Define the MuJoCo model path
-    reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/scene.xml"  # TODO better
-    # reachy_mujoco_model_path = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf/reachy2.xml"  # TODO better
+    scene_name = LaunchConfiguration("scene").perform(context)
+    reachy_mujoco_model_path = os.path.join(SCENES_DIR, f"{scene_name}_scene.xml")
+
+    if not os.path.exists(reachy_mujoco_model_path):
+        raise RuntimeError(f"Scene file not found: {reachy_mujoco_model_path}")
 
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
@@ -530,6 +558,7 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
+    scene_choices = get_scene_choices()
     return LaunchDescription(
         [
             # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79
@@ -551,6 +580,12 @@ def generate_launch_description():
                 default_value="false",
                 description="Start a fake_hardware with mujoco as simulation tool.",
                 choices=["true", "false"],
+            ),
+            DeclareLaunchArgument(
+                "scene",
+                default_value="table",
+                description="Select the Mujoco scene to load.",
+                choices=scene_choices,
             ),
             DeclareLaunchArgument(
                 "start_sdk_server",

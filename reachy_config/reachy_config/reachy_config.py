@@ -49,11 +49,17 @@ REACHY_CONFIG_PATH = os.path.expanduser("~/.reachy_config")
 
 
 class ReachyConfig:
-    def __init__(self, custom_config_file_path="~/.reachy_config_override", no_print=False):
+    def __init__(
+        self, custom_config_file_path="~/.reachy_config_override", no_print=False
+    ):
         self.custom_config_dir = os.path.expanduser(custom_config_file_path)
         # in package/default
-        self.default_config_dir = os.path.dirname(os.path.realpath(__file__)) + "/../config/default"
-        self.schema_config_dir = os.path.dirname(os.path.realpath(__file__)) + "/../config/schema"
+        self.default_config_dir = (
+            os.path.dirname(os.path.realpath(__file__)) + "/../config/default"
+        )
+        self.schema_config_dir = (
+            os.path.dirname(os.path.realpath(__file__)) + "/../config/schema"
+        )
         self.config = {}
         # create a logger object
         self.logger = get_logger()
@@ -82,14 +88,18 @@ class ReachyConfig:
                 self.config[default_config_file_name] = {}
             self.config[default_config_file_name]["mode"] = "default"
             self.config[default_config_file_name]["path"] = str(
-                Path(os.path.join(self.default_config_dir, default_config_file)).resolve()
+                Path(
+                    os.path.join(self.default_config_dir, default_config_file)
+                ).resolve()
             )
             # package_path
             self.config[default_config_file_name]["package_path"] = str(
                 Path(os.path.join(self.default_config_dir, "..")).resolve()
             )
 
-            self.config[default_config_file_name]["config"] = load_yaml(self.config[default_config_file_name]["path"])
+            self.config[default_config_file_name]["config"] = load_yaml(
+                self.config[default_config_file_name]["path"]
+            )
 
             # Add schema validation if it exists
             schema_file_path = os.path.join(self.schema_config_dir, default_config_file)
@@ -101,7 +111,9 @@ class ReachyConfig:
             if "~" in custom_config_file or not ".yaml" in custom_config_file:
                 continue
             # print("parsing custom config: ", custom_config_file)
-            custom_config_file_path = os.path.join(self.custom_config_dir, custom_config_file)
+            custom_config_file_path = os.path.join(
+                self.custom_config_dir, custom_config_file
+            )
 
             # self.config[os.path.splitext(custom_config_file)[0]] = load_yaml(custom_config_file_path)
             # print file name
@@ -117,7 +129,11 @@ class ReachyConfig:
             # TODO in case custom override is an add, we should load it and link it without creating file
             if not custom_config_file_name in self.config:
                 if not no_print:
-                    print("\033[93m" + f"[{custom_config_file}] custom configuration added" + "\033[0m")
+                    print(
+                        "\033[93m"
+                        + f"[{custom_config_file}] custom configuration added"
+                        + "\033[0m"
+                    )
                 self.config[custom_config_file_name] = {}
                 self.config[custom_config_file_name]["mode"] = "override"
                 self.config[custom_config_file_name]["config"] = custom_config
@@ -134,14 +150,22 @@ class ReachyConfig:
             # default_config = self.config[custom_config_file_name]["config"]
 
             # compare custom content with default one stored at same file adress -> self.config[custom_config_file_name]["config"]
-            if custom_config != self.config[custom_config_file_name]["config"]:  # some overriding will be done
+            if (
+                custom_config != self.config[custom_config_file_name]["config"]
+            ):  # some overriding will be done
                 if not no_print:
-                    print("\033[93m" + f"[{custom_config_file}] configuration override" + "\033[0m")
+                    print(
+                        "\033[93m"
+                        + f"[{custom_config_file}] configuration override"
+                        + "\033[0m"
+                    )
 
                 # override default_config in place
                 # merged_config_content = default_config  # for clarity as merge is done in place
                 # self.config[custom_config_file_name]["config"] same as default content, will now merge in place
-                merge_config(self.config[custom_config_file_name]["config"], custom_config)
+                merge_config(
+                    self.config[custom_config_file_name]["config"], custom_config
+                )
                 override_path = REACHY_CONFIG_PATH + f"/{custom_config_file}"
 
                 # Update config object
@@ -203,11 +227,18 @@ class ReachyConfig:
                 self.dvt = False
                 self.pvt = True
             else:
-                raise ValueError(
-                    'Bad serial number "{}". Expected values are {}'.format(
-                        reachy_config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA, PVT]
-                    )
+                # default to PVT
+                self.beta = False
+                self.dvt = False
+                self.pvt = True
+                self.logger.info(
+                    f"No reachy2 model specified {reachy_config[REACHY_CONFIG_SERIAL_NUMBER]}, defaulting to PVT."
                 )
+                # raise ValueError(
+                #     'Bad serial number "{}". Expected values are {}'.format(
+                #         reachy_config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA, PVT]
+                #     )
+                # )
 
         # Robot model (Only full kit for now, TODO)
         self.model = reachy_config[REACHY_CONFIG_MODEL]
@@ -238,8 +269,7 @@ class ReachyConfig:
 
     def __str__(self):
         return (
-            "robot_model".ljust(25, " ")
-            + "{}\n".format(self.model)
+            "robot_model".ljust(25, " ") + "{}\n".format(self.model)
             # + "neck_config".ljust(25, " ")
             # + "{}\n".format(self.neck_config)
             # + "right_arm_config".ljust(25, " ")
@@ -253,20 +283,25 @@ class ReachyConfig:
     def part_conf(self, part, fake=False):
         def build_part_conf_path(part, mode):
             # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
-            part_config_key = self.config["reachy"]["config"]["reachy2_configuration"][part]["default"].replace(".yaml", "")
+            part_config_key = self.config["reachy"]["config"]["reachy2_configuration"][
+                part
+            ]["default"].replace(".yaml", "")
             # print("part_config_key: ", part_config_key)
             # print("part: ", self.config[f"{part_config_key}"]["path"])
             if mode != "fake":
                 return self.config[part_config_key]["path"]
             else:
-                return f'{self.config[part_config_key]["package_path"]}/fake/{self.config["reachy"]["config"]["reachy2_configuration"][part]["fake"]}'
+                return f"{self.config[part_config_key]['package_path']}/fake/{self.config['reachy']['config']['reachy2_configuration'][part]['fake']}"
             # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
 
         # force fake mode
         if fake:
             return build_part_conf_path(part, "fake")
         else:  # can be fake, override or default,
-            return build_part_conf_path(part, self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"])
+            return build_part_conf_path(
+                part,
+                self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"],
+            )
 
     @property
     def mobile_base(self):
