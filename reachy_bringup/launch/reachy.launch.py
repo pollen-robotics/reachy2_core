@@ -52,6 +52,7 @@ from reachy_utils.launch import (
 
 SCENES_DIR = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf"
 
+
 def get_scene_choices():
     files = os.listdir(SCENES_DIR)
     scenes = []
@@ -139,8 +140,10 @@ def launch_setup(context, *args, **kwargs):
             "config",
             (
                 f"reachy_{reachy_config.model}_controllers.yaml"
-                if controllers_py == "default"
-                else f"ros2_controllers_ultimate_combo_top_moumoute.yaml"
+                if controllers_py == "default" and not mujoco_py
+                else f"reachy_{reachy_config.model}_controllers_mujoco.yaml"
+                if mujoco_py
+                else "ros2_controllers_ultimate_combo_top_moumoute.yaml"
             ),
         ]
     )
@@ -268,6 +271,24 @@ def launch_setup(context, *args, **kwargs):
             )
         )
 
+    velocity_controllers = []
+    for controller, condition in [
+        [
+            "zuuu_forward_command_controller",
+            f"'{reachy_config.model}' != '{MINI}' and {mujoco_py}",
+        ],
+    ]:
+        velocity_controllers.append(
+            Node(
+                package="controller_manager",
+                exec_name=controller,
+                name=controller,
+                executable="spawner",
+                arguments=[controller, "-c", "/controller_manager"],
+                condition=IfCondition(PythonExpression(condition)),
+            )
+        )
+
     generic_controllers = []
     for controller, condition in [
         ["forward_torque_controller", f"not {gazebo_py} and not {mujoco_py}"],
@@ -333,6 +354,7 @@ def launch_setup(context, *args, **kwargs):
             on_exit=[
                 *generic_controllers,
                 *(position_controllers if controllers_py != "trajectory" else []),
+                *(velocity_controllers if mujoco_py else []),
                 # DO NOT REMOVE, unused for now but, who knows # *(trajectory_controllers if controllers_py == "trajectory" else []),
                 kinematics_node,
             ],
