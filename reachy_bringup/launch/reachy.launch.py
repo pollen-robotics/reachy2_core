@@ -52,6 +52,7 @@ from reachy_utils.launch import (
 
 SCENES_DIR = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf"
 
+
 def get_scene_choices():
     files = os.listdir(SCENES_DIR)
     scenes = []
@@ -273,7 +274,8 @@ def launch_setup(context, *args, **kwargs):
     velocity_controllers = []
     for controller, condition in [
         [
-            "zuuu_forward_command_controller", f"'{reachy_config.model}' != '{MINI}' and {mujoco_py}",
+            "zuuu_forward_command_controller",
+            f"'{reachy_config.model}' != '{MINI}' and {mujoco_py}",
         ],
     ]:
         velocity_controllers.append(
