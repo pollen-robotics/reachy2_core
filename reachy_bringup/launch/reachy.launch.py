@@ -50,7 +50,7 @@ from reachy_utils.launch import (
     title_print,
 )
 
-SCENES_DIR = "/home/reachy/dev/reachy2_mujoco/reachy2_mujoco/description/mjcf"
+SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
 
 
 def get_scene_choices():
