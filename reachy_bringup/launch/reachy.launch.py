@@ -585,7 +585,7 @@ def generate_launch_description():
             ),
             DeclareLaunchArgument(
                 "scene",
-                default_value="table",
+                default_value="base",
                 description="Select the Mujoco scene to load.",
                 choices=scene_choices,
             ),
