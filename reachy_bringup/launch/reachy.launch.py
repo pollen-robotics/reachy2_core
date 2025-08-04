@@ -386,7 +386,10 @@ def launch_setup(context, *args, **kwargs):
         executable="reachy_grpc_video_sdk_server",
         output="both",
         condition=IfCondition(start_sdk_server_rl),
-        arguments=["--gazebo"] if (gazebo_py or mujoco_py) else [],
+        arguments=[
+            *(["--gazebo"] if (gazebo_py or mujoco_py) else []),
+            *(["--fake"] if fake_py else []),
+        ],
     )
 
     orbbec_node = IncludeLaunchDescription(
