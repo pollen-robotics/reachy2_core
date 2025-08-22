@@ -379,7 +379,11 @@ def launch_setup(context, *args, **kwargs):
                     str(
                         ReachyCoreMode.GAZEBO
                         if gazebo_py
-                        else ReachyCoreMode.MUJOCO if mujoco_py else ReachyCoreMode.FAKE if fake_py else ReachyCoreMode.REAL
+                        else ReachyCoreMode.MUJOCO
+                        if mujoco_py
+                        else ReachyCoreMode.FAKE
+                        if fake_py
+                        else ReachyCoreMode.REAL
                     ),
                 ],
                 condition=IfCondition(start_sdk_server_rl),
