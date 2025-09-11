@@ -19,8 +19,9 @@ from launch.actions import (
     TimerAction,
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit, OnShutdown
+from launch.event_handlers import OnProcessExit, OnProcessIO, OnShutdown
 from launch.events import Shutdown
+from launch.events.process import ProcessIO
 from launch.substitutions import (
     LocalSubstitution,
     PathJoinSubstitution,
@@ -339,3 +340,42 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
 
     for dir in dirs[nb_runs_to_keep:]:
         shutil.rmtree(dir)
+
+
+# wait for a specific log line to appear in the output of a process, then announce and trigger actions
+def wait_for_log_to_start(
+    target_action, matcher: str, announce, result_actions, delay=1.0
+):
+    def on_matching_output(matcher: str, result):
+        def on_output(event: ProcessIO):
+            for line in event.text.decode().splitlines():
+                if matcher in line:
+                    return result
+
+        return on_output
+
+    return RegisterEventHandler(
+        OnProcessIO(
+            target_action=target_action,
+            on_stdout=on_matching_output(
+                matcher,
+                [
+                    LogInfo(msg=announce),
+                    # OpaqueFunction(function=create_nodes_when_ready),
+                    # instead opaque on a lambda that does the same job
+                    TimerAction(
+                        period=delay,
+                        actions=[
+                            OpaqueFunction(
+                                function=lambda context,
+                                *args,
+                                **kwargs: result_actions,
+                                # instead opaque on a lambda that does the same job
+                            ),
+                        ],
+                        cancel_on_shutdown=True,
+                    ),
+                ],
+            ),
+        )
+    )

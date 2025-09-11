@@ -21,7 +21,6 @@ from launch.event_handlers import (
     OnProcessStart,
     OnShutdown,
 )
-from launch.events.process import ProcessIO
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
@@ -58,6 +57,7 @@ from reachy_utils.launch import (
     get_node_list,
     get_rviz_conf_choices,
     title_print,
+    wait_for_log_to_start,
 )
 
 SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
@@ -600,79 +600,6 @@ def launch_setup(context, *args, **kwargs):
         cancel_on_shutdown=True,
     )
 
-    # def start_nodes_when_topic_published(nodes, topic, msg_type):
-    #     """
-    #     Returns an OpaqueFunction that launches `nodes` only after `topic`
-    #     has published at least once with message type `msg_type`.
-    #     """
-
-    #     def _wait_for_topic(context, *args, **kwargs):
-    #         rclpy.init(args=None)
-    #         temp_node = RclpyNode("launch_waiter")
-
-    #         got_msg = []
-
-    #         def cb(msg):
-    #             got_msg.append(True)
-    #             temp_node.destroy_subscription(sub)
-
-    #         sub = temp_node.create_subscription(msg_type, topic, cb, 10)
-
-    #         # Block until first message is received
-    #         while not got_msg:
-    #             rclpy.spin_once(temp_node, timeout_sec=0.1)
-
-    #         temp_node.destroy_node()
-    #         rclpy.shutdown()
-
-    #         return nodes
-
-    #     return OpaqueFunction(function=_wait_for_topic)
-
-    def start_nodes_when_log_matches(target_action, pattern: bytes, nodes):
-        """
-        Launch `nodes` once when `target_action` prints a line containing `pattern`,
-        then unregister the event handler.
-        """
-        handler = None  # forward declaration
-
-        def _on_stdout(event, context):
-            nonlocal handler
-            text = event.text.decode(errors="ignore")
-            if pattern.decode() in text:
-                # unregister so it doesn't trigger again
-                context.unregister_event_handler(handler)
-                return nodes  # must return iterable of actions
-            return []
-
-        handler = RegisterEventHandler(
-            OnProcessIO(target_action=target_action, on_stdout=_on_stdout)
-        )
-        return handler
-
-    def create_nodes_when_ready(context):
-        return [*nodes]
-        return TimerAction(
-            period=4.0,
-            actions=[
-                *nodes,
-            ],
-            cancel_on_shutdown=True,
-        )
-
-    OpaqueFunction(function=create_nodes_when_ready)
-
-    def on_matching_output(matcher: str, result):
-        def on_output(event: ProcessIO):
-            for line in event.text.decode().splitlines():
-                if matcher in line:
-                    return result
-
-        return on_output
-
-    def wait_for_log_to_start(target_action, matcher: str, announce, result_actions):
-        handler = None
-
     start_everything_after_control = (
         TimerAction(
             period=4.0 if not gazebo_py else 1.5,
@@ -682,35 +609,14 @@ def launch_setup(context, *args, **kwargs):
             cancel_on_shutdown=True,
         )
         if not mujoco_py
-        else RegisterEventHandler(
-            OnProcessIO(
-                target_action=node_mujoco_ros2_control,
-                on_stdout=on_matching_output(
-                    "WebSocket connected!",
-                    [
-                        LogInfo(msg='Spawn request says "{}"'),
-                        OpaqueFunction(function=create_nodes_when_ready),
-                        # [*nodes] if b"WebSocket connected!" in event.text else [],
-                    ],
-                ),
-            )
+        else wait_for_log_to_start(
+            target_action=node_mujoco_ros2_control,
+            matcher="WebSocket connected!",
+            announce="Mujoco WebSocket connected! Starting all nodes...",
+            result_actions=nodes,
+            delay=3.0,
         )
     )
-
-    # RegisterEventHandler(
-    #     OnProcessIO(
-    #         target_action=node_mujoco_ros2_control,
-    #         on_stdout=lambda event: LogInfo(
-    #             msg='Spawn request says "{}"'.format(event.text.decode().strip())
-    #         ),
-    #     )
-    # )
-
-    # start_nodes_when_log_matches(
-    #         target_action=node_mujoco_ros2_control,
-    #         pattern=b"WebSocket connected!",
-    #         nodes=nodes,
-    #     )
 
     return [
         *build_watchers_from_node_list(
