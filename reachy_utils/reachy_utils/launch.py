@@ -18,9 +18,14 @@ from launch.actions import (
     SetLaunchConfiguration,
     TimerAction,
 )
+from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit, OnShutdown
 from launch.events import Shutdown
-from launch.substitutions import LocalSubstitution, PathJoinSubstitution
+from launch.substitutions import (
+    LocalSubstitution,
+    PathJoinSubstitution,
+    PythonExpression,
+)
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from rclpy.logging import get_logging_directory
@@ -85,15 +90,20 @@ ROSBAG_TOPICS = [
 
 # Helper function to get configuration file path
 def get_fake(package: str, filename: str, context: LaunchContext) -> str:
-    return PathJoinSubstitution([FindPackageShare(package), "config", filename]).perform(context)
+    return PathJoinSubstitution(
+        [FindPackageShare(package), "config", filename]
+    ).perform(context)
 
 
-def make_blup(sound: str):
+def make_blup(sound: str, simulation: bool) -> ExecuteProcess:
     return ExecuteProcess(
         cmd=["aplay", f"/home/reachy/dev/reachy2_sounds/{sound}"],
         output="both",
         log_cmd=True,
         shell=True,
+        condition=IfCondition(
+            PythonExpression(f"not {simulation}"),
+        ),
     )
 
 
@@ -101,7 +111,9 @@ def get_rviz_conf_choices() -> list[str]:
     """Lists all .rviz files in reachy_description/config, stripping the .rviz extension."""
 
     rviz_config_choices = []
-    for file in os.listdir(os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"):
+    for file in os.listdir(
+        os.path.dirname(os.path.realpath(__file__)) + "/../../reachy_description/config"
+    ):
         if file.endswith(".rviz"):
             rviz_config_choices.append(file[:-5])
     return rviz_config_choices
@@ -124,7 +136,9 @@ def parseTacus(tacus, context):
 
     elif isinstance(tacus, (IncludeLaunchDescription, LaunchDescription)):
         # launchDescription does not have a condition attribute
-        if isinstance(tacus, LaunchDescription) or (tacus.condition is not None and tacus.condition.evaluate(context=context)):
+        if isinstance(tacus, LaunchDescription) or (
+            tacus.condition is not None and tacus.condition.evaluate(context=context)
+        ):
             browse_sub_tacus(tacus.visit(context=context))
 
     elif isinstance(tacus, RegisterEventHandler):
@@ -134,7 +148,15 @@ def parseTacus(tacus, context):
         browse_sub_tacus(tacus.actions)
 
     elif isinstance(
-        tacus, (DeclareLaunchArgument, LogInfo, ExecuteProcess, GroupAction, OpaqueFunction, SetLaunchConfiguration)
+        tacus,
+        (
+            DeclareLaunchArgument,
+            LogInfo,
+            ExecuteProcess,
+            GroupAction,
+            OpaqueFunction,
+            SetLaunchConfiguration,
+        ),
     ):
         pass
     else:
@@ -146,7 +168,7 @@ def parseTacus(tacus, context):
 
 
 def title_print(title: str) -> LogInfo:
-    return LogInfo(msg=f"\n{'-'*50}\n{' '*20}{title}\n{'-'*50}\n")
+    return LogInfo(msg=f"\n{'-' * 50}\n{' ' * 20}{title}\n{'-' * 50}\n")
 
 
 def get_node_list(nodes, context: LaunchContext):
@@ -190,7 +212,9 @@ def check_node_status(context):
                 # EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")).execute(context)
                 # send the emit event after a timer
                 TimerAction(
-                    period=float(SHUTDOWN_GRACE_PERIOD),  # sadly TimerAction does not accept int
+                    period=float(
+                        SHUTDOWN_GRACE_PERIOD
+                    ),  # sadly TimerAction does not accept int
                     actions=[
                         EmitEvent(event=Shutdown(reason=f"Node failed : [{name}]")),
                     ],
@@ -198,7 +222,9 @@ def check_node_status(context):
                 # os.kill(os.getpid(), signal.SIGINT)
 
 
-def watcher_report(nb_node: int, delay: float = 10.0) -> TimerAction:
+def watcher_report(
+    nb_node: int, delay: float = 10.0, simulation: bool = False
+) -> TimerAction:
     """Sets up a timer to log a report on node statuses after a delay."""
 
     def print_report(context):
@@ -211,12 +237,14 @@ def watcher_report(nb_node: int, delay: float = 10.0) -> TimerAction:
         period=delay,
         actions=[
             OpaqueFunction(function=lambda context: print_report(context)),
-            make_blup(CORE_UP_SOUND),
+            make_blup(CORE_UP_SOUND, simulation),
         ],
     )
 
 
-def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHandler]:
+def build_watchers_from_node_list(
+    node_list: list[Node], simulation: bool
+) -> list[RegisterEventHandler]:
     """Creates event handlers to monitor node exits."""
     watchmen = []
     for node in node_list:
@@ -225,13 +253,15 @@ def build_watchers_from_node_list(node_list: list[Node]) -> list[RegisterEventHa
                 event_handler=OnProcessExit(
                     target_action=node,
                     on_exit=[
-                        OpaqueFunction(function=lambda context: check_node_status(context)),
+                        OpaqueFunction(
+                            function=lambda context: check_node_status(context)
+                        ),
                     ],
                 )
             )
         )
 
-    watchmen.append(watcher_report(len(node_list)))
+    watchmen.append(watcher_report(len(node_list), simulation=simulation))
     watchmen.append(
         RegisterEventHandler(
             OnShutdown(
@@ -281,7 +311,9 @@ def clear_bags_and_logs(nb_runs_to_keep: int = 10):
 
         if os.path.exists(os.path.join(dir, "reachy.bag", "metadata.yaml")):
             try:
-                with open(os.path.join(dir, "reachy.bag", "metadata.yaml"), "r") as file:
+                with open(
+                    os.path.join(dir, "reachy.bag", "metadata.yaml"), "r"
+                ) as file:
                     metadata = yaml.load(file, Loader=yaml.FullLoader)
                     if metadata["rosbag2_bagfile_information"]["message_count"] > 0:
                         # keeping dir

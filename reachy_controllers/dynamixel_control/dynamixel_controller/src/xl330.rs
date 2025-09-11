@@ -1,5 +1,4 @@
 use cache_cache::Cache;
-use log::error;
 use log::info;
 use log::warn;
 
@@ -310,7 +309,7 @@ impl RawMotorsIO<1> for XL330Dynamixel {
         self.control_mode
             .entry(self.id)
             .or_try_insert_with(|_| {
-                Ok((xl330::read_operating_mode(&self.io, self.serial_port.as_mut(), self.id)?))
+                Ok(xl330::read_operating_mode(&self.io, self.serial_port.as_mut(), self.id)?)
             })
             .map(|x| [x])
 
