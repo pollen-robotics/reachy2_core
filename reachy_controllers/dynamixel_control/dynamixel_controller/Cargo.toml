@@ -25,3 +25,5 @@ cbindgen = "0.24.3"
 
 # [lib]
 # crate-type = ["staticlib", "cdylib"]
+[lints.rust]
+dead_code = "allow"

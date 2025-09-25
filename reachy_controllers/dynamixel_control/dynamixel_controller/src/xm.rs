@@ -283,7 +283,7 @@ impl RawMotorsIO<1> for XMDynamixel {
         self.control_mode
             .entry(self.id)
             .or_try_insert_with(|_| {
-                Ok((xm::read_operating_mode(&self.io, self.serial_port.as_mut(), self.id)?))
+                Ok(xm::read_operating_mode(&self.io, self.serial_port.as_mut(), self.id)?)
             })
             .map(|x| [x])
 
