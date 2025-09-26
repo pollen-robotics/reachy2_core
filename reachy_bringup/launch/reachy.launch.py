@@ -415,7 +415,6 @@ def launch_setup(context, *args, **kwargs):
                         if gazebo_py
                         else ReachyCoreMode.MUJOCO
                         if mujoco_py
-
                         else ReachyCoreMode.FAKE
                         if fake_py
                         else ReachyCoreMode.REAL
@@ -561,14 +560,6 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    # Mujoco stuff
-    # Define the MuJoCo model path
-    scene_name = LaunchConfiguration("scene").perform(context)
-    reachy_mujoco_model_path = os.path.join(SCENES_DIR, f"{scene_name}_scene.xml")
-
-    if not os.path.exists(reachy_mujoco_model_path):
-        raise RuntimeError(f"Scene file not found: {reachy_mujoco_model_path}")
-
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
         executable="mujoco_ros2_control",
@@ -577,7 +568,6 @@ def launch_setup(context, *args, **kwargs):
             robot_description,
             robot_controllers,
             {"use_sim_time": True},
-            {"mujoco_model_path": reachy_mujoco_model_path},
         ],
     )
 
