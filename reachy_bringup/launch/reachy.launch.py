@@ -60,7 +60,7 @@ from reachy_utils.launch import (
     wait_for_log_to_start,
 )
 
-SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
+# SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
 
 
 def get_scene_choices():
