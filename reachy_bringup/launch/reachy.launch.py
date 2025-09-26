@@ -82,6 +82,8 @@ def launch_setup(context, *args, **kwargs):
     verbose_logger_log_level_rl = LaunchConfiguration("log")
     mujoco_rl = LaunchConfiguration("mujoco")
     mujoco_py = mujoco_rl.perform(context) == "true"
+    mujoco_url_rl = LaunchConfiguration("mujoco_url")
+    mujoco_url_py = mujoco_url_rl.perform(context)
 
     nodes = []
 
@@ -556,6 +558,7 @@ def launch_setup(context, *args, **kwargs):
             robot_description,
             robot_controllers,
             {"use_sim_time": True},
+            {"mujoco_websocket_url": mujoco_url_py},
         ],
     )
 
