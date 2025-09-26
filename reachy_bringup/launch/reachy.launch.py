@@ -63,14 +63,14 @@ from reachy_utils.launch import (
 # SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
 
 
-def get_scene_choices():
-    files = os.listdir(SCENES_DIR)
-    scenes = []
-    for f in files:
-        if f.endswith(".xml"):
-            scene_name = f.replace("_scene.xml", "").replace(".xml", "")
-            scenes.append(scene_name)
-    return scenes
+# def get_scene_choices():
+#     files = os.listdir(SCENES_DIR)
+#     scenes = []
+#     for f in files:
+#         if f.endswith(".xml"):
+#             scene_name = f.replace("_scene.xml", "").replace(".xml", "")
+#             scenes.append(scene_name)
+#     return scenes
 
 
 def launch_setup(context, *args, **kwargs):
