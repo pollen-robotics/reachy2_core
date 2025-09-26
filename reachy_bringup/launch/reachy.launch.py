@@ -60,18 +60,6 @@ from reachy_utils.launch import (
     wait_for_log_to_start,
 )
 
-# SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
-
-
-# def get_scene_choices():
-#     files = os.listdir(SCENES_DIR)
-#     scenes = []
-#     for f in files:
-#         if f.endswith(".xml"):
-#             scene_name = f.replace("_scene.xml", "").replace(".xml", "")
-#             scenes.append(scene_name)
-#     return scenes
-
 
 def launch_setup(context, *args, **kwargs):
     # perform(context) returns arg as a string, hence the conversion
@@ -627,7 +615,6 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    scene_choices = get_scene_choices()
     return LaunchDescription(
         [
             # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79
@@ -651,10 +638,9 @@ def generate_launch_description():
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
-                "scene",
-                default_value="base",
-                description="Select the Mujoco scene to load.",
-                choices=scene_choices,
+                "mujoco_url",
+                default_value="ws://host.docker.internal:8765",
+                description="WebSocket URL for Mujoco",
             ),
             DeclareLaunchArgument(
                 "start_sdk_server",
