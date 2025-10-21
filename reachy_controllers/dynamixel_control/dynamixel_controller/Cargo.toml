@@ -11,9 +11,9 @@ cache_cache = "0.1.1"
 libc = "0.2.146"
 once_cell = "1.19.0"
 
-rustypot = { version = "=0.6.0" }
+rustypot = { git = "https://github.com/pollen-robotics/rustypot", rev = "96c83c5" }
 
-serialport = "4.2.1"
+serialport = "=4.2.1"
 serde = { version = "1.0.183", features = ["derive"] }
 serde_yaml = "0.9.25"
 log = "0.4.20"

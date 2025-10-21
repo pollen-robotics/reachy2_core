@@ -203,11 +203,16 @@ class ReachyConfig:
                 self.dvt = False
                 self.pvt = True
             else:
-                raise ValueError(
-                    'Bad serial number "{}". Expected values are {}'.format(
-                        reachy_config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA, PVT]
-                    )
-                )
+                # default to PVT
+                self.beta = False
+                self.dvt = False
+                self.pvt = True
+                self.logger.info(f"No reachy2 model specified {reachy_config[REACHY_CONFIG_SERIAL_NUMBER]}, defaulting to PVT.")
+                # raise ValueError(
+                #     'Bad serial number "{}". Expected values are {}'.format(
+                #         reachy_config[REACHY_CONFIG_SERIAL_NUMBER], [DVT, BETA, PVT]
+                #     )
+                # )
 
         # Robot model (Only full kit for now, TODO)
         self.model = reachy_config[REACHY_CONFIG_MODEL]
@@ -259,14 +264,17 @@ class ReachyConfig:
             if mode != "fake":
                 return self.config[part_config_key]["path"]
             else:
-                return f'{self.config[part_config_key]["package_path"]}/fake/{self.config["reachy"]["config"]["reachy2_configuration"][part]["fake"]}'
+                return f"{self.config[part_config_key]['package_path']}/fake/{self.config['reachy']['config']['reachy2_configuration'][part]['fake']}"
             # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
 
         # force fake mode
         if fake:
             return build_part_conf_path(part, "fake")
         else:  # can be fake, override or default,
-            return build_part_conf_path(part, self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"])
+            return build_part_conf_path(
+                part,
+                self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"],
+            )
 
     @property
     def mobile_base(self):

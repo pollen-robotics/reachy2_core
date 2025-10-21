@@ -56,8 +56,7 @@
       	<geometry>
 
 
-	  <!-- <mesh filename="file://$(find dynamixel_description)/meshes/pincette_right_visual.dae" /> -->
-	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_base_visual.dae" />
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_right_visual.dae" />
 
       	</geometry>
       </visual>
@@ -88,8 +87,7 @@
       	<origin xyz="0 0 0" rpy="0 0 0"/>
       	<geometry>
 
-	  <!-- <mesh filename="file://$(find dynamixel_description)/meshes/pincette_left_visual.dae" /> -->
-	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_base_visual.dae" />
+	  <mesh filename="file://$(find dynamixel_description)/meshes/pincette_left_visual.dae" />
 
       	</geometry>
       </visual>

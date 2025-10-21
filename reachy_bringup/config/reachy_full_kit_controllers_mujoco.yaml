@@ -32,20 +32,6 @@ controller_manager:
     l_arm_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
-
-    r_arm_forward_velocity_controller:
-      type: forward_command_controller/ForwardCommandController
-
-    l_arm_forward_velocity_controller:
-      type: forward_command_controller/ForwardCommandController
-
-    r_arm_forward_effort_controller:
-      type: forward_command_controller/ForwardCommandController
-
-    l_arm_forward_effort_controller:
-      type: forward_command_controller/ForwardCommandController
-
-
     gripper_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
 
@@ -73,22 +59,14 @@ controller_manager:
     forward_speed_limit_controller:
       type: forward_command_controller/ForwardCommandController
 
-    forward_axis_torque_limit_controller:
-      type: forward_command_controller/ForwardCommandController
-
-    forward_axis_speed_limit_controller:
-      type: forward_command_controller/ForwardCommandController
-
-
     forward_pid_controller:
       type: pid_command_controller/PIDCommandController
 
     tripod_forward_position_controller:
       type: forward_command_controller/ForwardCommandController
-
-    # forward_mode_controller:
-    #   type: forward_command_controller/ForwardCommandController
-
+    
+    zuuu_forward_command_controller:
+        type: forward_command_controller/ForwardCommandController
 
 joint_state_broadcaster:
   ros__parameters:
@@ -111,55 +89,6 @@ neck_forward_position_controller:
     interface_name: position
     use_sim_time: false
 
-# r_shoulder_forward_position_controller:
-#   ros__parameters:
-#     joints:
-#       - r_shoulder_roll
-#       - r_shoulder_pitch
-#     interface_name: position
-#     use_sim_time: false
-
-# r_elbow_forward_position_controller:
-#   ros__parameters:
-#     joints:
-#       - r_elbow_yaw
-#       - r_elbow_pitch
-#     interface_name: position
-#     use_sim_time: false
-
-# r_wrist_forward_position_controller:
-#   ros__parameters:
-#     joints:
-#       - r_wrist_roll
-#       - r_wrist_pitch
-#       - r_wrist_yaw
-#     interface_name: position
-#     use_sim_time: false
-
-# l_shoulder_forward_position_controller:
-#   ros__parameters:
-#     joints:
-#       - l_shoulder_roll
-#       - l_shoulder_pitch
-#     interface_name: position
-#     use_sim_time: false
-
-# l_elbow_forward_position_controller:
-#   ros__parameters:
-#     joints:
-#       - l_elbow_yaw
-#       - l_elbow_pitch
-#     interface_name: position
-#     use_sim_time: false
-
-# l_wrist_forward_position_controller:
-#   ros__parameters:
-#     joints:
-#       - l_wrist_roll
-#       - l_wrist_pitch
-#       - l_wrist_yaw
-#     interface_name: position
-#     use_sim_time: false
 r_arm_forward_position_controller:
   ros__parameters:
     joints:
@@ -173,33 +102,6 @@ r_arm_forward_position_controller:
     interface_name: position
     use_sim_time: false
 
-r_arm_forward_velocity_controller:
-  ros__parameters:
-    joints:
-      - r_shoulder_pitch
-      - r_shoulder_roll
-      - r_elbow_yaw
-      - r_elbow_pitch
-      - r_wrist_roll
-      - r_wrist_pitch
-      - r_wrist_yaw
-    interface_name: velocity
-    use_sim_time: false
-
-r_arm_forward_effort_controller:
-  ros__parameters:
-    joints:
-      - r_shoulder_pitch
-      - r_shoulder_roll
-      - r_elbow_yaw
-      - r_elbow_pitch
-      - r_wrist_roll
-      - r_wrist_pitch
-      - r_wrist_yaw
-    interface_name: effort
-    use_sim_time: false
-
-
 l_arm_forward_position_controller:
   ros__parameters:
     joints:
@@ -212,35 +114,6 @@ l_arm_forward_position_controller:
       - l_wrist_yaw
     interface_name: position
     use_sim_time: false
-
-
-l_arm_forward_velocity_controller:
-  ros__parameters:
-    joints:
-      - l_shoulder_pitch
-      - l_shoulder_roll
-      - l_elbow_yaw
-      - l_elbow_pitch
-      - l_wrist_roll
-      - l_wrist_pitch
-      - l_wrist_yaw
-    interface_name: velocity
-    use_sim_time: false
-
-
-l_arm_forward_effort_controller:
-  ros__parameters:
-    joints:
-      - l_shoulder_pitch
-      - l_shoulder_roll
-      - l_elbow_yaw
-      - l_elbow_pitch
-      - l_wrist_roll
-      - l_wrist_pitch
-      - l_wrist_yaw
-    interface_name: effort
-    use_sim_time: false
-
 
 antenna_forward_position_controller:
   ros__parameters:
@@ -361,51 +234,6 @@ forward_speed_limit_controller:
     interface_name: speed_limit
     use_sim_time: false
 
-
-
-forward_axis_torque_limit_controller:
-  ros__parameters:
-    joints:
-      - r_shoulder_pitch
-      - r_shoulder_roll
-      - r_elbow_yaw
-      - r_elbow_pitch
-      - r_wrist_roll
-      - r_wrist_pitch
-      - r_wrist_yaw
-      - l_shoulder_pitch
-      - l_shoulder_roll
-      - l_elbow_yaw
-      - l_elbow_pitch
-      - l_wrist_roll
-      - l_wrist_pitch
-      - l_wrist_yaw
-    interface_name: torque_limit
-    use_sim_time: false
-
-forward_axis_speed_limit_controller:
-  ros__parameters:
-    joints:
-      - r_shoulder_pitch
-      - r_shoulder_roll
-      - r_elbow_yaw
-      - r_elbow_pitch
-      - r_wrist_roll
-      - r_wrist_pitch
-      - r_wrist_yaw
-      - l_shoulder_pitch
-      - l_shoulder_roll
-      - l_elbow_yaw
-      - l_elbow_pitch
-      - l_wrist_roll
-      - l_wrist_pitch
-      - l_wrist_yaw
-    interface_name: speed_limit
-    use_sim_time: false
-
-
-
-
 forward_pid_controller:
   ros__parameters:
     joints:
@@ -431,3 +259,12 @@ forward_pid_controller:
       - antenna_left_raw_motor
       - antenna_right_raw_motor
     use_sim_time: false
+
+zuuu_forward_command_controller:
+  ros__parameters:
+    joints:
+      - drivewhl1_joint
+      - drivewhl2_joint
+      - drivewhl3_joint
+    interface_name: velocity
+    use_sim_time: true

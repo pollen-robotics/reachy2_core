@@ -26,3 +26,5 @@ motor_gearbox_params:
   motor_max_velocity: 40.0 #rad/s
   motor_efficiency: 0.87
   motor_gearbox_efficiency: 0.9
+orientation_limits: 
+  orbita3D_max_angle: 0.7417649320975901 # 42.5 degrees

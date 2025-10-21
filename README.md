@@ -1,225 +1,41 @@
-# Installation
+# Reachy2 Core
 
-This guide is meant for an Ubuntu 22.04
+This repository provides the core ROS 2 packages required to simulate, configure, and launch the **Reachy 2** humanoid robot. It includes URDF descriptions, launch files, Gazebo simulation assets, and control interfaces used across real and simulated platforms.
 
-## Environment
+## Overview
 
-### ROS2 Humble
+The repo is structured as a multi-package ROS 2 workspace and serves as the foundation for developing and testing Reachy 2 behaviors, whether in hardware or in simulation.
 
-https://docs.ros.org/en/humble/Installation.html
+### Included Packages
 
-We use Cyclone DDS, here is
-a [link](https://docs.ros.org/en/humble/Installation/DDS-Implementations/Working-with-Eclipse-CycloneDDS.html)
-for reference, but there is no need to install more than what's already included in the following steps.
+- **`reachy_bringup`**  
+  Launch files and runtime orchestration for both real and simulated deployments.
 
-After ROS2 Humble installation is completed, you should add the following to your bashrc.
+- **`reachy_config`**  
+  YAML-based configuration files for Reachy’s kinematics, dynamics, and URDF parameterization.
 
-```commandline
-source /opt/ros/humble/setup.bash
-export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-```
+- **`reachy_controllers`**  
+  ROS 2 control nodes for interfacing with Reachy hardware and simulated joints.
 
-### Rust
+- **`reachy_description`**  
+  Robot description files (URDF, meshes, xacro) for Reachy 2, used across simulation and visualization.
 
-```commandline
-curl https://sh.rustup.rs -sSf | sh
-```
+- **`reachy_fake`**  
+  Fake interfaces for mimicking joint states and simulating Reachy's response without hardware.
 
-You may add to your bashrc, or source it anytime you want to build `reachy_ws`
-(the above script might have added this to your bashrc already)
+- **`reachy_gazebo`**  
+  Gazebo simulation environment for Reachy 2, including plugins and world integration.
 
-```commandline
-source "$HOME/.cargo/env"
-```
+- **`reachy_gazebo_gripper_glue`**  
+  Bridges and constraints for integrating the gripper with Gazebo’s physics and control pipeline.
 
-### Git LFS
+- **`reachy_utils`**  
+  Common utility functions and shared tools used by multiple packages.
 
-```commandline
-apt-get install -y git-lfs
-git lfs install
-```
+## Dependencies
 
-https://doc.rust-lang.org/cargo/getting-started/installation.html
+Install ROS 2 and the dependencies listed in `requirements.txt` and `pyproject.toml`. You can also use the included `dependencies.sh` script to install system-wide dependencies required for simulation and control.
 
-## Reachy WorkSpace
+## License
 
-### Create Reachy_2023 env
-
-```commandline
-mkdir ~/reachy_ws && cd ~/reachy_ws
-mkdir src && cd src
-git clone https://github.com/pollen-robotics/reachy_v2_wip.git
-git clone https://github.com/pollen-robotics/orbita2d_control.git
-git clone https://github.com/pollen-robotics/orbita3d_control.git
-git clone https://github.com/pollen-robotics/ros2_pollen_toolbox.git
-```
-
-### Install specific patches for Cargo/ROS
-
-```commandline
-cargo install --git https://github.com/jerry73204/cargo-ament-build.git --branch conditionally-copy-cargo-lock-file
-python3 -m pip install --upgrade --force-reinstall git+https://github.com/pollen-robotics/colcon-cargo.git
-```
-
-### Build Reachy_2023 env
-
-```commandline
-cd ~/reachy_ws
-./src/reachy_2023/dependencies.sh
-pip install -r ./src/reachy_2023/requirements.txt
-colcon build --symlink-install
-```
-
-Now you can add the following lines to your bashrc
-
-```commandline
-source ~/reachy_ws/install/setup.bash
-source /usr/share/gazebo/setup.bash
-```
-
-If there is multiple ROS2 environement on the same network, you should think about using adding ROS_DOMAIN_ID yo your
-bashrc as well.
-(choosing an integer between 0 and 101 inclusive as domain ID is a safe bet)
-e.g.
-
-```commandline
-export ROS_DOMAIN_ID=42
-```
-
-For a more detailed explanation os this mechanic, please have a look at
-this [documentation](https://docs.ros.org/en/humble/Concepts/About-Domain-ID.html)
-
-### Nav
-
-## Reachy SDK API
-
-```commandline
-mkdir ~/dev && cd ~/dev
-git clone https://github.com/pollen-robotics/reachy-sdk-api.git
-cd ~/dev/reachy-sdk-api/python
-pip3 install -e .
-pip3 install scipy
-```
-
-## Demos
-
-```commandline
-ros2 launch reachy_bringup reachy.launch.py  -s
-```
-
-This command should give you a list a currently accepted arguments by reachy.launch.py,
-if you want to try things by yourself. Let's walk you through some of these.
-
-### Software only {#custom-id}
-
-<details>
-  <summary>Fake</summary>
-
-```commandline
-ros2 launch reachy_bringup reachy.launch.py  fake:=true start_rviz:=true
-```
-
-If you see a full_kit robot (torso, head and arms) inside rviz, then it should mean that most stuff
-went right, or at least that not everything went wrong.
-
-Fake robot enables to test the bare minimum.
-To actually run some code, we will escalate this replacing fake by gazebo simulation.
-
-Don't forget to add the Orbita2d and Orbita3d config files paths to your .reachy.yaml:
-
-```
-	neck_config: path_to_orbita3d_neck_config_file
-	right_shoulder_config:: path_to_orbita2d_right_shoulder_config_file
-	right_elbow_config:: path_to_orbita2d_right_elbow_config_file
-	right_wrist_config:: path_to_orbita3d_right_wrist_config_file
-	...
-```
-
-</details>
-
-<details>
-  <summary>Gazebo</summary>
-
-
-```commandline
-ros2 launch reachy_bringup reachy.launch.py  gazebo:=true
-```
-After running this one, you should see Reachy inside Gazebo simulation tool.
-Nothing should be moving yet, but we will see about it in the next sections.
-</details>
-
-<details>
-  <summary>ROS2 CLI</summary>
-Launch Gazebo with the command provided in previous section.
-Now you can try to move some joints directly through ROS control using this kind of command :
-
-```commandline
-ros2 topic pub /dynamic_joint_commands control_msgs/msg/DynamicJointState "header:
-  stamp:
-    sec: 0
-    nanosec: 0
-  frame_id: ''
-joint_names:
-- l_shoulder_pitch
-interface_values:
-- interface_names:
-  - position
-  values:
-  - -1.0
-"
-```
-
-To list available interfaces in ROS control, you can use
-
-```commandline
-ros2 control list_hardware_interfaces
-```
-</details>
-
-<details>
-  <summary>Reachy SDK</summary>
-
-To test a bit further, you can start a fake instance and gazebo, with sdk_server on
-
-```commandline
-ros2 launch reachy_bringup reachy.launch.py  gazebo:=true start_sdk_server:=true
-```
-
-Then try to move the robot through [Reachy's python SDK](https://github.com/pollen-robotics/reachy-sdk)
-
-```python
-import reachy_sdk
-
-my_awesome_reachy = reachy_sdk.ReachySDK(host="localhost")
-my_awesome_reachy.head.look_at(0.5, 0, -0.5, 4)
-my_awesome_reachy.l_arm.l_elbow_pitch.goal_position = -90
-
-from reachy_sdk.trajectory import goto
-
-goto({my_awesome_reachy.l_arm.l_elbow_pitch: 0}, 10)
-
-```
-
-More info on how to use Reachy's Python SDK can be found on
-[its documentation](https://docs.pollen-robotics.com/sdk/getting-started/introduction/)
-</details>
-
-### Full stack examples
-
-Now that is everything is set up properly on your environment, let's try to move some real stuff.
-
-To be continued...
-
-
-### Current prefered way of showing GUIs in docker
-In the docker console:
-```
-tigervnc &
-novnc &
-DISPLAY=:0 startfluxbox &
-DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py
-DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveit_gazebo.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=true
-DISPLAY=:0 ros2 launch reachy_moveit_config reachy_moveitpy.launch.py use_fake_hardware:=true use_gazebo:=true use_moveit_gazebo:=true use_sim_time:=true
-
-
-```
+This project is licensed under the **Apache License 2.0** – see the `LICENSE` file for details.
