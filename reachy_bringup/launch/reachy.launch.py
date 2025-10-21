@@ -344,6 +344,13 @@ def launch_setup(context, *args, **kwargs):
         executable="dynamic_state_router",
         arguments=[robot_controllers],
     )
+    
+    gravity_compensator_node = Node(
+        package="reachy2_gravity_compensation",
+        executable="gravity_compensator",
+        output="both",
+        emulate_tty=True,
+    )
 
     # Used for MoveIt support, to be maintenained
     # # TODO propper refacto of this https://github.com/pollen-robotics/reachy_v2_wip/issues/20
@@ -524,6 +531,7 @@ def launch_setup(context, *args, **kwargs):
             dynamic_state_router_node,
             foxglove_bridge_node,
             rosbag,
+            gravity_compensator_node
         ]
     )
 
