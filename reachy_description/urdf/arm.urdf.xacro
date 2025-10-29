@@ -82,7 +82,7 @@
 
     <xacro:if value="${side == 'left'}">
       <xacro:property name="reflect" value="-1" />
-      <xacro:property name="min_shoulder_roll" value="-0.0" />
+      <xacro:property name="min_shoulder_roll" value="-0.51" />
       <xacro:property name="max_shoulder_roll" value="${pi}" />
       <xacro:property name="shoulder_axis1_inverted" value="0" />
       <xacro:property name="shoulder_axis2_inverted" value="0" />
@@ -93,7 +93,7 @@
     <xacro:if value="${side == 'right'}">
       <xacro:property name="reflect" value="1" />
       <xacro:property name="min_shoulder_roll" value="-${pi}" />
-      <xacro:property name="max_shoulder_roll" value="0.0" />
+      <xacro:property name="max_shoulder_roll" value="0.51" />
       <xacro:property name="shoulder_axis1_inverted" value="1" />
       <xacro:property name="shoulder_axis2_inverted" value="0" />
       <xacro:property name="elbow_axis1_inverted" value="1" />
