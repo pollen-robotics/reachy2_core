@@ -12,7 +12,7 @@ log = "0.4"
 
 # Can we "inherit" the version from the workspace?
 # motor_toolbox_rs = { git = "https://github.com/pollen-robotics/motor_toolbox_rs", branch="24-add-get_board_state" }
-motor_toolbox_rs = { git = "https://github.com/pollen-robotics/motor_toolbox_rs", branch="develop" }
+motor_toolbox_rs = { git = "https://github.com/pollen-robotics/motor_toolbox_rs", branch = "develop" }
 once_cell = "1.18.0"
 dynamixel_controller = { version = "0.1.0", path = "../dynamixel_controller" }
 

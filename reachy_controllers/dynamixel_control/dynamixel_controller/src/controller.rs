@@ -3,7 +3,6 @@ use crate::DxlConfig;
 use crate::DynamixelJoint;
 use log::error;
 use std::error::Error;
-use std::{thread, time::Duration};
 pub struct ForegroundDynamixelController {
     pub left: DynamixelJoint,
     pub right: DynamixelJoint,

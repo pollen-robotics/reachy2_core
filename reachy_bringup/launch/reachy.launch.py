@@ -1,5 +1,8 @@
 import os
 
+import rclpy
+
+# from click import launch
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -12,7 +15,12 @@ from launch.actions import (
     TimerAction,
 )
 from launch.conditions import IfCondition
-from launch.event_handlers import OnProcessExit, OnProcessStart, OnShutdown
+from launch.event_handlers import (
+    OnProcessExit,
+    OnProcessIO,
+    OnProcessStart,
+    OnShutdown,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
@@ -25,8 +33,9 @@ from launch.substitutions import (
 from launch_ros.actions import LifecycleNode, Node, SetUseSimTime
 from launch_ros.descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
+from nav_msgs.msg import Odometry
+from rclpy.node import Node as RclpyNode
 from reachy2_sdk_api.reachy_pb2 import ReachyCoreMode
-
 from reachy_config import (
     BETA,
     DVT,
@@ -48,19 +57,8 @@ from reachy_utils.launch import (
     get_node_list,
     get_rviz_conf_choices,
     title_print,
+    wait_for_log_to_start,
 )
-
-SCENES_DIR = "/home/reachy/dev/reachy2_mujoco_assets/scenes"
-
-
-def get_scene_choices():
-    files = os.listdir(SCENES_DIR)
-    scenes = []
-    for f in files:
-        if f.endswith(".xml"):
-            scene_name = f.replace("_scene.xml", "").replace(".xml", "")
-            scenes.append(scene_name)
-    return scenes
 
 
 def launch_setup(context, *args, **kwargs):
@@ -84,6 +82,8 @@ def launch_setup(context, *args, **kwargs):
     verbose_logger_log_level_rl = LaunchConfiguration("log")
     mujoco_rl = LaunchConfiguration("mujoco")
     mujoco_py = mujoco_rl.perform(context) == "true"
+    mujoco_url_rl = LaunchConfiguration("mujoco_url")
+    mujoco_url_py = mujoco_url_rl.perform(context)
 
     nodes = []
 
@@ -103,21 +103,25 @@ def launch_setup(context, *args, **kwargs):
         f" use_mujoco:=true" if mujoco_py else " ",
         f" depth_camera:=true" if gazebo_py or orbbec_py else " ",
         f" robot_config:={reachy_config.model}",
-        f' neck_config:="{reachy_config.part_conf("neck_config", fake= fake_py or gazebo_py)}"',
-        f' right_shoulder_config:="{reachy_config.part_conf("right_shoulder_config", fake= fake_py or gazebo_py)}"',
-        f' right_elbow_config:="{reachy_config.part_conf("right_elbow_config", fake= fake_py or gazebo_py)}"',
-        f' right_wrist_config:="{reachy_config.part_conf("right_wrist_config", fake= fake_py or gazebo_py)}"',
-        f' left_shoulder_config:="{reachy_config.part_conf("left_shoulder_config", fake= fake_py or gazebo_py)}"',
-        f' left_elbow_config:="{reachy_config.part_conf("left_elbow_config", fake= fake_py or gazebo_py)}"',
-        f' left_wrist_config:="{reachy_config.part_conf("left_wrist_config", fake= fake_py or gazebo_py)}"',
-        f' antenna_config:="{reachy_config.part_conf("antenna_config", fake= fake_py or gazebo_py)}"',
-        f' grippers_config:="{reachy_config.part_conf("grippers_config", fake= fake_py or gazebo_py)}"',
-        f' robot_model:="{BETA if reachy_config.beta else DVT }"',  # for now PVT urdf is assumed to be the same as dvt
+        f' neck_config:="{reachy_config.part_conf("neck_config", fake=fake_py or gazebo_py)}"',
+        f' right_shoulder_config:="{reachy_config.part_conf("right_shoulder_config", fake=fake_py or gazebo_py)}"',
+        f' right_elbow_config:="{reachy_config.part_conf("right_elbow_config", fake=fake_py or gazebo_py)}"',
+        f' right_wrist_config:="{reachy_config.part_conf("right_wrist_config", fake=fake_py or gazebo_py)}"',
+        f' left_shoulder_config:="{reachy_config.part_conf("left_shoulder_config", fake=fake_py or gazebo_py)}"',
+        f' left_elbow_config:="{reachy_config.part_conf("left_elbow_config", fake=fake_py or gazebo_py)}"',
+        f' left_wrist_config:="{reachy_config.part_conf("left_wrist_config", fake=fake_py or gazebo_py)}"',
+        f' antenna_config:="{reachy_config.part_conf("antenna_config", fake=fake_py or gazebo_py)}"',
+        f' grippers_config:="{reachy_config.part_conf("grippers_config", fake=fake_py or gazebo_py)}"',
+        f' robot_model:="{BETA if reachy_config.beta else DVT}"',  # for now PVT urdf is assumed to be the same as dvt
     )
-    LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(context=context)
+    LogInfo(msg=f"Reachy URDF config : \n{log_config(reachy_urdf_config)}").execute(
+        context=context
+    )
 
     if gazebo_py:
-        LogInfo(msg="Starting Gazebo simulation, setting UseSimTime").execute(context=context)
+        LogInfo(msg="Starting Gazebo simulation, setting UseSimTime").execute(
+            context=context
+        )
         SetUseSimTime(True)
 
     robot_description = {
@@ -126,7 +130,13 @@ def launch_setup(context, *args, **kwargs):
                 [
                     PathJoinSubstitution([FindExecutable(name="xacro")]),
                     " ",
-                    PathJoinSubstitution([FindPackageShare("reachy_description"), "urdf", "reachy.urdf.xacro"]),
+                    PathJoinSubstitution(
+                        [
+                            FindPackageShare("reachy_description"),
+                            "urdf",
+                            "reachy.urdf.xacro",
+                        ]
+                    ),
                     *reachy_urdf_config,
                 ]
             ),
@@ -190,7 +200,7 @@ def launch_setup(context, *args, **kwargs):
         cmd=[
             "/bin/bash",
             "-c",
-            f'$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh {reachy_config.config["robot_ethercat_config"]["path"]}',
+            f"$HOME/dev/poulpe_ethercat_controller/start_ethercat_server.sh {reachy_config.config['robot_ethercat_config']['path']}",
         ],
         output="both",
         emulate_tty=True,
@@ -296,10 +306,22 @@ def launch_setup(context, *args, **kwargs):
         ["forward_torque_controller", f"not {gazebo_py} and not {mujoco_py}"],
         ["forward_torque_limit_controller", f"not {gazebo_py} and not {mujoco_py}"],
         ["forward_speed_limit_controller", f"not {gazebo_py} and not {mujoco_py}"],
-        ["forward_pid_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
-        ["gripper_current_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
-        ["gripper_mode_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
-        ["antenna_current_controller", f"not {fake_py} and not {gazebo_py} and not {mujoco_py}"],
+        [
+            "forward_pid_controller",
+            f"not {fake_py} and not {gazebo_py} and not {mujoco_py}",
+        ],
+        [
+            "gripper_current_controller",
+            f"not {fake_py} and not {gazebo_py} and not {mujoco_py}",
+        ],
+        [
+            "gripper_mode_controller",
+            f"not {fake_py} and not {gazebo_py} and not {mujoco_py}",
+        ],
+        [
+            "antenna_current_controller",
+            f"not {fake_py} and not {gazebo_py} and not {mujoco_py}",
+        ],
         ["antenna_mode_controller", f"not {gazebo_py} and not {mujoco_py}"],
     ]:
         generic_controllers.append(
@@ -320,7 +342,9 @@ def launch_setup(context, *args, **kwargs):
         executable="pollen_kdl_kinematics",
         output="both",
         emulate_tty=True,
-        additional_env={"RCUTILS_CONSOLE_OUTPUT_FILE": "/home/reachy/.ros/log/kinematics.log"},
+        additional_env={
+            "RCUTILS_CONSOLE_OUTPUT_FILE": "/home/reachy/.ros/log/kinematics.log"
+        },
     )
 
     dynamic_state_router_node = Node(
@@ -400,8 +424,17 @@ def launch_setup(context, *args, **kwargs):
     )
 
     orbbec_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("orbbec_camera"), "/launch", "/gemini_330_series.launch.py"]),
-        launch_arguments={"depth_width": "1280", "enable_colored_point_cloud": "true"}.items(),
+        PythonLaunchDescriptionSource(
+            [
+                FindPackageShare("orbbec_camera"),
+                "/launch",
+                "/gemini_330_series.launch.py",
+            ]
+        ),
+        launch_arguments={
+            "depth_width": "1280",
+            "enable_colored_point_cloud": "true",
+        }.items(),
         condition=IfCondition(PythonExpression(f"{orbbec_py} and not {gazebo_py}")),
     )
 
@@ -436,7 +469,9 @@ def launch_setup(context, *args, **kwargs):
                     name="rviz2",
                     output="log",
                     arguments=["-d", rviz_config_file],
-                    condition=IfCondition(PythonExpression(f"'{start_rviz_py}' != 'false'")),
+                    condition=IfCondition(
+                        PythonExpression(f"'{start_rviz_py}' != 'false'")
+                    ),
                 )
             ],
         ),
@@ -453,7 +488,9 @@ def launch_setup(context, *args, **kwargs):
 
     if reachy_config.mobile_base["enable"]:
         mobile_base_node = IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([FindPackageShare("zuuu_hal"), "/hal.launch.py"]),
+            PythonLaunchDescriptionSource(
+                [FindPackageShare("zuuu_hal"), "/hal.launch.py"]
+            ),
             launch_arguments={
                 "use_sim_time": f"{gazebo_py or mujoco_py}",
                 "fake": f"{fake_py}",
@@ -463,7 +500,9 @@ def launch_setup(context, *args, **kwargs):
         nodes.append(mobile_base_node)
 
     gazebo_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]),
+        PythonLaunchDescriptionSource(
+            [FindPackageShare("reachy_gazebo"), "/launch", "/gazebo.launch.py"]
+        ),
         launch_arguments={
             "robot_config": f"{reachy_config.model}",
         }.items(),
@@ -511,14 +550,6 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
-    # Mujoco stuff
-    # Define the MuJoCo model path
-    scene_name = LaunchConfiguration("scene").perform(context)
-    reachy_mujoco_model_path = os.path.join(SCENES_DIR, f"{scene_name}_scene.xml")
-
-    if not os.path.exists(reachy_mujoco_model_path):
-        raise RuntimeError(f"Scene file not found: {reachy_mujoco_model_path}")
-
     node_mujoco_ros2_control = Node(
         package="mujoco_ros2_control",
         executable="mujoco_ros2_control",
@@ -527,7 +558,7 @@ def launch_setup(context, *args, **kwargs):
             robot_description,
             robot_controllers,
             {"use_sim_time": True},
-            {"mujoco_model_path": reachy_mujoco_model_path},
+            {"mujoco_websocket_url": mujoco_url_py},
         ],
     )
 
@@ -540,24 +571,41 @@ def launch_setup(context, *args, **kwargs):
     )
 
     start_control_after_ehtercat = TimerAction(
-        period=3.0 if not gazebo_py else 0.5,
+        period=3.0 if not gazebo_py and not mujoco_py else 0.5,
         actions=[
-            node_mujoco_ros2_control if mujoco_py else gazebo_node if gazebo_py else control_node,
+            node_mujoco_ros2_control
+            if mujoco_py
+            else gazebo_node
+            if gazebo_py
+            else control_node,
             fake_interface,
         ],
         cancel_on_shutdown=True,
     )
 
-    start_everything_after_control = TimerAction(
-        period=4.0 if not gazebo_py else 1.5,
-        actions=[
-            *nodes,
-        ],
-        cancel_on_shutdown=True,
+    start_everything_after_control = (
+        TimerAction(
+            period=4.0 if not gazebo_py else 1.5,
+            actions=[
+                *nodes,
+            ],
+            cancel_on_shutdown=True,
+        )
+        if not mujoco_py
+        else wait_for_log_to_start(
+            target_action=node_mujoco_ros2_control,
+            matcher="WebSocket connected!",
+            announce="Mujoco WebSocket connected! Starting all nodes...",
+            result_actions=nodes,
+            delay=3.0,
+        )
     )
 
     return [
-        *build_watchers_from_node_list(get_node_list(nodes, context) + [ethercat_master_server] + [control_node]),
+        *build_watchers_from_node_list(
+            get_node_list(nodes, context) + [ethercat_master_server] + [control_node],
+            simulation=mujoco_py or gazebo_py or fake_py,
+        ),
         ethercat_master_server,
         start_control_after_ehtercat,
         start_everything_after_control,
@@ -570,7 +618,6 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
-    scene_choices = get_scene_choices()
     return LaunchDescription(
         [
             # Needed by camera publisher - See: https://github.com/ros2/rosidl_python/issues/79
@@ -594,10 +641,9 @@ def generate_launch_description():
                 choices=["true", "false"],
             ),
             DeclareLaunchArgument(
-                "scene",
-                default_value="base",
-                description="Select the Mujoco scene to load.",
-                choices=scene_choices,
+                "mujoco_url",
+                default_value="ws://host.docker.internal:8765",
+                description="WebSocket URL for Mujoco",
             ),
             DeclareLaunchArgument(
                 "start_sdk_server",
