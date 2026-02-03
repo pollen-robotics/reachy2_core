@@ -262,19 +262,19 @@ def launch_setup(context, *args, **kwargs):
         ],
         [
             "r_arm_forward_velocity_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}'] and not ({mujoco_py} or {gazebo_py})",
         ],
         [
             "l_arm_forward_velocity_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}'] and not ({mujoco_py} or {gazebo_py})",
         ],
         [
             "r_arm_forward_effort_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}']",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_RIGHT}', '{FULL_KIT}', '{HEADLESS}'] and not ({mujoco_py} or {gazebo_py})",
         ],
         [
             "l_arm_forward_effort_controller",
-            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}']",
+            f"'{reachy_config.model}' in ['{STARTER_KIT_LEFT}', '{FULL_KIT}', '{HEADLESS}'] and not ({mujoco_py} or {gazebo_py})",
         ],
         ["gripper_forward_position_controller", f"'{reachy_config.model}' != '{MINI}'"],
     ]:
