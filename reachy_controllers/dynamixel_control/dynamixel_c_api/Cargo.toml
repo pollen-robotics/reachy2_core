@@ -18,7 +18,7 @@ dynamixel_controller = { version = "0.1.0", path = "../dynamixel_controller" }
 
 [build-dependencies]
 cbindgen = "0.24.5"
-
+indexmap = "=2.11.4"
 
 [lib]
 name = "dynamixel_c_api"
