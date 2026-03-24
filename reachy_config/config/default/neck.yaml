@@ -1,6 +1,7 @@
 io: !PoulpeEthercat
   url: http://127.0.0.1:50098
   id: 0
+  name: NeckOrbita3d
 disks:
   zeros: !FirmwareZero
   reduction: 5.333333333333333333
