@@ -110,7 +110,7 @@ class PoulpeEthercat(dict):
 
     @staticmethod
     def representer(dumper, data):
-        return dumper.represent_mapping("!PoulpeEthercat", dict(data))
+        return dumper.represent_mapping("tag:yaml.org,2002:map", dict(data))
 
 
 yaml.SafeLoader.add_constructor("!PoulpeEthercat", PoulpeEthercat.constructor)
@@ -257,16 +257,14 @@ def load_yaml(file_path):
 
 
 def dump_yaml(file_path, data):
-    # print("\nData:")
-    # print(data)
-    # output_yaml = yaml.dump(data, Dumper=yaml.SafeDumper, default_flow_style=False)
-    # print("\nDumped YAML:")
-    # print(output_yaml)
-    # exit(1)
+    output = yaml.dump(data, Dumper=yaml.SafeDumper, default_flow_style=False, sort_keys=False)
+    # Remove trailing empty-string quotes added by PyYAML for scalar custom tags
+    output = output.replace("!FirmwareZero ''", "!FirmwareZero")
+    output = output.replace("!XL330 ''", "!XL330")
+    output = output.replace("!XM ''", "!XM")
 
     if file_path is None:
-        print(yaml.dump(data, Dumper=yaml.SafeDumper, default_flow_style=False))
+        print(output)
     else:
         with open(file_path, "w") as f:
-            # yaml.dump(data, f)
-            yaml.dump(data, f, Dumper=yaml.SafeDumper, default_flow_style=False)
+            f.write(output)
