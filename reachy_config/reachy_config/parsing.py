@@ -110,7 +110,7 @@ class PoulpeEthercat(dict):
 
     @staticmethod
     def representer(dumper, data):
-        return dumper.represent_mapping("tag:yaml.org,2002:map", dict(data))
+        return dumper.represent_mapping("!PoulpeEthercat", dict(data))
 
 
 yaml.SafeLoader.add_constructor("!PoulpeEthercat", PoulpeEthercat.constructor)
