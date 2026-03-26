@@ -219,6 +219,7 @@ class FakeMotors(dict):
 yaml.SafeLoader.add_constructor("!FakeMotors", FakeMotors.constructor)
 yaml.SafeDumper.add_representer(FakeMotors, FakeMotors.representer)
 
+
 class ZeroStartup:
     def __repr__(self):
         return "ZeroStartup()"
