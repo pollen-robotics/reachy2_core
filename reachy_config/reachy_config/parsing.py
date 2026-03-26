@@ -83,7 +83,7 @@ class AngleLimits:
     @staticmethod
     def representer(dumper, data):
         # When dumping, we represent it as a custom tag !AngleLimits
-        return dumper.represent_mapping("!AngleLimits", {"min": data.min, "max": data.max})
+        return dumper.represent_mapping("!AngleLimits:", {"min": data.min, "max": data.max})
 
     def validate(self):
         if not isinstance(self.min, float) or not (-18000.0 <= self.min <= 18000.0):
@@ -97,24 +97,20 @@ yaml.SafeDumper.add_representer(AngleLimits, AngleLimits.representer)
 
 
 # PouleEthercat
-class PoulpeEthercat:
-    def __init__(self, port_name, id):
-        self.port_name = port_name
-        self.id = id
+class PoulpeEthercat(dict):
+    """Dict subclass so downstream code accesses fields normally while preserving the YAML tag on dump."""
 
     def __repr__(self):
-        return f"PoulpeEthercat(port_name={self.port_name}, id={self.id})"
-
-    def __eq__(self, other):
-        return self.port_name == other.port_name and self.id == other.id
+        return f"PoulpeEthercat({dict.__repr__(self)})"
 
     @staticmethod
     def constructor(loader, node):
-        return loader.construct_mapping(node)
+        value = loader.construct_mapping(node)
+        return PoulpeEthercat(value)
 
     @staticmethod
     def representer(dumper, data):
-        return dumper.represent_mapping("!PoulpeEthercat", {"port_name": data.port_name, "id": data.id})
+        return dumper.represent_mapping("!PoulpeEthercat", dict(data))
 
 
 yaml.SafeLoader.add_constructor("!PoulpeEthercat", PoulpeEthercat.constructor)
@@ -261,16 +257,14 @@ def load_yaml(file_path):
 
 
 def dump_yaml(file_path, data):
-    # print("\nData:")
-    # print(data)
-    # output_yaml = yaml.dump(data, Dumper=yaml.SafeDumper, default_flow_style=False)
-    # print("\nDumped YAML:")
-    # print(output_yaml)
-    # exit(1)
+    output = yaml.dump(data, Dumper=yaml.SafeDumper, default_flow_style=False, sort_keys=False)
+    # Remove trailing empty-string quotes added by PyYAML for scalar custom tags
+    output = output.replace("!FirmwareZero ''", "!FirmwareZero")
+    output = output.replace("!XL330 ''", "!XL330")
+    output = output.replace("!XM ''", "!XM")
 
     if file_path is None:
-        print(yaml.dump(data, Dumper=yaml.SafeDumper, default_flow_style=False))
+        print(output)
     else:
         with open(file_path, "w") as f:
-            # yaml.dump(data, f)
-            yaml.dump(data, f, Dumper=yaml.SafeDumper, default_flow_style=False)
+            f.write(output)
