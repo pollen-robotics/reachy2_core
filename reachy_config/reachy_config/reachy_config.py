@@ -265,6 +265,9 @@ class ReachyConfig:
                 return self.config[part_config_key]["path"]
             else:
                 fake_filename = self.config["reachy"]["config"]["reachy2_configuration"][part]["fake"]
+                custom_fake_path = os.path.join(self.custom_config_dir, fake_filename)
+                if os.path.exists(custom_fake_path):
+                    return custom_fake_path
                 return f"{Path(self.default_config_dir).parent}/fake/{fake_filename}"
             # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
 

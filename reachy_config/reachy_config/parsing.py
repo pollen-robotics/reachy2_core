@@ -96,7 +96,7 @@ yaml.SafeLoader.add_constructor("!AngleLimits:", AngleLimits.constructor)
 yaml.SafeDumper.add_representer(AngleLimits, AngleLimits.representer)
 
 
-# PouleEthercat
+# PoulpeEthercat
 class PoulpeEthercat(dict):
     """Dict subclass so downstream code accesses fields normally while preserving the YAML tag on dump."""
 
@@ -200,6 +200,43 @@ class XM:
 yaml.SafeDumper.add_representer(FirmwareZero, firmware_zero_representer)
 yaml.SafeDumper.add_representer(XL330, xl330_representer)
 yaml.SafeDumper.add_representer(XM, xm_representer)
+
+
+# FakeMotors
+class FakeMotors(dict):
+    """Dict subclass preserving the !FakeMotors tag on dump."""
+
+    @staticmethod
+    def constructor(loader, node):
+        value = loader.construct_mapping(node, deep=True)
+        return FakeMotors(value)
+
+    @staticmethod
+    def representer(dumper, data):
+        return dumper.represent_mapping("!FakeMotors", dict(data))
+
+
+yaml.SafeLoader.add_constructor("!FakeMotors", FakeMotors.constructor)
+yaml.SafeDumper.add_representer(FakeMotors, FakeMotors.representer)
+
+class ZeroStartup:
+    def __repr__(self):
+        return "ZeroStartup()"
+
+    def __eq__(self, other):
+        return isinstance(other, ZeroStartup)
+
+
+def zero_startup_constructor(loader, node):
+    return ZeroStartup()
+
+
+def zero_startup_representer(dumper, data):
+    return dumper.represent_scalar("!ZeroStartup", "")
+
+
+yaml.SafeLoader.add_constructor("!ZeroStartup", zero_startup_constructor)
+yaml.SafeDumper.add_representer(ZeroStartup, zero_startup_representer)
 
 
 # Poulpe
