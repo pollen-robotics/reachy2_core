@@ -53,6 +53,7 @@ class ReachyConfig:
         self.custom_config_dir = os.path.expanduser(custom_config_file_path)
         # in package/default
         self.default_config_dir = os.path.dirname(os.path.realpath(__file__)) + "/../config/default"
+        self.fake_config_dir = os.path.dirname(os.path.realpath(__file__)) + "/../config/fake"
         self.schema_config_dir = os.path.dirname(os.path.realpath(__file__)) + "/../config/schema"
         self.config = {}
         # create a logger object
@@ -170,6 +171,26 @@ class ReachyConfig:
 
         # exit(1)
 
+        # Resolve default and fake paths for each part in reachy2_configuration
+        reachy2_conf = self.config.get("reachy", {}).get("config", {}).get("reachy2_configuration", {})
+        for part, part_conf_data in reachy2_conf.items():
+            part_config_key = part_conf_data["default"].replace(".yaml", "")
+            if part_config_key not in self.config:
+                continue
+
+            # Default/override path: already set in self.config[part_config_key]["path"]
+
+            # Fake path: check custom_config_dir first, then fall back to fake_config_dir
+            fake_filename = part_conf_data.get("fake")
+            if fake_filename:
+                custom_fake_path = os.path.join(self.custom_config_dir, fake_filename)
+                if os.path.exists(custom_fake_path):
+                    if not no_print:
+                        print("\033[93m" + f"[{fake_filename}] custom fake configuration found" + "\033[0m")
+                    self.config[part_config_key]["fake_path"] = custom_fake_path
+                else:
+                    self.config[part_config_key]["fake_path"] = str(Path(self.fake_config_dir) / fake_filename)
+
         # Validating configuration files
         validate(self.config, self.logger)
         # exit(1)
@@ -256,29 +277,11 @@ class ReachyConfig:
         )
 
     def part_conf(self, part, fake=False):
-        def build_part_conf_path(part, mode):
-            # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
-            part_config_key = self.config["reachy"]["config"]["reachy2_configuration"][part]["default"].replace(".yaml", "")
-            # print("part_config_key: ", part_config_key)
-            # print("part: ", self.config[f"{part_config_key}"]["path"])
-            if mode != "fake":
-                return self.config[part_config_key]["path"]
-            else:
-                fake_filename = self.config["reachy"]["config"]["reachy2_configuration"][part]["fake"]
-                custom_fake_path = os.path.join(self.custom_config_dir, fake_filename)
-                if os.path.exists(custom_fake_path):
-                    return custom_fake_path
-                return f"{Path(self.default_config_dir).parent}/fake/{fake_filename}"
-            # return f'{REACHY_CONFIG_PATH}/{mode}/{self.config["reachy"]["config"]["reachy2_configuration"][part][mode]}'
-
-        # force fake mode
-        if fake:
-            return build_part_conf_path(part, "fake")
-        else:  # can be fake, override or default,
-            return build_part_conf_path(
-                part,
-                self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"],
-            )
+        part_config_key = self.config["reachy"]["config"]["reachy2_configuration"][part]["default"].replace(".yaml", "")
+        mode = self.config["reachy"]["config"]["reachy2_configuration"][part]["mode"]
+        if fake or mode == "fake":
+            return self.config[part_config_key]["fake_path"]
+        return self.config[part_config_key]["path"]
 
     @property
     def mobile_base(self):
